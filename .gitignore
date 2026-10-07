@@ -1,5 +1,5 @@
 # Données téléchargées et base générée (reconstruites par `medsql setup`)
-data/
+/data/
 *.sqlite
 *.tmp
 
