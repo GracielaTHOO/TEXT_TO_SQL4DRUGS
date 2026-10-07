@@ -135,7 +135,7 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 - [Dictionnaire de données](docs/data.md)
 - [Méthodologie d'évaluation](docs/evaluation.md)
 - [Déploiement (local, vLLM, Hugging Face, GitHub Pages)](docs/deploiement.md)
-- [Feuille de route](docs/roadmap.md)
+- [Plan de développement](docs/PLAN.md) · [Feuille de route](docs/roadmap.md)
 - [Contribuer](CONTRIBUTING.md) · [Journal des modifications](CHANGELOG.md)
 
 ## ⚖️ Données et avertissement
