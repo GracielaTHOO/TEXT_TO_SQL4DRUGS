@@ -20,6 +20,22 @@ README_END = "<!-- RESULTS:END -->"
 
 Run = dict[str, Any]
 
+LABELS = {
+    "facile": "Facile",
+    "moyen": "Moyen",
+    "difficile": "Difficile",
+    "comptage": "Comptage",
+    "filtrage": "Filtrage",
+    "jointure": "Jointures",
+    "agregation": "Agrégations",
+    "classement": "Classements (top N)",
+    "dates": "Dates",
+    "prix": "Prix et remboursement",
+    "generiques": "Génériques",
+    "has": "Avis HAS",
+    "disponibilite": "Ruptures de stock",
+}
+
 
 # --------------------------------------------------------------------------- sélection
 
@@ -122,6 +138,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:8px 10px;border-bottom:1px solid var(--grid);text-align:left;white-space:nowrap}
 th{color:var(--ink2);font-weight:600}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .ok{color:var(--good-ink);font-weight:600}.ko{color:var(--crit);font-weight:600}
+td.heat{border:2px solid var(--surface);border-radius:6px}
 code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
 details summary{cursor:pointer;color:var(--ink2)}
 svg text{fill:var(--ink2);font:12px system-ui,sans-serif}
@@ -204,12 +221,12 @@ def _heatmap(board: list[Run], key: str, order: Sequence[str]) -> str:
                 cells.append('<td class="n">–</td>')
                 continue
             bg, fg = _seq_color(stat["accuracy"])
-            tip = f"{config_label(run['summary'])} · {name} : {_pct(stat['accuracy'])} sur {stat['n']} questions"
+            tip = f"{config_label(run['summary'])} · {LABELS.get(name, name)} : {_pct(stat['accuracy'])} sur {stat['n']} questions"
             cells.append(
-                f'<td class="n" style="background:{bg};color:{fg}" data-tip="{_e(tip)}">'
+                f'<td class="n heat" style="background:{bg};color:{fg}" data-tip="{_e(tip)}">'
                 f"{_pct(stat['accuracy'])}</td>"
             )
-        body.append(f"<tr><th>{_e(name)}</th>{''.join(cells)}</tr>")
+        body.append(f"<tr><th>{_e(LABELS.get(name, name))}</th>{''.join(cells)}</tr>")
     return f"<table><thead><tr><th></th>{head}</tr></thead><tbody>{''.join(body)}</tbody></table>"
 
 

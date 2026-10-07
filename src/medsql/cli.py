@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from contextlib import closing
 from dataclasses import replace
 from pathlib import Path
 from typing import Annotated
@@ -107,11 +108,12 @@ def stats() -> None:
     from medsql.sql_guard import connect_readonly
     from medsql.stats import key_figures
 
-    conn = connect_readonly(_settings().db_path)
+    with closing(connect_readonly(_settings().db_path)) as conn:
+        figures = key_figures(conn)
     table = Table(title="La BDPM en chiffres", show_edge=False)
     table.add_column("Indicateur")
     table.add_column("Valeur", justify="right")
-    for kf, value in key_figures(conn):
+    for kf, value in figures:
         table.add_row(kf.label, f"{value}{' ' + kf.unit if kf.unit else ''}")
     console.print(table)
 
@@ -129,9 +131,10 @@ def ask(
     from medsql.sql_guard import connect_readonly
 
     s = _settings(model, backend, base_url)
-    engine = Text2SQL(make_client(s), connect_readonly(s.db_path), max_rows=s.max_rows)
-    with console.status(f"Génération avec {s.model}…"):
-        answer = engine.ask(question)
+    with closing(connect_readonly(s.db_path)) as conn:
+        engine = Text2SQL(make_client(s), conn, max_rows=s.max_rows)
+        with console.status(f"Génération avec {s.model}…"):
+            answer = engine.ask(question)
     if answer.sql:
         console.print(Syntax(answer.sql, "sql", theme="ansi_dark", word_wrap=True))
     if answer.error or answer.result is None:
@@ -205,6 +208,7 @@ def evaluate(
         },
         environment=default_environment(items, s.db_path),
     )
+    conn.close()
     path = save_run(summary, results, out)
     console.print(
         f"\n[bold]Exactitude : {100 * summary.accuracy:.1f} %[/] "
@@ -234,7 +238,9 @@ def report(
         from medsql.sql_guard import connect_readonly
         from medsql.stats import key_figures
 
-        for kf, value in key_figures(connect_readonly(db_path)):
+        with closing(connect_readonly(db_path)) as conn:
+            values = key_figures(conn)
+        for kf, value in values:
             shown = f"{value:,}".replace(",", " ") if isinstance(value, int) else str(value)
             figures.append((kf.label, f"{shown}{' ' + kf.unit if kf.unit else ''}"))
         out.parent.mkdir(parents=True, exist_ok=True)

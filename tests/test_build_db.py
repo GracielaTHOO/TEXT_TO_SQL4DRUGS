@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
+
+import pytest
 
 from medsql.data.build_db import SOURCES, _fields, build_database
 from medsql.data.schema import SOURCE_FILES, TABLES
@@ -18,15 +21,22 @@ def test_fields_pads_and_merges() -> None:
     assert _fields(" a \t\r\n", 2) == ["a", None]
 
 
-def test_build_loads_all_tables(db_path: Path) -> None:
+@pytest.fixture
+def raw(db_path: Path) -> Iterator[sqlite3.Connection]:
     conn = sqlite3.connect(db_path)
+    yield conn
+    conn.close()
+
+
+def test_build_loads_all_tables(raw: sqlite3.Connection) -> None:
+    conn = raw
     for table in TABLES:
         count = conn.execute(f"SELECT COUNT(*) FROM {table.name}").fetchone()[0]
         assert count > 0, table.name
 
 
-def test_values_are_normalized(db_path: Path) -> None:
-    conn = sqlite3.connect(db_path)
+def test_values_are_normalized(raw: sqlite3.Connection) -> None:
+    conn = raw
     titulaires, date_amm, sr = conn.execute(
         "SELECT titulaires, date_amm, surveillance_renforcee FROM medicaments WHERE cis = 69000008"
     ).fetchone()
@@ -42,8 +52,8 @@ def test_values_are_normalized(db_path: Path) -> None:
     ).fetchone() == (65,)
 
 
-def test_routes_are_exploded(db_path: Path) -> None:
-    conn = sqlite3.connect(db_path)
+def test_routes_are_exploded(raw: sqlite3.Connection) -> None:
+    conn = raw
     voies = {r[0] for r in conn.execute("SELECT voie FROM medicament_voies WHERE cis = 61000020")}
     assert voies == {"intraveineuse", "sous-cutanée", "périneurale"}
 
