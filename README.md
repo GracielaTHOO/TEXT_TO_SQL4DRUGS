@@ -7,13 +7,13 @@
 **Posez une question en français, un LLM local la traduit en SQL sur la Base de données publique des médicaments.**
 **Chaque modèle est mesuré sur un jeu de 60 questions de référence.**
 
-[![CI](https://github.com/GracielaTHOO/text2sql-medicaments/actions/workflows/ci.yml/badge.svg)](https://github.com/GracielaTHOO/text2sql-medicaments/actions/workflows/ci.yml)
-[![Évaluation](https://github.com/GracielaTHOO/text2sql-medicaments/actions/workflows/eval.yml/badge.svg)](https://github.com/GracielaTHOO/text2sql-medicaments/actions/workflows/eval.yml)
+[![CI](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml)
+[![Évaluation](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml)
 ![Python](https://img.shields.io/badge/python-3.10%20%E2%86%92%203.13-2a78d6)
 ![Typage](https://img.shields.io/badge/mypy-strict-2a78d6)
 ![Licence](https://img.shields.io/badge/licence-MIT-2a78d6)
 [![Démo](https://img.shields.io/badge/%F0%9F%A4%97%20d%C3%A9mo-Hugging%20Face-ffcc4d)](https://huggingface.co/spaces/GracielaTHOO/text2sql-medicaments)
-[![Tableau de bord](https://img.shields.io/badge/%F0%9F%93%88%20tableau%20de%20bord-GitHub%20Pages-2a78d6)](https://gracielathoo.github.io/text2sql-medicaments/)
+[![Tableau de bord](https://img.shields.io/badge/%F0%9F%93%88%20tableau%20de%20bord-GitHub%20Pages-2a78d6)](https://gracielathoo.github.io/TEXT_TO_SQL4DRUGS/)
 
 </div>
 
@@ -47,7 +47,7 @@ _Aucun run d'évaluation complet pour l'instant. Lancez `medsql eval`._
 <!-- RESULTS:END -->
 
 Ce tableau est régénéré par `medsql report` à chaque évaluation. Le détail par difficulté,
-par catégorie et question par question est dans le [tableau de bord](https://gracielathoo.github.io/text2sql-medicaments/).
+par catégorie et question par question est dans le [tableau de bord](https://gracielathoo.github.io/TEXT_TO_SQL4DRUGS/).
 
 ## ⚙️ Fonctionnement
 
@@ -72,8 +72,8 @@ flowchart LR
 ## 🚀 Démarrage rapide
 
 ```bash
-git clone https://github.com/GracielaTHOO/text2sql-medicaments.git
-cd text2sql-medicaments
+git clone https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS.git
+cd TEXT_TO_SQL4DRUGS
 pip install -e ".[app]"
 
 medsql setup                       # télécharge la BDPM et construit data/bdpm.sqlite

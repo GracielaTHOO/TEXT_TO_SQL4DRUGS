@@ -110,8 +110,8 @@ with gr.Blocks(title="Text-to-SQL médicaments") as demo:
             "**Sécurité** : une seule requête `SELECT`, vérifiée par analyse syntaxique, base ouverte "
             "en lecture seule, autorisateur SQLite, délai maximal.  \n"
             "**Avertissement** : démonstration technique, ne constitue pas un avis médical.  \n"
-            "**Code** : [github.com/GracielaTHOO/text2sql-medicaments]"
-            "(https://github.com/GracielaTHOO/text2sql-medicaments)"
+            "**Code** : [github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS]"
+            "(https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS)"
         )
 
 if __name__ == "__main__":

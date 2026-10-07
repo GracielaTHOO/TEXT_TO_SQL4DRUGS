@@ -40,8 +40,8 @@ dev = [
 medsql = "medsql.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/GracielaTHOO/text2sql-medicaments"
-Documentation = "https://github.com/GracielaTHOO/text2sql-medicaments/tree/main/docs"
+Homepage = "https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS"
+Documentation = "https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/tree/main/docs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/medsql"]
