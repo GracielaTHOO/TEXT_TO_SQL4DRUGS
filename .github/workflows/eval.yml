@@ -1,0 +1,77 @@
+name: Évaluation des modèles
+
+# Télécharge la BDPM du jour, sert les modèles avec Ollama sur le runner (CPU),
+# lance le banc d'évaluation, puis publie les résultats (dépôt + GitHub Pages).
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: "Modèles Ollama, séparés par des virgules"
+        default: "qwen2.5-coder:1.5b,qwen2.5-coder:3b,qwen2.5-coder:7b"
+      limit:
+        description: "Nombre de questions (vide = toutes)"
+        default: ""
+  schedule:
+    - cron: "17 3 2 * *" # le 2 de chaque mois, après la mise à jour mensuelle de la BDPM
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: eval
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    env:
+      MODELS: ${{ inputs.models || 'qwen2.5-coder:1.5b,qwen2.5-coder:3b,qwen2.5-coder:7b' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Installation
+        run: pip install -e ".[report]"
+      - name: Téléchargement de la BDPM et construction de la base
+        run: medsql setup
+      - name: Installation d'Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve > /tmp/ollama.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/tags && break; sleep 1; done
+      - name: Évaluation
+        run: |
+          LIMIT_OPT=""
+          if [ -n "${{ inputs.limit }}" ]; then LIMIT_OPT="--limit ${{ inputs.limit }}"; fi
+          for model in ${MODELS//,/ }; do
+            echo "::group::$model"
+            ollama pull "$model"
+            medsql eval --model "$model" $LIMIT_OPT
+            echo "::endgroup::"
+          done
+      - name: Tableau de bord et README
+        run: medsql report
+      - name: Résumé du run
+        run: |
+          echo "## Résultats" >> "$GITHUB_STEP_SUMMARY"
+          sed -n '/RESULTS:START/,/RESULTS:END/p' README.md | sed '1d;$d' >> "$GITHUB_STEP_SUMMARY"
+      - name: Enregistrement des résultats
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results README.md
+          git diff --cached --quiet || git commit -m "eval: résultats du $(date -u +%Y-%m-%d)"
+          git push
+      - name: Préparation de GitHub Pages
+        run: |
+          mkdir -p site
+          cp results/dashboard.html site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - uses: actions/deploy-pages@v4

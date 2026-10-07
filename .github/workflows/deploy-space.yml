@@ -1,0 +1,32 @@
+name: Déploiement Hugging Face Space
+
+on:
+  push:
+    branches: [main]
+    paths: ["src/**", "app/**", "space/**", "results/runs/**", "pyproject.toml"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_SPACE: ${{ vars.HF_SPACE || 'GracielaTHOO/text2sql-medicaments' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérification du jeton
+        id: token
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::notice::Secret HF_TOKEN absent : déploiement ignoré (voir docs/deploiement.md)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.token.outputs.skip != 'true'
+        with:
+          python-version: "3.12"
+      - name: Publication
+        if: steps.token.outputs.skip != 'true'
+        run: |
+          pip install huggingface_hub
+          python scripts/deploy_space.py --space "$HF_SPACE"
