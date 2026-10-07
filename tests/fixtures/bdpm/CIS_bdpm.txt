@@ -1,0 +1,23 @@
+60234100	DOLIPRANE 1000 mg, comprimé	comprimé	orale	Autorisation active	Procédure nationale	Commercialisée	09/07/2002			 SANOFI AVENTIS FRANCE	Non
+61234567	DOLIPRANE 500 mg, gélule	gélule	orale	Autorisation active	Procédure nationale	Commercialisée	15/03/1996			 SANOFI AVENTIS FRANCE	Non
+62000001	PARACETAMOL BIOGARAN 1 g, comprimé	comprimé	orale	Autorisation active	Procédure nationale	Commercialisée	21/11/2008			 BIOGARAN	Non
+63000002	EFFERALGAN 1 g, comprimé effervescent sécable	comprimé effervescent(e) sécable	orale	Autorisation active	Procédure nationale	Commercialisée	04/02/2005			 UPSA SAS	Non
+64000003	ADVIL 200 mg, comprimé enrobé	comprimé enrobé	orale	Autorisation active	Procédure nationale	Commercialisée	12/06/1989			 PFIZER HOLDING FRANCE	Non
+65000004	IBUPROFENE ARROW 400 mg, comprimé pelliculé	comprimé pelliculé	orale	Autorisation active	Procédure décentralisée	Commercialisée	30/09/2010			 ARROW GENERIQUES	Non
+66000005	AMOXICILLINE SANDOZ 1 g, comprimé dispersible	comprimé dispersible	orale	Autorisation active	Procédure nationale	Commercialisée	17/01/2001	Warning disponibilité		 SANDOZ	Non
+67000006	CLAMOXYL 500 mg, gélule	gélule	orale	Autorisation active	Procédure nationale	Commercialisée	02/05/1974			 GLAXOSMITHKLINE	Non
+68000007	LEVOTHYROX 100 microgrammes, comprimé sécable	comprimé sécable	orale	Autorisation active	Procédure nationale	Commercialisée	29/03/1982			 MERCK SANTE	Non
+69000008	KEYTRUDA 25 mg/mL, solution à diluer pour perfusion	solution à diluer pour perfusion	intraveineuse	Autorisation active	Procédure centralisée	Commercialisée	17/07/2015		EU/1/15/1024/002	 MERCK SHARP & DOHME	Oui
+60000009	VENTOLINE 100 microgrammes/dose, suspension pour inhalation en flacon pressurisé	suspension pour inhalation	inhalée	Autorisation active	Procédure nationale	Commercialisée	11/10/1985			 GLAXOSMITHKLINE	Non
+
+61000010	SPASFON, comprimé enrobé	comprimé enrobé	orale	Autorisation active	Procédure nationale	Commercialisée	05/12/1964			 TEVA SANTE	Non
+62000011	DAFALGAN 1 g, comprimé pelliculé	comprimé pelliculé	orale	Autorisation active	Procédure nationale	Commercialisée	13/08/2003			 UPSA SAS	Non
+63000012	VOLTARENE EMULGEL 1 %, gel	gel	cutanée	Autorisation active	Procédure nationale	Commercialisée	20/04/1990			 HALEON FRANCE	Non
+64000013	XARELTO 20 mg, comprimé pelliculé	comprimé pelliculé	orale	Autorisation active	Procédure centralisée	Commercialisée	30/09/2008		EU/1/08/472/016	 BAYER AG	Non
+65000014	METFORMINE ZENTIVA 850 mg, comprimé pelliculé	comprimé pelliculé	orale	Autorisation active	Procédure nationale	Commercialisée	08/02/2012			 ZENTIVA FRANCE	Non
+66000015	GLUCOPHAGE 850 mg, comprimé pelliculé	comprimé pelliculé	orale	Autorisation active	Procédure nationale	Commercialisée	16/07/1985			 MERCK SANTE	Non
+67000016	OZEMPIC 1 mg, solution injectable en stylo prérempli	solution injectable	sous-cutanée	Autorisation active	Procédure centralisée	Commercialisée	08/02/2018	Alerte	EU/1/17/1251/005	 NOVO NORDISK A/S	Oui
+68000017	MEDIATOR 150 mg, comprimé enrobé	comprimé enrobé	orale	Autorisation retirée	Procédure nationale	Non commercialisée	11/06/1974			 LES LABORATOIRES SERVIER	Non
+69000018	SMECTA 3 g, poudre pour suspension buvable en sachet	poudre pour suspension buvable	orale	Autorisation active	Procédure nationale	Commercialisée	19/02/1975			 IPSEN CONSUMER HEALTHCARE	Non
+60000019	CODOLIPRANE 500 mg/30 mg, comprimé sécable	comprimé sécable	orale	Autorisation active	Procédure nationale	Commercialisée	28/04/1998			 SANOFI AVENTIS FRANCE	Non
+61000020	LIDOCAINE AGUETTANT 10 mg/mL, solution injectable	solution injectable	intraveineuse;sous-cutanée;périneurale	Autorisation active	Procédure nationale	Commercialisée	03/03/1999			 LABORATOIRE AGUETTANT	Non

@@ -1,0 +1,9 @@
+CT-10123	https://www.has-sante.fr/jcms/ct-10123
+CT-10456	https://www.has-sante.fr/jcms/ct-10456
+CT-10789	https://www.has-sante.fr/jcms/ct-10789
+CT-14567	https://www.has-sante.fr/jcms/ct-14567
+CT-11223	https://www.has-sante.fr/jcms/ct-11223
+CT-12345	https://www.has-sante.fr/jcms/ct-12345
+CT-16789	https://www.has-sante.fr/jcms/ct-16789
+CT-13579	https://www.has-sante.fr/jcms/ct-13579
+CT-09999	https://www.has-sante.fr/jcms/ct-09999

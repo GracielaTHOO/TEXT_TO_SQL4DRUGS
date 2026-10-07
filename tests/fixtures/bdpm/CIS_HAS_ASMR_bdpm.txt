@@ -1,0 +1,4 @@
+69000008	CT-14567	Extension d'indication	20210120	III	ASMR modérée dans la stratégie thérapeutique.
+64000013	CT-12345	Inscription (CT)	20090218	IV	ASMR mineure.
+67000016	CT-16789	Inscription (CT)	20190109	V	Absence d'ASMR par rapport aux autres analogues du GLP-1.
+68000007	CT-10789	Inscription (CT)	20170705	V	Absence d'ASMR.

@@ -1,0 +1,28 @@
+# Données téléchargées et base générée (reconstruites par `medsql setup`)
+data/
+*.sqlite
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Gradio
+.gradio/
+flagged/
+
+# Éditeurs
+.vscode/
+.idea/
+.DS_Store

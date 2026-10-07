@@ -1,0 +1,2 @@
+68000007	2017-08-24	2027-08-24	<a href='https://ansm.sante.fr'>Levothyrox : nouvelle formule</a>
+67000016	2023-03-01	2026-12-31	<a href='https://ansm.sante.fr'>Ozempic : réserver aux patients diabétiques</a>

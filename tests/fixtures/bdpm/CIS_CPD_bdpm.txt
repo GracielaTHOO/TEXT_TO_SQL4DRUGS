@@ -1,0 +1,11 @@
+60000019	liste I
+66000005	liste I
+67000006	liste I
+68000007	liste II
+69000008	réservé à l'usage HOSPITALIER
+69000008	prescription réservée aux spécialistes et services ONCOLOGIE MEDICALE
+64000013	liste I
+67000016	liste I
+65000014	liste II
+66000015	liste II
+61000020	liste II

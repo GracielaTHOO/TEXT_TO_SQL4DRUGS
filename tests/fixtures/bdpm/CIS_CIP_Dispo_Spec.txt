@@ -1,0 +1,3 @@
+66000005	3400933333333	1	Rupture de stock	02/11/2022	15/01/2023		https://ansm.sante.fr/disponibilites-des-produits-de-sante/medicaments
+67000016		2	Tension d'approvisionnement	01/03/2023	10/06/2024		https://ansm.sante.fr/disponibilites-des-produits-de-sante/medicaments
+60000009	3400936666666	4	Remise à disposition	05/09/2022	20/12/2022	20/12/2022	https://ansm.sante.fr/disponibilites-des-produits-de-sante/medicaments

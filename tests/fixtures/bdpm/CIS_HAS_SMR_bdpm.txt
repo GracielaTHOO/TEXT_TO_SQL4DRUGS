@@ -1,0 +1,9 @@
+60234100	CT-10123	Renouvellement d'inscription (CT)	20190612	Important	Le service médical rendu reste important.
+66000005	CT-10456	Renouvellement d'inscription (CT)	20180314	Important	Le service médical rendu reste important.
+68000007	CT-10789	Inscription (CT)	20170705	Important	Le service médical rendu est important.
+69000008	CT-14567	Extension d'indication	20210120	Important	Le service médical rendu est important dans l'indication.
+61000010	CT-11223	Renouvellement d'inscription (CT)	20210407	Faible	Le service médical rendu est faible.
+64000013	CT-12345	Inscription (CT)	20090218	Important	Le service médical rendu est important.
+67000016	CT-16789	Inscription (CT)	20190109	Important	Le service médical rendu est important.
+69000018	CT-13579	Réévaluation SMR	20180606	Insuffisant	Le service médical rendu est insuffisant.
+68000017	CT-09999	Réévaluation SMR	20091020	Insuffisant	Le service médical rendu est insuffisant.

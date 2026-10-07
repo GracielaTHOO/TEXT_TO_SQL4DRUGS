@@ -1,0 +1,23 @@
+60234100	3400935	plaquette(s) PVC aluminium de 8 comprimé(s)	Présentation active	Déclaration de commercialisation	16/03/2011	3400935955838	oui	65%	1,16	2,18	1,02	
+61234567	3400934	plaquette(s) PVC aluminium de 16 gélule(s)	Présentation active	Déclaration de commercialisation	01/01/1996	3400934998331	oui	65 %	1,16	2,18	1,02	
+62000001	3400927	plaquette(s) PVC aluminium de 8 comprimé(s)	Présentation active	Déclaration de commercialisation	12/12/2008	3400927654321	oui	65%	0,98	2,00	1,02	
+63000002	3400936	tube(s) polypropylène de 8 comprimé(s)	Présentation active	Déclaration de commercialisation	04/02/2005	3400936123456	oui	65%	1,59	2,61	1,02	
+64000003	3400930	plaquette(s) PVC aluminium de 20 comprimé(s)	Présentation active	Déclaration de commercialisation	12/06/1989	3400930111111	non					
+65000004	3400939	plaquette(s) PVC aluminium de 30 comprimé(s)	Présentation active	Déclaration de commercialisation	30/09/2010	3400939222222	oui	65%	2,05	3,07	1,02	
+66000005	3400933	plaquette(s) aluminium de 6 comprimé(s)	Présentation active	Déclaration de commercialisation	17/01/2001	3400933333333	oui	65%	1,79	2,81	1,02	
+66000005	3400933	plaquette(s) aluminium de 14 comprimé(s)	Présentation active	Déclaration de commercialisation	17/01/2001	3400933333444	oui	65%	3,62	4,64	1,02	
+67000006	3400931	plaquette(s) PVC aluminium de 12 gélule(s)	Présentation active	Déclaration de commercialisation	02/05/1974	3400931444444	oui	65%	2,30	3,32	1,02	
+68000007	3400932	plaquette(s) PVC aluminium de 30 comprimé(s)	Présentation active	Déclaration de commercialisation	29/03/1982	3400932555555	oui	65%	2,26	3,28	1,02	
+69000008	5501234	1 flacon(s) en verre de 4 mL	Présentation active	Déclaration de commercialisation	17/07/2015	3400955012345	oui	100%	2,868,45	2,891,47	23,02	Traitement du mélanome avancé
+60000009	3400936	1 flacon(s) pressurisé(s) aluminium de 200 dose(s)	Présentation active	Déclaration de commercialisation	11/10/1985	3400936666666	oui	65%	3,82	4,84	1,02	
+61000010	3400937	plaquette(s) PVC aluminium de 30 comprimé(s)	Présentation active	Déclaration de commercialisation	05/12/1964	3400937777777	non					
+62000011	3400938	plaquette(s) PVC aluminium de 8 comprimé(s)	Présentation active	Déclaration de commercialisation	13/08/2003	3400938888888	oui	65%	1,16	2,18	1,02	
+63000012	3400939	1 tube(s) aluminium de 100 g	Présentation active	Déclaration de commercialisation	20/04/1990	3400939999999	non					
+64000013	5502345	plaquette(s) PP aluminium de 28 comprimé(s)	Présentation active	Déclaration de commercialisation	30/09/2008	3400955123456	oui	65%	55,40	56,42	1,02	
+65000014	3400940	plaquette(s) PVC aluminium de 30 comprimé(s)	Présentation active	Déclaration de commercialisation	08/02/2012	3400940101010	oui	65%	1,94	2,96	1,02	
+66000015	3400941	plaquette(s) PVC aluminium de 30 comprimé(s)	Présentation active	Déclaration de commercialisation	16/07/1985	3400941202020	oui	65%	2,13	3,15	1,02	
+67000016	5503456	1 stylo(s) prérempli(s) de 3 mL	Présentation active	Déclaration de commercialisation	08/02/2018	3400955234567	oui	65%	73,04	74,06	1,02	Diabète de type 2 insuffisamment contrôlé
+68000017	3400942	plaquette(s) PVC aluminium de 30 comprimé(s)	Présentation abrogée	Arrêt de commercialisation (le médicament n'a plus d'autorisation)	11/06/1974	3400942303030	non					
+69000018	3400943	30 sachet(s) papier aluminium polyéthylène de 3 g	Présentation active	Déclaration de commercialisation	19/02/1975	3400943404040	non					
+60000019	3400944	plaquette(s) PVC aluminium de 16 comprimé(s)	Présentation active	Déclaration de commercialisation	28/04/1998	3400944505050	oui	65%	1,99	3,01	1,02	
+61000020	5504567	10 ampoule(s) en verre de 20 mL	Présentation active	Déclaration de commercialisation	03/03/1999	3400955345678	oui					

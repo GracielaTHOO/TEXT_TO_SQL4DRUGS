@@ -1,0 +1,6 @@
+60234100	N02BE01	DOLIPRANE 1000 mg, comprimé	https://base-donnees-publique.medicaments.gouv.fr/extrait.php?specid=60234100
+66000005	J01CA04	AMOXICILLINE SANDOZ 1 g, comprimé dispersible	https://base-donnees-publique.medicaments.gouv.fr/extrait.php?specid=66000005
+68000007	H03AA01	LEVOTHYROX 100 microgrammes, comprimé sécable	https://base-donnees-publique.medicaments.gouv.fr/extrait.php?specid=68000007
+69000008	L01FF02	KEYTRUDA 25 mg/mL, solution à diluer pour perfusion	https://base-donnees-publique.medicaments.gouv.fr/extrait.php?specid=69000008
+60000009	R03AC02	VENTOLINE 100 microgrammes/dose	https://base-donnees-publique.medicaments.gouv.fr/extrait.php?specid=60000009
+64000013	B01AF01	XARELTO 20 mg, comprimé pelliculé	https://base-donnees-publique.medicaments.gouv.fr/extrait.php?specid=64000013
