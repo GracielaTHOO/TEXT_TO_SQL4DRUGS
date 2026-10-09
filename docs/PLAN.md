@@ -14,7 +14,7 @@ Légende : 🙋 = action de Graciela nécessaire.
 ## Jalon 1 : premiers chiffres réels (v0.2, 7 → 16 octobre)
 
 - [x] **S0 · mer. 7 oct.** Socle v0.1 : base SQLite, garde-fous, clients LLM, 60 questions, CLI, démo, tableau de bord, CI.
-- [ ] **S1 · ven. 9 oct.** Premier run réel (workflow d'évaluation, 10 questions, Qwen2.5-Coder 1.5B).
+- [x] **S1 · ven. 9 oct.** Premier run réel (workflow d'évaluation, 10 questions, Qwen2.5-Coder 1.5B).
       Corriger le chargement et les questions dont la référence renvoie 0 ligne sur la vraie BDPM.
       Publier les chiffres de la base (`results/bdpm_stats.json`) et un profil des données (`docs/donnees-profil.md`).
 - [ ] **S2 · lun. 12 oct.** Runs complets Qwen2.5-Coder 1.5B, 3B et 7B. Premier tableau de résultats dans le README.

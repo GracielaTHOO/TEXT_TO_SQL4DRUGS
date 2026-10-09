@@ -27,7 +27,7 @@ RUNS_DIR = Path(os.environ.get("MEDSQL_RUNS_DIR", ROOT / "results" / "runs"))
 
 EXAMPLES = [
     "Combien de médicaments sont actuellement commercialisés ?",
-    "Quels médicaments contenant de l'amoxicilline sont en rupture ou en tension ?",
+    "Quelles substances actives sont le plus souvent en rupture ou en tension ?",
     "Quels sont les génériques du TAHOR 10 mg ?",
     "Quelles sont les 5 substances actives présentes dans le plus de spécialités ?",
     "Quel est le prix moyen d'une boîte de médicament à base de metformine ?",

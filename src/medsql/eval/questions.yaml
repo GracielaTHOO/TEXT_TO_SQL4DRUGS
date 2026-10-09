@@ -315,12 +315,13 @@
   categorie: generiques
 
 - id: q041
-  question: Quels médicaments contenant de l'amoxicilline font l'objet d'une rupture ou d'une tension d'approvisionnement ?
+  question: Combien de substances actives distinctes entrent dans la composition de spécialités commercialisées en rupture ou en tension d'approvisionnement ?
   sql: |
-    SELECT DISTINCT m.denomination FROM medicaments m
+    SELECT COUNT(DISTINCT c.substance) FROM medicaments m
     JOIN disponibilites d ON d.cis = m.cis
     JOIN compositions c ON c.cis = m.cis
-    WHERE d.code_statut IN (1, 2) AND sans_accents(c.substance) LIKE '%AMOXICILLINE%'
+    WHERE d.code_statut IN (1, 2) AND m.etat_commercialisation = 'Commercialisée'
+      AND c.nature_composant = 'SA'
   difficulte: difficile
   categorie: disponibilite
 
@@ -454,8 +455,8 @@
   categorie: disponibilite
 
 - id: q058
-  question: Combien d'informations de sécurité importantes sont encore en vigueur aujourd'hui ?
-  sql: SELECT COUNT(*) FROM informations_importantes WHERE date_fin >= date('now')
+  question: Combien de ruptures ou de tensions d'approvisionnement ont commencé depuis le 1er janvier 2026 ?
+  sql: SELECT COUNT(*) FROM disponibilites WHERE code_statut IN (1, 2) AND date_debut >= '2026-01-01'
   difficulte: moyen
   categorie: dates
 

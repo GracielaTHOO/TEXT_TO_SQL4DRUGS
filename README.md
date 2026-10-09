@@ -20,13 +20,15 @@
 ---
 
 ```text
-$ medsql ask "Quels médicaments contenant de l'amoxicilline sont en rupture ou en tension ?"
+$ medsql ask "Quelles substances actives sont le plus souvent en rupture ou en tension ?"
 
-SELECT DISTINCT m.denomination
-FROM medicaments m
-JOIN disponibilites d ON d.cis = m.cis
-JOIN compositions c ON c.cis = m.cis
-WHERE d.code_statut IN (1, 2) AND sans_accents(c.substance) LIKE '%AMOXICILLINE%'
+SELECT c.substance, COUNT(DISTINCT d.cis) AS nb_specialites
+FROM disponibilites d
+JOIN compositions c ON c.cis = d.cis
+WHERE d.code_statut IN (1, 2) AND c.nature_composant = 'SA'
+GROUP BY c.substance
+ORDER BY nb_specialites DESC
+LIMIT 10
 ```
 
 ## 🎯 En bref

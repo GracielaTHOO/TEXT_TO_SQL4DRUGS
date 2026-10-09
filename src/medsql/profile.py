@@ -120,11 +120,15 @@ def check_questions(conn: sqlite3.Connection, items: list[EvalItem]) -> list[Que
         start = time.perf_counter()
         rows: int | None = None
         error: str | None = None
+        degenerate = False
         try:
-            rows = len(run_query(conn, item.sql, max_rows=10_000, timeout_s=60).rows)
+            result = run_query(conn, item.sql, max_rows=10_000, timeout_s=60).rows
+            rows = len(result)
+            degenerate = rows == 1 and all(value in (None, 0) for value in result[0])
         except Exception as exc:
             error = f"{type(exc).__name__}: {exc}"
-        checks.append(QuestionCheck(item.id, rows, round(time.perf_counter() - start, 3), error))
+        elapsed = round(time.perf_counter() - start, 3)
+        checks.append(QuestionCheck(item.id, rows, elapsed, error, degenerate))
     return checks
 
 
