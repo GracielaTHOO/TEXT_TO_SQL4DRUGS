@@ -21,9 +21,11 @@ class OpenAICompatClient:
         timeout_s: float = 180,
         *,
         api_key: str = "",
+        max_tokens: int = 512,
         transport: httpx.BaseTransport | None = None,
     ) -> None:
         self.model = model
+        self.max_tokens = max_tokens
         headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
         self._client = httpx.Client(
             base_url=base_url.rstrip("/"), timeout=timeout_s, headers=headers, transport=transport
@@ -34,6 +36,7 @@ class OpenAICompatClient:
             "model": self.model,
             "messages": [asdict(m) for m in messages],
             "temperature": temperature,
+            "max_tokens": self.max_tokens,
             "seed": 42,
         }
         start = time.perf_counter()

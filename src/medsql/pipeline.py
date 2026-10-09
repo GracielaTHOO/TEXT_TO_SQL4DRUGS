@@ -6,6 +6,8 @@ import sqlite3
 import time
 from dataclasses import dataclass, field
 
+import httpx
+
 from medsql.llm.base import LLMClient
 from medsql.prompting import PromptConfig, build_messages, build_repair_messages
 from medsql.sql_guard import (
@@ -63,7 +65,13 @@ class Text2SQL:
         messages = build_messages(question, self.prompt)
         for attempt in range(self.max_repairs + 1):
             answer.attempts = attempt + 1
-            completion = self.llm.complete(messages, temperature=self.temperature)
+            try:
+                completion = self.llm.complete(messages, temperature=self.temperature)
+            except (httpx.HTTPError, KeyError, ValueError) as exc:
+                # Panne ou délai du serveur LLM : la question est comptée fausse,
+                # le banc continue avec la suivante.
+                answer.error = f"LLMError: {type(exc).__name__}: {exc}"
+                break
             answer.llm_latency_s += completion.latency_s
             answer.prompt_tokens += completion.prompt_tokens or 0
             answer.completion_tokens += completion.completion_tokens or 0

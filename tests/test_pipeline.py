@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import sqlite3
 
+import httpx
+
 from medsql.eval.dataset import load_questions
 from medsql.eval.runner import evaluate_item, summarize
 from medsql.pipeline import Text2SQL
@@ -49,3 +51,17 @@ def test_oracle_scores_100_percent(conn: sqlite3.Connection) -> None:
     assert summary.accuracy_strict == 1.0
     assert summary.executable_rate == 1.0
     assert set(summary.by_difficulty) == {"facile", "moyen", "difficile"}
+
+
+class _TimeoutLLM:
+    model = "timeout"
+
+    def complete(self, messages, *, temperature=0.0):  # type: ignore[no-untyped-def]
+        raise httpx.ReadTimeout("timed out")
+
+
+def test_llm_failure_is_recorded_not_raised(conn: sqlite3.Connection) -> None:
+    answer = Text2SQL(_TimeoutLLM(), conn).ask("Combien ?")
+    assert not answer.ok
+    assert answer.error is not None
+    assert answer.error.startswith("LLMError: ReadTimeout")

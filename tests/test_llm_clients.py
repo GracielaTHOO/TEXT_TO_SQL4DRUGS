@@ -15,6 +15,7 @@ def test_ollama_client_parses_response() -> None:
         assert request.url.path == "/api/chat"
         assert body["stream"] is False
         assert body["options"]["temperature"] == 0.0
+        assert body["options"]["num_predict"] == 512
         return httpx.Response(
             200, json={"message": {"content": "SELECT 1"}, "prompt_eval_count": 50, "eval_count": 5}
         )

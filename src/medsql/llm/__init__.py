@@ -13,9 +13,15 @@ __all__ = ["Completion", "LLMClient", "OllamaClient", "OpenAICompatClient", "mak
 def make_client(settings: Settings) -> LLMClient:
     """Instancie le client correspondant à ``settings.backend``."""
     if settings.backend == "ollama":
-        return OllamaClient(settings.model, settings.base_url, settings.timeout_s)
+        return OllamaClient(
+            settings.model, settings.base_url, settings.timeout_s, max_tokens=settings.max_tokens
+        )
     if settings.backend in {"openai", "vllm", "llamacpp"}:
         return OpenAICompatClient(
-            settings.model, settings.base_url, settings.timeout_s, api_key=settings.api_key
+            settings.model,
+            settings.base_url,
+            settings.timeout_s,
+            api_key=settings.api_key,
+            max_tokens=settings.max_tokens,
         )
     raise ValueError(f"Backend inconnu : {settings.backend!r} (ollama, openai, vllm, llamacpp)")

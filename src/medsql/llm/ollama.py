@@ -18,10 +18,12 @@ class OllamaClient:
         timeout_s: float = 180,
         *,
         num_ctx: int = 8192,
+        max_tokens: int = 512,
         transport: httpx.BaseTransport | None = None,
     ) -> None:
         self.model = model
         self.num_ctx = num_ctx
+        self.max_tokens = max_tokens
         self._client = httpx.Client(base_url=base_url, timeout=timeout_s, transport=transport)
 
     def complete(self, messages: list[Message], *, temperature: float = 0.0) -> Completion:
@@ -29,7 +31,13 @@ class OllamaClient:
             "model": self.model,
             "messages": [asdict(m) for m in messages],
             "stream": False,
-            "options": {"temperature": temperature, "num_ctx": self.num_ctx, "seed": 42},
+            "options": {
+                "temperature": temperature,
+                "num_ctx": self.num_ctx,
+                # Plafond de génération : un petit modèle peut boucler sans jamais s'arrêter.
+                "num_predict": self.max_tokens,
+                "seed": 42,
+            },
         }
         start = time.perf_counter()
         response = self._client.post("/api/chat", json=payload)

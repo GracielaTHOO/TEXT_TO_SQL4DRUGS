@@ -25,6 +25,7 @@ class Settings:
     api_key: str = field(default_factory=lambda: _env("API_KEY", ""))
     temperature: float = field(default_factory=lambda: float(_env("TEMPERATURE", "0")))
     timeout_s: float = field(default_factory=lambda: float(_env("TIMEOUT", "180")))
+    max_tokens: int = field(default_factory=lambda: int(_env("MAX_TOKENS", "512")))
     max_rows: int = field(default_factory=lambda: int(_env("MAX_ROWS", "200")))
     query_timeout_s: float = field(default_factory=lambda: float(_env("QUERY_TIMEOUT", "10")))
 
