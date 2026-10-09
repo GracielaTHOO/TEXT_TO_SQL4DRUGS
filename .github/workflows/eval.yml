@@ -42,6 +42,7 @@ jobs:
       - name: Profil des données et contrôle des questions
         run: |
           medsql stats
+          mkdir -p results && cp data/raw/manifest.json results/bdpm_manifest.json
           medsql profile
           medsql check-questions
       - name: Installation d'Ollama

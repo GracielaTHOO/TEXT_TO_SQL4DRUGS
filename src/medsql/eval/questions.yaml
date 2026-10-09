@@ -155,7 +155,7 @@
   categorie: generiques
 
 - id: q021
-  question: Quels sont les génériques du DOLIPRANE 1000 mg ?
+  question: Quels sont les génériques du TAHOR 10 mg ?
   sql: |
     SELECT DISTINCT m.denomination
     FROM groupes_generiques g
@@ -163,7 +163,7 @@
     JOIN medicaments mp ON mp.cis = p.cis
     JOIN medicaments m ON m.cis = g.cis
     WHERE g.type_generique <> 0
-      AND sans_accents(mp.denomination) LIKE 'DOLIPRANE 1000 MG%'
+      AND sans_accents(mp.denomination) LIKE 'TAHOR 10 MG%'
   difficulte: difficile
   categorie: generiques
 
@@ -315,12 +315,12 @@
   categorie: generiques
 
 - id: q041
-  question: Quels médicaments contenant de l'amoxicilline sont en rupture de stock ?
+  question: Quels médicaments contenant de l'amoxicilline font l'objet d'une rupture ou d'une tension d'approvisionnement ?
   sql: |
     SELECT DISTINCT m.denomination FROM medicaments m
     JOIN disponibilites d ON d.cis = m.cis
     JOIN compositions c ON c.cis = m.cis
-    WHERE d.code_statut = 1 AND sans_accents(c.substance) LIKE '%AMOXICILLINE%'
+    WHERE d.code_statut IN (1, 2) AND sans_accents(c.substance) LIKE '%AMOXICILLINE%'
   difficulte: difficile
   categorie: disponibilite
 

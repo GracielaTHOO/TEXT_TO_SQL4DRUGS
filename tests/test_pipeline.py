@@ -65,3 +65,22 @@ def test_llm_failure_is_recorded_not_raised(conn: sqlite3.Connection) -> None:
     assert not answer.ok
     assert answer.error is not None
     assert answer.error.startswith("LLMError: ReadTimeout")
+
+
+def test_unterminated_string_is_repaired(conn: sqlite3.Connection) -> None:
+    llm = ScriptedLLM("SELECT 'abc", "SELECT COUNT(*) FROM medicaments")
+    answer = Text2SQL(llm, conn, max_repairs=1).ask("Combien ?")
+    assert answer.ok
+    assert answer.attempts == 2
+
+
+class _CrashingEngine:
+    def ask(self, question: str) -> None:
+        raise RuntimeError("panne inattendue")
+
+
+def test_evaluate_item_survives_unexpected_errors(conn: sqlite3.Connection) -> None:
+    item = load_questions()[0]
+    result = evaluate_item(_CrashingEngine(), conn, item)  # type: ignore[arg-type]
+    assert not result.correct
+    assert result.error == "RuntimeError: panne inattendue"

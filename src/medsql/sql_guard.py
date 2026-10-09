@@ -22,7 +22,7 @@ from pathlib import Path
 
 import sqlglot
 from sqlglot import exp
-from sqlglot.errors import ParseError
+from sqlglot.errors import SqlglotError
 
 _FORBIDDEN_NODES: tuple[type[exp.Expression], ...] = (
     exp.Insert,
@@ -77,7 +77,7 @@ def validate(sql: str) -> str:
         raise UnsafeQueryError("Requête vide.")
     try:
         statements = [s for s in sqlglot.parse(sql, read="sqlite") if s is not None]
-    except ParseError as exc:
+    except SqlglotError as exc:  # ParseError, TokenError…
         raise UnsafeQueryError(f"SQL invalide : {exc}") from exc
     if len(statements) != 1:
         raise ForbiddenQueryError("Une seule instruction SQL est autorisée.")

@@ -33,6 +33,8 @@ def test_extract_sql(text: str, expected: str) -> None:
         "CREATE TABLE t (a)",
         "",
         "SELEC * FROM",
+        "SELECT 'chaîne non fermée",
+        'SELECT "identifiant non fermé',
     ],
 )
 def test_validate_rejects(sql: str) -> None:

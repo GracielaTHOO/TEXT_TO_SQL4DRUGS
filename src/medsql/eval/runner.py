@@ -17,7 +17,7 @@ from pathlib import Path
 from medsql import __version__
 from medsql.eval.dataset import EvalItem
 from medsql.eval.metrics import soft_match, strict_match
-from medsql.pipeline import Text2SQL
+from medsql.pipeline import Answer, Text2SQL
 from medsql.sql_guard import run_query
 
 EVAL_ROW_CAP = 10_000
@@ -108,7 +108,10 @@ def dataset_fingerprint(items: list[EvalItem]) -> str:
 
 def evaluate_item(engine: Text2SQL, conn: sqlite3.Connection, item: EvalItem) -> ItemResult:
     gold = run_query(conn, item.sql, max_rows=EVAL_ROW_CAP, timeout_s=60)
-    answer = engine.ask(item.question)
+    try:
+        answer = engine.ask(item.question)
+    except Exception as exc:
+        answer = Answer(question=item.question, error=f"{type(exc).__name__}: {exc}", attempts=1)
     pred_rows = answer.result.rows if answer.result else None
     correct = strict = False
     if pred_rows is not None:

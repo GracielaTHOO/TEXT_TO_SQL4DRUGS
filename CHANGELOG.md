@@ -11,6 +11,9 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ### Corrigé
 - Un délai dépassé ou une panne du serveur LLM n'interrompt plus l'évaluation : la question est comptée fausse avec l'erreur `LLMError`, et le banc continue (constaté sur le premier run réel, bloqué à la 10e question).
+- Une requête générée avec une chaîne non fermée (`TokenError` de sqlglot) est désormais refusée proprement puis réparée, au lieu d'interrompre l'évaluation ; toute autre erreur inattendue sur une question est enregistrée sans arrêter le banc.
+- Questions q021 et q041 : leurs requêtes de référence renvoyaient 0 ligne sur la BDPM réelle (DOLIPRANE absent du répertoire des génériques, aucune amoxicilline en rupture stricte). Elles portent désormais sur TAHOR 10 mg et sur les ruptures ou tensions.
+- `medsql check-questions` signale aussi les réponses dégénérées (une seule valeur nulle).
 - Le workflow d'évaluation enregistre les résultats partiels même si un modèle échoue, et ne bloque plus tant que GitHub Pages n'est pas activé.
 
 ## [0.1.0] - 2026-10-07

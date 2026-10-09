@@ -288,7 +288,8 @@ def check_questions_cmd(
     out.write_text(json.dumps(checks_as_dict(checks), indent=2, ensure_ascii=False) + "\n", "utf-8")
     review = [c for c in checks if c.needs_review]
     for c in review:
-        console.print(f"[yellow]⚠ {c.id}[/] : {c.error or '0 ligne'}")
+        reason = c.error or ("valeur nulle" if c.degenerate else "0 ligne")
+        console.print(f"[yellow]⚠ {c.id}[/] : {reason}")
     console.print(
         f"[green]✓[/] {len(checks) - len(review)}/{len(checks)} questions valides · {out}"
     )

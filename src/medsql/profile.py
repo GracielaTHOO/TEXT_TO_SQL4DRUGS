@@ -106,10 +106,11 @@ class QuestionCheck:
     rows: int | None
     seconds: float
     error: str | None
+    degenerate: bool = False  # une seule valeur, nulle ou NULL (ex. COUNT sur une table vide)
 
     @property
     def needs_review(self) -> bool:
-        return self.error is not None or self.rows == 0
+        return self.error is not None or self.rows == 0 or self.degenerate
 
 
 def check_questions(conn: sqlite3.Connection, items: list[EvalItem]) -> list[QuestionCheck]:

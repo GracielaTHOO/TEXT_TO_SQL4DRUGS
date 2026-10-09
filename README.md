@@ -20,13 +20,13 @@
 ---
 
 ```text
-$ medsql ask "Quels médicaments contenant de l'amoxicilline sont en rupture de stock ?"
+$ medsql ask "Quels médicaments contenant de l'amoxicilline sont en rupture ou en tension ?"
 
 SELECT DISTINCT m.denomination
 FROM medicaments m
 JOIN disponibilites d ON d.cis = m.cis
 JOIN compositions c ON c.cis = m.cis
-WHERE d.code_statut = 1 AND sans_accents(c.substance) LIKE '%AMOXICILLINE%'
+WHERE d.code_statut IN (1, 2) AND sans_accents(c.substance) LIKE '%AMOXICILLINE%'
 ```
 
 ## 🎯 En bref
@@ -38,7 +38,7 @@ WHERE d.code_statut = 1 AND sans_accents(c.substance) LIKE '%AMOXICILLINE%'
 | 🧪 **Évaluation** | 60 questions en français, 3 niveaux, 10 catégories, exactitude mesurée par exécution |
 | 🛡️ **Sécurité** | SQL en lecture seule garanti par trois barrières indépendantes |
 | 🖥️ **Interfaces** | CLI `medsql`, démo Gradio sur Hugging Face Spaces, tableau de bord HTML |
-| ✅ **Qualité** | 142 tests, mypy strict, ruff, CI sur Python 3.10 à 3.13 |
+| ✅ **Qualité** | 146 tests, mypy strict, ruff, CI sur Python 3.10 à 3.13 |
 
 ## 📊 Résultats
 
@@ -108,7 +108,7 @@ recalculées sur la base du jour, si bien que le jeu reste valide après chaque 
 |---|---:|---|
 | Facile | 25 | *Combien de médicaments ne sont plus commercialisés ?* |
 | Moyen | 26 | *Quel laboratoire est titulaire du plus grand nombre de génériques ?* |
-| Difficile | 9 | *Quels sont les génériques du DOLIPRANE 1000 mg ?* |
+| Difficile | 9 | *Quels sont les génériques du TAHOR 10 mg ?* |
 
 Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evaluation.md).
 
@@ -127,7 +127,7 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 ├── app/app.py           démo Gradio
 ├── space/               image Docker Hugging Face Spaces (Ollama embarqué)
 ├── results/runs/        un fichier JSON par évaluation
-├── tests/               142 tests, échantillon synthétique au format BDPM
+├── tests/               146 tests, échantillon synthétique au format BDPM
 └── docs/                architecture, données, évaluation, déploiement, feuille de route
 ```
 
