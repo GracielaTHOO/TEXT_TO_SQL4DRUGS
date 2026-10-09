@@ -43,7 +43,11 @@ WHERE d.code_statut IN (1, 2) AND sans_accents(c.substance) LIKE '%AMOXICILLINE%
 ## 📊 Résultats
 
 <!-- RESULTS:START -->
-_Aucun run d'évaluation complet pour l'instant. Lancez `medsql eval`._
+| Modèle | Exactitude | Exactitude stricte | SQL exécutable | Latence p50 | Latence p95 | Date |
+|---|---:|---:|---:|---:|---:|---|
+| qwen2.5-coder:1.5b | **58,3 %** | 40,0 % | 90,0 % | 7,5 s | 22,1 s | 2026-10-09 |
+
+_60 questions · exactitude = résultat d'exécution identique à la référence (voir [docs/evaluation.md](docs/evaluation.md))._
 <!-- RESULTS:END -->
 
 Ce tableau est régénéré par `medsql report` à chaque évaluation. Le détail par difficulté,

@@ -1,0 +1,71 @@
+{
+  "downloaded_at": "2026-10-09T07:04:26+00:00",
+  "files": [
+    {
+      "name": "CIS_bdpm.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_bdpm.txt",
+      "bytes": 3175357,
+      "sha256": "332b95926f76f1a2ab3d70cdf64205397fc13e74b7cc9afad9b625fbb6961640"
+    },
+    {
+      "name": "CIS_CIP_bdpm.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CIP_bdpm.txt",
+      "bytes": 4151337,
+      "sha256": "ad46ac95cc138af78bad443e4ef66aff706bae45379e83134f422a4b19aff01a"
+    },
+    {
+      "name": "CIS_COMPO_bdpm.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_COMPO_bdpm.txt",
+      "bytes": 2735840,
+      "sha256": "90a6e8ee286b6245c3938dd417ac75d1135a61b15ba50cfad70ee6b3bd181b7a"
+    },
+    {
+      "name": "CIS_GENER_bdpm.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_GENER_bdpm.txt",
+      "bytes": 1219514,
+      "sha256": "04ea92fb3d2e7682ed0720daea48ecf65f3459b4b0b61fe9160bb7cce82f152c"
+    },
+    {
+      "name": "CIS_HAS_SMR_bdpm.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_HAS_SMR_bdpm.txt",
+      "bytes": 4630126,
+      "sha256": "c2215af6b20705bb8b8eb6f447ebb2a45000c40e5cd8d3f575149832c639ffdd"
+    },
+    {
+      "name": "CIS_HAS_ASMR_bdpm.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_HAS_ASMR_bdpm.txt",
+      "bytes": 4605173,
+      "sha256": "f849554030c7dafdaf9ccf604dcdb8393590302f7a28f869a71a3fd798ae0a69"
+    },
+    {
+      "name": "CIS_CPD_bdpm.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CPD_bdpm.txt",
+      "bytes": 1336246,
+      "sha256": "e92ca48f83f54f6e2bca7248d3e8c24d7399402fd6b5b9058c41ad730529c237"
+    },
+    {
+      "name": "CIS_CIP_Dispo_Spec.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CIP_Dispo_Spec.txt",
+      "bytes": 153880,
+      "sha256": "c528179cf4acf8c2d7e4052e3be68d2d0753e8d314499a736150a11bbcd81a17"
+    },
+    {
+      "name": "CIS_MITM.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_MITM.txt",
+      "bytes": 1136234,
+      "sha256": "fa091533897ebf4911d1d79d5b53af6ac08c733fa5d486722f458e140dbcd7f7"
+    },
+    {
+      "name": "CIS_InfoImportantes.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_InfoImportantes.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "HAS_LiensPageCT_bdpm.txt",
+      "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/HAS_LiensPageCT_bdpm.txt",
+      "bytes": 517390,
+      "sha256": "2f01ff1e13f8431434d545d1c567368276223b7a5d9c5612fc423f4353c54a2b"
+    }
+  ]
+}
