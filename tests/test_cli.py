@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -64,3 +65,19 @@ def test_docs(tmp_path: Path) -> None:
     out = tmp_path / "data.md"
     assert runner.invoke(app, ["docs", "--out", str(out)]).exit_code == 0
     assert "## `medicaments`" in out.read_text("utf-8")
+
+
+def test_profile_and_check_questions(data_dir: Path, tmp_path: Path) -> None:
+    out = tmp_path / "profil.md"
+    result = runner.invoke(app, ["profile", "--out", str(out)])
+    assert result.exit_code == 0, result.output
+    text = out.read_text("utf-8")
+    assert "| `medicaments` | 22 |" in text
+    assert "Commercialisée" in text
+    report = tmp_path / "check.json"
+    result = runner.invoke(app, ["check-questions", "--out", str(report)])
+    assert result.exit_code == 0, result.output
+    data = json.loads(report.read_text("utf-8"))
+    assert len(data["questions"]) == 60
+    # Sur l'échantillon synthétique, quelques références sont vides : elles sont signalées.
+    assert "q024" in data["to_review"]

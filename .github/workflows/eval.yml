@@ -39,6 +39,11 @@ jobs:
         run: pip install -e ".[report]"
       - name: Téléchargement de la BDPM et construction de la base
         run: medsql setup
+      - name: Profil des données et contrôle des questions
+        run: |
+          medsql stats
+          medsql profile
+          medsql check-questions
       - name: Installation d'Ollama
         run: |
           curl -fsSL https://ollama.com/install.sh | sh
@@ -48,30 +53,45 @@ jobs:
         run: |
           LIMIT_OPT=""
           if [ -n "${{ inputs.limit }}" ]; then LIMIT_OPT="--limit ${{ inputs.limit }}"; fi
+          status=0
           for model in ${MODELS//,/ }; do
             echo "::group::$model"
             ollama pull "$model"
-            medsql eval --model "$model" $LIMIT_OPT
+            # Un modèle en échec n'empêche pas d'évaluer les suivants.
+            medsql eval --model "$model" $LIMIT_OPT || { echo "::warning::échec de $model"; status=1; }
             echo "::endgroup::"
           done
+          exit $status
       - name: Tableau de bord et README
+        if: always()
         run: medsql report
       - name: Résumé du run
+        if: always()
         run: |
           echo "## Résultats" >> "$GITHUB_STEP_SUMMARY"
           sed -n '/RESULTS:START/,/RESULTS:END/p' README.md | sed '1d;$d' >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrement des résultats
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add results README.md
-          git diff --cached --quiet || git commit -m "eval: résultats du $(date -u +%Y-%m-%d)"
+          git add results README.md docs
+          git diff --cached --quiet && exit 0
+          git commit -m "eval: résultats du $(date -u +%Y-%m-%d)"
+          git pull --rebase origin main
           git push
+      # Les trois étapes suivantes échouent sans bloquer tant que GitHub Pages n'est pas activé.
       - name: Préparation de GitHub Pages
+        if: always()
+        continue-on-error: true
         run: |
           mkdir -p site
           cp results/dashboard.html site/index.html
       - uses: actions/upload-pages-artifact@v3
+        if: always()
+        continue-on-error: true
         with:
           path: site
       - uses: actions/deploy-pages@v4
+        if: always()
+        continue-on-error: true

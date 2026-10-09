@@ -38,7 +38,7 @@ WHERE d.code_statut = 1 AND sans_accents(c.substance) LIKE '%AMOXICILLINE%'
 | 🧪 **Évaluation** | 60 questions en français, 3 niveaux, 10 catégories, exactitude mesurée par exécution |
 | 🛡️ **Sécurité** | SQL en lecture seule garanti par trois barrières indépendantes |
 | 🖥️ **Interfaces** | CLI `medsql`, démo Gradio sur Hugging Face Spaces, tableau de bord HTML |
-| ✅ **Qualité** | 140 tests, mypy strict, ruff, CI sur Python 3.10 à 3.13 |
+| ✅ **Qualité** | 142 tests, mypy strict, ruff, CI sur Python 3.10 à 3.13 |
 
 ## 📊 Résultats
 
@@ -91,6 +91,8 @@ python app/app.py                  # démo sur http://127.0.0.1:7860
 | `medsql ask "…"` | Pose une question, affiche le SQL et le résultat |
 | `medsql eval --model …` | Évalue un modèle sur les 60 questions |
 | `medsql report` | Génère le tableau de bord et met à jour ce README |
+| `medsql profile` | Génère le profil de la base réelle ([docs/donnees-profil.md](docs/donnees-profil.md)) |
+| `medsql check-questions` | Vérifie les requêtes de référence sur la base réelle |
 | `medsql docs` | Régénère le dictionnaire de données |
 
 Options utiles : `--backend vllm --base-url http://localhost:8000`, `--zero-shot`, `--repairs 0`, `--limit 10`.
@@ -125,7 +127,7 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 ├── app/app.py           démo Gradio
 ├── space/               image Docker Hugging Face Spaces (Ollama embarqué)
 ├── results/runs/        un fichier JSON par évaluation
-├── tests/               140 tests, échantillon synthétique au format BDPM
+├── tests/               142 tests, échantillon synthétique au format BDPM
 └── docs/                architecture, données, évaluation, déploiement, feuille de route
 ```
 

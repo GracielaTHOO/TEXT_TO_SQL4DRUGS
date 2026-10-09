@@ -18,6 +18,7 @@ Variables d'environnement (préfixe `MEDSQL_`) :
 | `MEDSQL_BASE_URL` | `http://localhost:11434` | URL du serveur LLM |
 | `MEDSQL_API_KEY` | vide | clé éventuelle (API compatible OpenAI) |
 | `MEDSQL_DATA_DIR` | `data` | dossier des fichiers bruts et de la base |
+| `MEDSQL_MAX_TOKENS` | `512` | tokens générés au maximum par réponse |
 | `MEDSQL_MAX_ROWS` | `200` | lignes maximum affichées |
 | `MEDSQL_QUERY_TIMEOUT` | `10` | délai maximal d'une requête SQL (s) |
 

@@ -255,6 +255,46 @@ def report(
 
 
 @app.command()
+def profile(
+    out: Annotated[Path, typer.Option(help="Fichier Markdown")] = Path("docs/donnees-profil.md"),
+) -> None:
+    """🔬 Génère le profil de la base (volumétrie, complétude, valeurs fréquentes)."""
+    from medsql.profile import profile_markdown
+    from medsql.sql_guard import connect_readonly
+
+    s = _settings()
+    manifest = s.raw_dir / "manifest.json"
+    downloaded_at = (
+        json.loads(manifest.read_text("utf-8"))["downloaded_at"] if manifest.exists() else None
+    )
+    with closing(connect_readonly(s.db_path)) as conn:
+        out.write_text(profile_markdown(conn, downloaded_at=downloaded_at), "utf-8")
+    console.print(f"[green]✓[/] {out}")
+
+
+@app.command("check-questions")
+def check_questions_cmd(
+    out: Annotated[Path, typer.Option(help="Rapport JSON")] = Path("results/questions_check.json"),
+    questions: Annotated[Path | None, typer.Option(help="Jeu de questions YAML")] = None,
+) -> None:
+    """🩺 Exécute les requêtes de référence sur la base et liste les questions à revoir."""
+    from medsql.eval.dataset import load_questions
+    from medsql.profile import check_questions, checks_as_dict
+    from medsql.sql_guard import connect_readonly
+
+    with closing(connect_readonly(_settings().db_path)) as conn:
+        checks = check_questions(conn, load_questions(questions))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(checks_as_dict(checks), indent=2, ensure_ascii=False) + "\n", "utf-8")
+    review = [c for c in checks if c.needs_review]
+    for c in review:
+        console.print(f"[yellow]⚠ {c.id}[/] : {c.error or '0 ligne'}")
+    console.print(
+        f"[green]✓[/] {len(checks) - len(review)}/{len(checks)} questions valides · {out}"
+    )
+
+
+@app.command()
 def docs(
     out: Annotated[Path, typer.Option(help="Fichier Markdown")] = Path("docs/data.md"),
 ) -> None:

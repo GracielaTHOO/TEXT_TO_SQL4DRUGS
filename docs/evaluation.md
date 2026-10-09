@@ -47,6 +47,9 @@ Cette métrique suit l'*execution accuracy* de [Spider](https://yale-lily.github
 - seuls les runs complets (sans `--limit`) entrent au classement ;
 - une requête de référence qui renvoie zéro ligne lève un avertissement dans le run :
   la question doit être revue, car un modèle qui renvoie aussi zéro ligne serait compté juste.
+  `medsql check-questions` fait ce contrôle sur la base réelle avant chaque évaluation ;
+- la génération est plafonnée à 512 tokens et chaque appel au modèle à 180 s : au-delà,
+  la question est comptée fausse (`LLMError`) et l'évaluation continue.
 
 ## Lancer une évaluation
 
