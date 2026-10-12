@@ -47,7 +47,9 @@ LIMIT 10
 <!-- RESULTS:START -->
 | Modèle | Exactitude | Exactitude stricte | SQL exécutable | Latence p50 | Latence p95 | Date |
 |---|---:|---:|---:|---:|---:|---|
-| qwen2.5-coder:1.5b | **58,3 %** | 40,0 % | 90,0 % | 7,5 s | 22,1 s | 2026-10-09 |
+| qwen2.5-coder:7b | **60,0 %** | 48,3 % | 96,7 % | 17,0 s | 39,9 s | 2026-10-12 |
+| qwen2.5-coder:1.5b | **56,7 %** | 38,3 % | 91,7 % | 4,2 s | 12,4 s | 2026-10-12 |
+| qwen2.5-coder:3b | **56,7 %** | 41,7 % | 91,7 % | 7,4 s | 25,2 s | 2026-10-12 |
 
 _60 questions · exactitude = résultat d'exécution identique à la référence (voir [docs/evaluation.md](docs/evaluation.md))._
 <!-- RESULTS:END -->

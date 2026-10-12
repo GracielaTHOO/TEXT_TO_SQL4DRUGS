@@ -1,5 +1,5 @@
 {
-  "downloaded_at": "2026-10-09T07:04:26+00:00",
+  "downloaded_at": "2026-10-12T06:54:33+00:00",
   "files": [
     {
       "name": "CIS_bdpm.txt",
@@ -10,8 +10,8 @@
     {
       "name": "CIS_CIP_bdpm.txt",
       "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CIP_bdpm.txt",
-      "bytes": 4151337,
-      "sha256": "ad46ac95cc138af78bad443e4ef66aff706bae45379e83134f422a4b19aff01a"
+      "bytes": 4151167,
+      "sha256": "32bb60da1dddee0014bf1ad1a56a75f7f2add83a2c3d8d4e6069cee1b830932d"
     },
     {
       "name": "CIS_COMPO_bdpm.txt",
