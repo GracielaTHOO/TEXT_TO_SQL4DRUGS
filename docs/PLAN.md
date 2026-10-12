@@ -17,10 +17,12 @@ Légende : 🙋 = action de Graciela nécessaire.
 - [x] **S1 · ven. 9 oct.** Premier run réel (workflow d'évaluation, 10 questions, Qwen2.5-Coder 1.5B).
       Corriger le chargement et les questions dont la référence renvoie 0 ligne sur la vraie BDPM.
       Publier les chiffres de la base (`results/bdpm_stats.json`) et un profil des données (`docs/donnees-profil.md`).
-- [ ] **S2 · lun. 12 oct.** Runs complets Qwen2.5-Coder 1.5B, 3B et 7B. Premier tableau de résultats dans le README.
-      🙋 Activer GitHub Pages (*Settings → Pages → Source : GitHub Actions*).
+- [x] **S2 · lun. 12 oct.** Runs complets Qwen2.5-Coder 1.5B, 3B et 7B. Premier tableau de résultats dans le README.
+      🙋 Activer GitHub Pages (*Settings → Pages → Source : GitHub Actions*) : **toujours en attente** au 12 octobre.
 - [ ] **S3 · mer. 14 oct.** Ablations : zero-shot contre few-shot, avec et sans auto-correction
       (entrées du workflow, colonne « configuration » du tableau de bord).
+      Ablation supplémentaire : libellés exacts des colonnes catégorielles dans le schéma du prompt
+      (constat de S2 sur `disponibilites.statut`).
 - [ ] **S4 · ven. 16 oct.** Analyse d'erreurs automatique (`medsql.eval.errors`) : table manquante, mauvaise
       jointure, filtre texte, agrégat, lignes en trop ou en moins. Section dédiée du tableau de bord.
       Release **v0.2.0**.

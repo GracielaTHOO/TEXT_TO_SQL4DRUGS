@@ -61,6 +61,27 @@ medsql eval --model qwen2.5-coder:7b --repairs 0 # ablation : sans auto-correcti
 medsql report                                    # tableau de bord + README
 ```
 
+## Premiers constats (runs du 12 octobre 2026)
+
+Trois tailles de Qwen2.5-Coder, mêmes 60 questions, même prompt (few-shot et une auto-correction),
+CPU du runner GitHub. Fichiers sources : `results/runs/20261012T*.json`.
+
+| Modèle | Exactitude | Stricte | SQL exécutable | Facile | Moyen | Difficile | Latence p50 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 1.5B | 56,7 % | 38,3 % | 91,7 % | 80 % | 54 % | 0 % | 4,2 s |
+| 3B | 56,7 % | 41,7 % | 91,7 % | 80 % | 46 % | 22 % | 7,4 s |
+| 7B | 60,0 % | 48,3 % | 96,7 % | 80 % | 58 % | 11 % | 17,0 s |
+
+- Les trois modèles sont à égalité sur les questions faciles. Le 7B gagne surtout en SQL exécutable
+  et en exactitude stricte, pour une latence quatre fois plus élevée que le 1.5B.
+- Les écarts d'exactitude (3,3 points) restent dans la marge d'incertitude de 60 questions
+  (voir plus bas) : les intervalles de confiance arrivent en S6.
+- Les jointures sont le point faible commun (29 %, 0 % et 14 %).
+- **Libellés devinés.** Sur les ruptures et tensions, le 7B obtient 0 sur 4 : il filtre
+  `statut = 'Rupture'` ou `'Tension'` alors que les libellés réels sont « Rupture de stock » et
+  « Tension d'approvisionnement ». Le schéma du prompt ne donne pas ces libellés exacts. Leur ajout
+  est mesuré en S3 comme une ablation, pour que les chiffres ci-dessus restent comparables.
+
 ## Limites connues
 
 - 60 questions donnent un intervalle de confiance à 95 % d'environ ±12 points autour de 50 % :

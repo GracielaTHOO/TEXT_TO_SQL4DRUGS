@@ -4,6 +4,9 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ## [Non publié]
 
+### Résultats
+- Premiers runs complets sur la BDPM réelle (12 octobre 2026, 60 questions) : Qwen2.5-Coder 7B 60,0 %, 3B 56,7 %, 1.5B 56,7 %. Détail et constats dans `docs/evaluation.md`.
+
 ### Ajouté
 - `medsql profile` : profil de la base réelle (volumétrie, complétude, plages de dates, valeurs fréquentes) publié dans `docs/donnees-profil.md`.
 - `medsql check-questions` : exécution des requêtes de référence sur la base réelle et liste des questions à revoir (`results/questions_check.json`).
