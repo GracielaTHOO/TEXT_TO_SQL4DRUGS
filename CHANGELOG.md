@@ -8,6 +8,7 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Premiers runs complets sur la BDPM réelle (12 octobre 2026, 60 questions) : Qwen2.5-Coder 7B 60,0 %, 3B 56,7 %, 1.5B 56,7 %. Détail et constats dans `docs/evaluation.md`.
 
 ### Ajouté
+- Workflow *Tableau de bord (GitHub Pages)* : publie `results/dashboard.html` sans relancer l'évaluation.
 - `medsql profile` : profil de la base réelle (volumétrie, complétude, plages de dates, valeurs fréquentes) publié dans `docs/donnees-profil.md`.
 - `medsql check-questions` : exécution des requêtes de référence sur la base réelle et liste des questions à revoir (`results/questions_check.json`).
 - Variable `MEDSQL_MAX_TOKENS` (512 par défaut) : plafond de génération transmis à Ollama (`num_predict`) et aux API compatibles OpenAI (`max_tokens`).
@@ -19,7 +20,8 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Question q041 : aucune spécialité à base d'amoxicilline n'est en rupture ni en tension dans la BDPM du 9 octobre 2026. Elle compte désormais les substances actives des spécialités commercialisées en rupture ou en tension.
 - Question q058 : le fichier `CIS_InfoImportantes.txt` est publié vide par l'ANSM (0 octet le 9 octobre 2026), la table `informations_importantes` aussi. La question porte désormais sur les ruptures et tensions commencées depuis le 1er janvier 2026, sans dépendre de `date('now')`.
 - `medsql check-questions` signale réellement les réponses dégénérées (une seule ligne de valeurs nulles ou `NULL`, par exemple un `COUNT` sur une table vide) : le champ existait mais n'était jamais renseigné.
-- Le workflow d'évaluation enregistre les résultats partiels même si un modèle échoue, et ne bloque plus tant que GitHub Pages n'est pas activé.
+- Le workflow d'évaluation enregistre les résultats partiels même si un modèle échoue.
+- Tableau de bord public sur GitHub Pages (dépôt passé en public le 13 octobre 2026) ; un échec de publication fait de nouveau échouer le workflow.
 
 ## [0.1.0] - 2026-10-07
 

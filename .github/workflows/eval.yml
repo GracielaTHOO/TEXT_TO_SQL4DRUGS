@@ -81,18 +81,14 @@ jobs:
           git commit -m "eval: résultats du $(date -u +%Y-%m-%d)"
           git pull --rebase origin main
           git push
-      # Les trois étapes suivantes échouent sans bloquer tant que GitHub Pages n'est pas activé.
       - name: Préparation de GitHub Pages
         if: always()
-        continue-on-error: true
         run: |
           mkdir -p site
           cp results/dashboard.html site/index.html
       - uses: actions/upload-pages-artifact@v3
         if: always()
-        continue-on-error: true
         with:
           path: site
       - uses: actions/deploy-pages@v4
         if: always()
-        continue-on-error: true

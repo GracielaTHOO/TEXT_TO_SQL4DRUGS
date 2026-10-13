@@ -47,8 +47,10 @@ Pour un modèle plus gros, changer `MEDSQL_MODEL` dans le Dockerfile et passer s
 
 ## GitHub Pages (tableau de bord)
 
-*Settings → Pages → Source : GitHub Actions*. Le workflow *Évaluation des modèles* publie
-`results/dashboard.html` à chaque run.
+En ligne sur <https://gracielathoo.github.io/TEXT_TO_SQL4DRUGS/> (dépôt public, *Settings → Pages →
+Source : GitHub Actions*). Le workflow *Évaluation des modèles* publie `results/dashboard.html` à chaque
+run ; le workflow *Tableau de bord (GitHub Pages)* le republie seul, à la demande ou quand le fichier
+change sur `main`.
 
 ## Évaluation automatique
 

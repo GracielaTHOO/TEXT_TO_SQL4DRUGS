@@ -18,7 +18,7 @@ Légende : 🙋 = action de Graciela nécessaire.
       Corriger le chargement et les questions dont la référence renvoie 0 ligne sur la vraie BDPM.
       Publier les chiffres de la base (`results/bdpm_stats.json`) et un profil des données (`docs/donnees-profil.md`).
 - [x] **S2 · lun. 12 oct.** Runs complets Qwen2.5-Coder 1.5B, 3B et 7B. Premier tableau de résultats dans le README.
-      🙋 Activer GitHub Pages (*Settings → Pages → Source : GitHub Actions*) : **toujours en attente** au 12 octobre.
+      🙋 Activer GitHub Pages (*Settings → Pages → Source : GitHub Actions*)  : fait le 13 octobre (dépôt public).
 - [ ] **S3 · mer. 14 oct.** Ablations : zero-shot contre few-shot, avec et sans auto-correction
       (entrées du workflow, colonne « configuration » du tableau de bord).
       Ablation supplémentaire : libellés exacts des colonnes catégorielles dans le schéma du prompt
