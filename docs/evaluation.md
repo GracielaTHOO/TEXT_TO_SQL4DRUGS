@@ -92,6 +92,31 @@ CPU du runner GitHub. Fichiers sources : `results/runs/20261012T*.json`.
   « Tension d'approvisionnement ». Le schéma du prompt ne donne pas ces libellés exacts. Leur ajout
   est mesuré en S3 comme une ablation, pour que les chiffres ci-dessus restent comparables.
 
+## Ablations (runs du 14 octobre 2026)
+
+Quatre configurations pour Qwen2.5-Coder 1.5B et 7B, le même jour et sur la même BDPM.
+Fichiers sources : `results/runs/20261014T*.json`. Écarts en points d'exactitude par rapport à la
+configuration de base (few-shot, une auto-correction, sans libellés exacts).
+
+| Variante | 1.5B | 7B |
+|---|---:|---:|
+| Base | 55,0 % | 63,3 % |
+| Libellés exacts | **+3,3** | **+5,0** |
+| Zero-shot (sans exemples) | −6,7 | 0,0 |
+| Sans auto-correction | −3,3 | −1,7 |
+
+- **Libellés exacts.** Sur le 7B, la variante gagne exactement les trois questions de disponibilité
+  que le constat de S2 avait prédites (q017, q018, q041) et n'en perd aucune : la catégorie passe de
+  0 % à 75 %. Sur le 1.5B, le bilan est de cinq questions gagnées et trois perdues, donc surtout du
+  bruit. Le prompt grossit d'environ 500 tokens par question.
+- **Exemples few-shot.** Ils comptent pour le petit modèle (−6,7 points sans eux, dont −16 points
+  sur les questions faciles) et pas pour le 7B.
+- **Auto-correction.** Elle rattrape surtout des requêtes non exécutables : sans elle, le SQL
+  exécutable baisse de 95 % à 88 % (1.5B) et de 100 % à 95 % (7B).
+- **Variabilité entre deux jours.** La configuration de base du 1.5B obtient 55,0 % ce jour contre
+  56,7 % le 12 octobre, sur une BDPM mise à jour entre-temps. Les écarts de un à deux points ne sont
+  pas interprétables seuls ; les tests appariés arrivent en S6.
+
 ## Limites connues
 
 - 60 questions donnent un intervalle de confiance à 95 % d'environ ±12 points autour de 50 % :

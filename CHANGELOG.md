@@ -6,6 +6,7 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ### Résultats
 - Premiers runs complets sur la BDPM réelle (12 octobre 2026, 60 questions) : Qwen2.5-Coder 7B 60,0 %, 3B 56,7 %, 1.5B 56,7 %. Détail et constats dans `docs/evaluation.md`.
+- Ablations du 14 octobre 2026 : les libellés exacts font gagner 5,0 points au 7B (68,3 %) et 3,3 points au 1.5B ; sans exemples, le 1.5B perd 6,7 points ; sans auto-correction, 1,7 à 3,3 points.
 
 ### Ajouté
 - Ablations : option `--value-hints` (libellés exacts des colonnes catégorielles dans le prompt), entrée `configs` du workflow d'évaluation (`base`, `zero-shot`, `sans-correction`, `libelles`) et section *Ablations* du tableau de bord (écart à la configuration de base de chaque modèle).
