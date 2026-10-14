@@ -12,27 +12,10 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 
-from medsql.data.schema import TABLES
+from medsql.data.schema import CATEGORICAL, TABLES
 from medsql.eval.dataset import EvalItem
 from medsql.sql_guard import run_query
 
-# Colonnes catégorielles dont on publie les valeurs les plus fréquentes.
-CATEGORICAL: tuple[tuple[str, str], ...] = (
-    ("medicaments", "etat_commercialisation"),
-    ("medicaments", "statut_amm"),
-    ("medicaments", "type_procedure_amm"),
-    ("medicaments", "statut_bdm"),
-    ("medicaments", "forme_pharmaceutique"),
-    ("medicament_voies", "voie"),
-    ("presentations", "taux_remboursement"),
-    ("presentations", "statut_administratif"),
-    ("compositions", "nature_composant"),
-    ("groupes_generiques", "type_libelle"),
-    ("avis_smr", "valeur_smr"),
-    ("avis_asmr", "valeur_asmr"),
-    ("conditions_prescription", "condition"),
-    ("disponibilites", "statut"),
-)
 TOP_N = 8
 
 

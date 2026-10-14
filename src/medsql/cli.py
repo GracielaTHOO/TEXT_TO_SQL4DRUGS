@@ -157,6 +157,13 @@ def evaluate(
     base_url: UrlOpt = None,
     limit: Annotated[int | None, typer.Option(help="N premières questions (test rapide)")] = None,
     few_shot: Annotated[bool, typer.Option("--few-shot/--zero-shot")] = True,
+    hints: Annotated[
+        bool,
+        typer.Option(
+            "--value-hints/--no-value-hints",
+            help="Ajouter au prompt les libellés exacts des colonnes catégorielles",
+        ),
+    ] = False,
     repairs: Annotated[int, typer.Option(help="Tours d'auto-correction sur erreur SQL")] = 1,
     out: Annotated[Path, typer.Option(help="Dossier des runs")] = Path("results/runs"),
     questions: Annotated[Path | None, typer.Option(help="Jeu de questions YAML")] = None,
@@ -175,7 +182,7 @@ def evaluate(
     engine = Text2SQL(
         make_client(s),
         conn,
-        prompt=PromptConfig(few_shot=few_shot),
+        prompt=PromptConfig(few_shot=few_shot, value_hints=hints),
         max_repairs=repairs,
         max_rows=10_000,
         query_timeout_s=s.query_timeout_s,
@@ -202,6 +209,7 @@ def evaluate(
         backend=s.backend,
         config={
             "few_shot": few_shot,
+            "value_hints": hints,
             "max_repairs": repairs,
             "temperature": s.temperature,
             "limit": limit,

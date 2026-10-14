@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 import httpx
 
 from medsql.llm.base import LLMClient
-from medsql.prompting import PromptConfig, build_messages, build_repair_messages
+from medsql.prompting import PromptConfig, build_messages, build_repair_messages, value_hints
 from medsql.sql_guard import (
     ForbiddenQueryError,
     QueryResult,
@@ -58,11 +58,12 @@ class Text2SQL:
         self.max_rows = max_rows
         self.query_timeout_s = query_timeout_s
         self.temperature = temperature
+        self.hints = value_hints(conn) if self.prompt.value_hints else ""
 
     def ask(self, question: str) -> Answer:
         answer = Answer(question=question)
         start = time.perf_counter()
-        messages = build_messages(question, self.prompt)
+        messages = build_messages(question, self.prompt, hints=self.hints)
         for attempt in range(self.max_repairs + 1):
             answer.attempts = attempt + 1
             try:

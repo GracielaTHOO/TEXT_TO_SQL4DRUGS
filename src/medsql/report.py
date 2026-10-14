@@ -47,6 +47,8 @@ def config_label(summary: dict[str, Any]) -> str:
         parts.append("zero-shot")
     if cfg.get("max_repairs", 1) == 0:
         parts.append("sans auto-correction")
+    if cfg.get("value_hints", False):
+        parts.append("libellés exacts")
     return " · ".join(parts)
 
 
@@ -59,6 +61,34 @@ def latest_per_config(runs: Sequence[Run]) -> list[Run]:
             continue  # les runs partiels (--limit) ne vont pas au classement
         latest[config_label(s)] = run
     return sorted(latest.values(), key=lambda r: -float(r["summary"]["accuracy"]))
+
+
+def _is_baseline(summary: dict[str, Any]) -> bool:
+    cfg = summary.get("config", {})
+    return (
+        bool(cfg.get("few_shot", True))
+        and cfg.get("max_repairs", 1) != 0
+        and not cfg.get("value_hints", False)
+    )
+
+
+def ablations(board: Sequence[Run]) -> list[tuple[str, str, float, float]]:
+    """Écart de chaque variante à la configuration de base du même modèle.
+
+    Renvoie (modèle, variante, exactitude, écart en points) ; les modèles sans run de base
+    ou sans variante sont ignorés.
+    """
+    base = {r["summary"]["model"]: r["summary"] for r in board if _is_baseline(r["summary"])}
+    rows = []
+    for run in board:
+        s = run["summary"]
+        ref = base.get(s["model"])
+        if ref is None or _is_baseline(s):
+            continue
+        variant = config_label(s).removeprefix(f"{s['model']} · ")
+        acc = float(s["accuracy"])
+        rows.append((str(s["model"]), variant, acc, 100 * (acc - float(ref["accuracy"]))))
+    return sorted(rows, key=lambda r: (r[0], -r[3]))
 
 
 # --------------------------------------------------------------------------- README
@@ -250,6 +280,23 @@ def _leaderboard(board: list[Run]) -> str:
     )
 
 
+def _ablation_table(rows: list[tuple[str, str, float, float]]) -> str:
+    body = []
+    for model, variant, acc, delta in rows:
+        cls = "ok" if delta > 0 else "ko" if delta < 0 else ""
+        sign = "+" if delta > 0 else ""
+        points = f"{sign}{delta:.1f}".replace(".", ",")
+        body.append(
+            f"<tr><td>{_e(model)}</td><td>{_e(variant)}</td><td class='n'>{_pct(acc)}</td>"
+            f"<td class='n'><span class='{cls}'>{points} pt</span></td></tr>"
+        )
+    return (
+        "<table><thead><tr><th>Modèle</th><th>Variante</th><th class='n'>Exactitude</th>"
+        "<th class='n'>Écart à la base</th></tr></thead>"
+        f"<tbody>{''.join(body)}</tbody></table>"
+    )
+
+
 def _questions(run: Run) -> str:
     rows = []
     for item in run["items"]:
@@ -304,6 +351,14 @@ def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | N
         sections.append(f'<div class="card">{_bar_chart(bars)}</div>')
         sections.append("<h2>Classement détaillé</h2>")
         sections.append(f'<div class="card">{_leaderboard(board)}</div>')
+        deltas = ablations(board)
+        if deltas:
+            sections.append("<h2>Ablations</h2>")
+            sections.append(
+                "<p class='note'>Écart de chaque variante à la configuration de base du même modèle "
+                "(few-shot, une auto-correction, sans libellés exacts), en points d'exactitude.</p>"
+            )
+            sections.append(f'<div class="card">{_ablation_table(deltas)}</div>')
         sections.append("<h2>Par difficulté</h2>")
         sections.append(f'<div class="card">{_heatmap(board, "by_difficulty", DIFFICULTIES)}</div>')
         sections.append("<h2>Par catégorie de question</h2>")

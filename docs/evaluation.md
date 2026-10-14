@@ -58,8 +58,18 @@ ollama pull qwen2.5-coder:7b
 medsql eval --model qwen2.5-coder:7b             # few-shot + 1 tour d'auto-correction
 medsql eval --model qwen2.5-coder:7b --zero-shot # ablation : sans exemples
 medsql eval --model qwen2.5-coder:7b --repairs 0 # ablation : sans auto-correction
+medsql eval --model qwen2.5-coder:7b --value-hints # ablation : libellés exacts dans le prompt
 medsql report                                    # tableau de bord + README
 ```
+
+Sur GitHub, le workflow *Évaluation des modèles* prend une entrée `configs` (par défaut `base`) :
+`base`, `zero-shot`, `sans-correction` et `libelles`, séparées par des virgules. Chaque configuration
+est évaluée pour chaque modèle. Le tableau de bord compare alors chaque variante à la configuration de
+base du même modèle (section *Ablations*).
+
+L'option `--value-hints` lit dans la base les valeurs des colonnes catégorielles qui en ont au plus 12
+(statut de disponibilité, SMR, ASMR, type de générique…) et les ajoute au schéma du prompt, écrites
+comme des littéraux SQL.
 
 ## Premiers constats (runs du 12 octobre 2026)
 

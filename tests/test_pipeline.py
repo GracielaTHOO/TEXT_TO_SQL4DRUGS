@@ -7,7 +7,7 @@ import httpx
 from medsql.eval.dataset import load_questions
 from medsql.eval.runner import evaluate_item, summarize
 from medsql.pipeline import Text2SQL
-from medsql.prompting import build_messages
+from medsql.prompting import MAX_HINT_VALUES, PromptConfig, build_messages, value_hints
 from tests.conftest import OracleLLM, ScriptedLLM
 
 
@@ -84,3 +84,27 @@ def test_evaluate_item_survives_unexpected_errors(conn: sqlite3.Connection) -> N
     result = evaluate_item(_CrashingEngine(), conn, item)  # type: ignore[arg-type]
     assert not result.correct
     assert result.error == "RuntimeError: panne inattendue"
+
+
+def test_value_hints_list_exact_labels(conn: sqlite3.Connection) -> None:
+    hints = value_hints(conn)
+    assert "medicaments.etat_commercialisation : 'Commercialisée'" in hints
+    # Colonne à texte libre (trop de valeurs distinctes) : non listée.
+    assert all(len(line.split(", ")) <= MAX_HINT_VALUES for line in hints.splitlines())
+
+
+def test_value_hints_reach_the_prompt_only_when_enabled(conn: sqlite3.Connection) -> None:
+    sql = "```sql\nSELECT COUNT(*) FROM medicaments\n```"
+    plain, hinted = ScriptedLLM(sql), ScriptedLLM(sql)
+    Text2SQL(plain, conn).ask("Combien ?")
+    Text2SQL(hinted, conn, prompt=PromptConfig(value_hints=True)).ask("Combien ?")
+    assert "Valeurs exactes" not in plain.calls[0][0].content
+    assert "Valeurs exactes" in hinted.calls[0][0].content
+
+
+def test_value_hints_quote_like_sql() -> None:
+    conn = sqlite3.connect(":memory:")
+    conn.execute("CREATE TABLE disponibilites (statut TEXT)")
+    conn.execute("INSERT INTO disponibilites VALUES ('Tension d''approvisionnement')")
+    assert "'Tension d''approvisionnement'" in value_hints(conn)
+    conn.close()

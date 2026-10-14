@@ -11,6 +11,9 @@ on:
       limit:
         description: "Nombre de questions (vide = toutes)"
         default: ""
+      configs:
+        description: "Configurations, séparées par des virgules : base, zero-shot, sans-correction, libelles"
+        default: "base"
   schedule:
     - cron: "17 3 2 * *" # le 2 de chaque mois, après la mise à jour mensuelle de la BDPM
 
@@ -55,12 +58,22 @@ jobs:
           LIMIT_OPT=""
           if [ -n "${{ inputs.limit }}" ]; then LIMIT_OPT="--limit ${{ inputs.limit }}"; fi
           status=0
+          CONFIGS="${{ inputs.configs || 'base' }}"
           for model in ${MODELS//,/ }; do
-            echo "::group::$model"
             ollama pull "$model"
-            # Un modèle en échec n'empêche pas d'évaluer les suivants.
-            medsql eval --model "$model" $LIMIT_OPT || { echo "::warning::échec de $model"; status=1; }
-            echo "::endgroup::"
+            for config in ${CONFIGS//,/ }; do
+              case "$config" in
+                base) flags="" ;;
+                zero-shot) flags="--zero-shot" ;;
+                sans-correction) flags="--repairs 0" ;;
+                libelles) flags="--value-hints" ;;
+                *) echo "::error::configuration inconnue : $config"; exit 1 ;;
+              esac
+              echo "::group::$model · $config"
+              # Une configuration en échec n'empêche pas d'évaluer les suivantes.
+              medsql eval --model "$model" $flags $LIMIT_OPT || { echo "::warning::échec de $model · $config"; status=1; }
+              echo "::endgroup::"
+            done
           done
           exit $status
       - name: Tableau de bord et README

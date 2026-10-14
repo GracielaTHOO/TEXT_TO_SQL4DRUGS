@@ -4,14 +4,17 @@ Choix de conception :
 - le schéma complet est fourni (12 tables, ~4 k tokens) : pas de sélection de tables
   approximative qui ferait échouer les jointures ;
 - les règles métier propres à la BDPM sont explicites (majuscules accentuées, dates ISO…) ;
-- les exemples few-shot sont **disjoints** du jeu d'évaluation (vérifié par un test).
+- les exemples few-shot sont **disjoints** du jeu d'évaluation (vérifié par un test) ;
+- en option, les libellés exacts des colonnes catégorielles sont lus dans la base et ajoutés
+  au schéma, pour que le modèle ne devine pas « Rupture » au lieu de « Rupture de stock ».
 """
 
 from __future__ import annotations
 
+import sqlite3
 from dataclasses import dataclass
 
-from medsql.data.schema import schema_for_prompt
+from medsql.data.schema import CATEGORICAL, schema_for_prompt
 from medsql.llm.base import Message
 
 SYSTEM_RULES = """\
@@ -59,14 +62,55 @@ FEW_SHOTS: tuple[tuple[str, str], ...] = (
 )
 
 
+# Au-delà, une colonne est un texte libre (formes, conditions) : ses libellés ne sont pas listés.
+MAX_HINT_VALUES = 12
+
+
 @dataclass(frozen=True)
 class PromptConfig:
     few_shot: bool = True
+    value_hints: bool = False
 
 
-def build_messages(question: str, config: PromptConfig | None = None) -> list[Message]:
+def _sql_literal(value: object) -> str:
+    """Littéral SQL tel que le modèle doit l'écrire : 'Tension d''approvisionnement'."""
+    if isinstance(value, str):
+        return "'" + value.replace("'", "''") + "'"
+    return str(value)
+
+
+def value_hints(conn: sqlite3.Connection) -> str:
+    """Libellés exacts des colonnes catégorielles, du plus au moins fréquent."""
+    lines = []
+    for table, column in CATEGORICAL:
+        try:
+            values = [
+                row[0]
+                for row in conn.execute(
+                    f"SELECT {column} FROM {table} WHERE {column} IS NOT NULL "
+                    f"GROUP BY {column} ORDER BY COUNT(*) DESC LIMIT {MAX_HINT_VALUES + 1}"
+                )
+            ]
+        except sqlite3.OperationalError:  # table absente d'une base partielle
+            continue
+        if not values or len(values) > MAX_HINT_VALUES:
+            continue
+        shown = ", ".join(_sql_literal(v) for v in values)
+        lines.append(f"- {table}.{column} : {shown}")
+    if not lines:
+        return ""
+    return "Valeurs exactes des colonnes catégorielles (à utiliser telles quelles) :\n" + "\n".join(
+        lines
+    )
+
+
+def build_messages(
+    question: str, config: PromptConfig | None = None, *, hints: str = ""
+) -> list[Message]:
     config = config or PromptConfig()
     system = f"{SYSTEM_RULES}\nSchéma de la base :\n\n{schema_for_prompt()}"
+    if hints:
+        system += f"\n\n{hints}"
     messages = [Message("system", system)]
     if config.few_shot:
         for q, sql in FEW_SHOTS:

@@ -7,7 +7,13 @@ from pathlib import Path
 from medsql.eval.dataset import load_questions
 from medsql.eval.runner import evaluate_item, load_runs, save_run, summarize
 from medsql.pipeline import Text2SQL
-from medsql.report import README_END, README_START, render_dashboard, update_readme
+from medsql.report import (
+    README_END,
+    README_START,
+    ablations,
+    render_dashboard,
+    update_readme,
+)
 from tests.conftest import OracleLLM
 
 
@@ -36,3 +42,21 @@ def test_dashboard_and_readme(conn: sqlite3.Connection, tmp_path: Path) -> None:
 
 def test_dashboard_without_runs() -> None:
     assert "Aucun run" in render_dashboard([])
+
+
+def _summary(model: str, accuracy: float, **config: object) -> dict[str, object]:
+    return {"model": model, "accuracy": accuracy, "config": config}
+
+
+def test_ablations_compare_variants_to_the_model_baseline() -> None:
+    board = [
+        {"summary": _summary("m", 0.50, few_shot=True, max_repairs=1)},
+        {"summary": _summary("m", 0.60, few_shot=True, max_repairs=1, value_hints=True)},
+        {"summary": _summary("m", 0.40, few_shot=False, max_repairs=1)},
+        {"summary": _summary("seul", 0.30, few_shot=False)},  # pas de base : ignoré
+    ]
+    rows = ablations(board)  # type: ignore[arg-type]
+    assert [(r[1], round(r[3], 1)) for r in rows] == [
+        ("libellés exacts", 10.0),
+        ("zero-shot", -10.0),
+    ]

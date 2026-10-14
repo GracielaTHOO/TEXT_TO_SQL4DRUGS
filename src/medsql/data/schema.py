@@ -279,6 +279,26 @@ TABLES_BY_NAME: dict[str, Table] = {t.name: t for t in TABLES}
 SOURCE_FILES: tuple[str, ...] = tuple(dict.fromkeys(t.source_file for t in TABLES))
 
 
+# Colonnes catégorielles : valeurs publiées dans le profil des données et, en option,
+# libellés exacts donnés au modèle dans le prompt (ablation « libellés exacts »).
+CATEGORICAL: tuple[tuple[str, str], ...] = (
+    ("medicaments", "etat_commercialisation"),
+    ("medicaments", "statut_amm"),
+    ("medicaments", "type_procedure_amm"),
+    ("medicaments", "statut_bdm"),
+    ("medicaments", "forme_pharmaceutique"),
+    ("medicament_voies", "voie"),
+    ("presentations", "taux_remboursement"),
+    ("presentations", "statut_administratif"),
+    ("compositions", "nature_composant"),
+    ("groupes_generiques", "type_libelle"),
+    ("avis_smr", "valeur_smr"),
+    ("avis_asmr", "valeur_asmr"),
+    ("conditions_prescription", "condition"),
+    ("disponibilites", "statut"),
+)
+
+
 def schema_for_prompt(tables: list[str] | None = None) -> str:
     """Schéma annoté à inclure dans le prompt (toutes les tables par défaut)."""
     selected = [TABLES_BY_NAME[n] for n in tables] if tables else list(TABLES)
