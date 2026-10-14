@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-12T06:54:36+00:00",
+  "checked_at": "2026-10-14T06:58:05+00:00",
   "to_review": [],
   "questions": [
     {
@@ -19,7 +19,7 @@
     {
       "id": "q003",
       "rows": 1,
-      "seconds": 0.003,
+      "seconds": 0.002,
       "error": null,
       "degenerate": false
     },
@@ -40,21 +40,21 @@
     {
       "id": "q006",
       "rows": 68,
-      "seconds": 0.152,
+      "seconds": 0.034,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q007",
       "rows": 1,
-      "seconds": 0.07,
+      "seconds": 0.071,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q008",
       "rows": 1691,
-      "seconds": 0.004,
+      "seconds": 0.003,
       "error": null,
       "degenerate": false
     },
@@ -75,21 +75,21 @@
     {
       "id": "q011",
       "rows": 1,
-      "seconds": 0.066,
+      "seconds": 0.063,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q012",
       "rows": 1,
-      "seconds": 0.003,
+      "seconds": 0.002,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q013",
       "rows": 1,
-      "seconds": 0.005,
+      "seconds": 0.004,
       "error": null,
       "degenerate": false
     },
@@ -116,7 +116,7 @@
     },
     {
       "id": "q017",
-      "rows": 55,
+      "rows": 56,
       "seconds": 0.001,
       "error": null,
       "degenerate": false
@@ -124,7 +124,7 @@
     {
       "id": "q018",
       "rows": 1,
-      "seconds": 0.0,
+      "seconds": 0.001,
       "error": null,
       "degenerate": false
     },
@@ -152,7 +152,7 @@
     {
       "id": "q022",
       "rows": 1,
-      "seconds": 0.011,
+      "seconds": 0.009,
       "error": null,
       "degenerate": false
     },
@@ -194,7 +194,7 @@
     {
       "id": "q028",
       "rows": 1,
-      "seconds": 0.085,
+      "seconds": 0.082,
       "error": null,
       "degenerate": false
     },
@@ -208,7 +208,7 @@
     {
       "id": "q030",
       "rows": 1,
-      "seconds": 0.045,
+      "seconds": 0.038,
       "error": null,
       "degenerate": false
     },
@@ -250,7 +250,7 @@
     {
       "id": "q036",
       "rows": 1,
-      "seconds": 0.02,
+      "seconds": 0.019,
       "error": null,
       "degenerate": false
     },
@@ -278,14 +278,14 @@
     {
       "id": "q040",
       "rows": 1,
-      "seconds": 0.013,
+      "seconds": 0.012,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q041",
       "rows": 1,
-      "seconds": 0.003,
+      "seconds": 0.002,
       "error": null,
       "degenerate": false
     },
@@ -313,7 +313,7 @@
     {
       "id": "q045",
       "rows": 1,
-      "seconds": 0.0,
+      "seconds": 0.001,
       "error": null,
       "degenerate": false
     },
@@ -327,7 +327,7 @@
     {
       "id": "q047",
       "rows": 1,
-      "seconds": 0.006,
+      "seconds": 0.005,
       "error": null,
       "degenerate": false
     },
@@ -341,7 +341,7 @@
     {
       "id": "q049",
       "rows": 8,
-      "seconds": 0.116,
+      "seconds": 0.112,
       "error": null,
       "degenerate": false
     },
@@ -355,7 +355,7 @@
     {
       "id": "q051",
       "rows": 7,
-      "seconds": 0.007,
+      "seconds": 0.006,
       "error": null,
       "degenerate": false
     },
@@ -390,14 +390,14 @@
     {
       "id": "q056",
       "rows": 1,
-      "seconds": 0.066,
+      "seconds": 0.06,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q057",
       "rows": 1,
-      "seconds": 0.001,
+      "seconds": 0.0,
       "error": null,
       "degenerate": false
     },
@@ -411,14 +411,14 @@
     {
       "id": "q059",
       "rows": 1,
-      "seconds": 0.006,
+      "seconds": 0.007,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q060",
       "rows": 1,
-      "seconds": 0.153,
+      "seconds": 0.156,
       "error": null,
       "degenerate": false
     }

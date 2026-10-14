@@ -1,5 +1,5 @@
 {
-  "downloaded_at": "2026-10-12T06:54:33+00:00",
+  "downloaded_at": "2026-10-14T06:58:02+00:00",
   "files": [
     {
       "name": "CIS_bdpm.txt",
@@ -10,8 +10,8 @@
     {
       "name": "CIS_CIP_bdpm.txt",
       "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CIP_bdpm.txt",
-      "bytes": 4151167,
-      "sha256": "32bb60da1dddee0014bf1ad1a56a75f7f2add83a2c3d8d4e6069cee1b830932d"
+      "bytes": 4150573,
+      "sha256": "3eecfe4c0d317350b0ab00457c7abf77699af4af4c161fb8b015dd4b546a3ca1"
     },
     {
       "name": "CIS_COMPO_bdpm.txt",
@@ -46,14 +46,14 @@
     {
       "name": "CIS_CIP_Dispo_Spec.txt",
       "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_CIP_Dispo_Spec.txt",
-      "bytes": 153880,
-      "sha256": "c528179cf4acf8c2d7e4052e3be68d2d0753e8d314499a736150a11bbcd81a17"
+      "bytes": 154918,
+      "sha256": "554613ea8348810c32cf8872a97c9f5ccd8828c45a8eb873a0479a800663a72e"
     },
     {
       "name": "CIS_MITM.txt",
       "url": "https://base-donnees-publique.medicaments.gouv.fr/download/file/CIS_MITM.txt",
-      "bytes": 1136234,
-      "sha256": "fa091533897ebf4911d1d79d5b53af6ac08c733fa5d486722f458e140dbcd7f7"
+      "bytes": 1618769,
+      "sha256": "300f24c39e84466c617eedce9edfd491870259fd5abd2092b3f8296a3b6245fa"
     },
     {
       "name": "CIS_InfoImportantes.txt",
