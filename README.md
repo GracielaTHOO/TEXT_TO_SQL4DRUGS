@@ -51,6 +51,7 @@ LIMIT 10
 | qwen2.5-coder:7b · sans libellés exacts | **63,3 %** | 51,7 % | 100,0 % | 14,7 s | 36,9 s | 2026-10-14 |
 | qwen2.5-coder:7b · zero-shot · sans libellés exacts | **63,3 %** | 50,0 % | 100,0 % | 14,0 s | 24,9 s | 2026-10-14 |
 | qwen2.5-coder:7b · sans auto-correction · sans libellés exacts | **61,7 %** | 50,0 % | 95,0 % | 15,2 s | 27,3 s | 2026-10-14 |
+| qwen2.5-coder:3b | **60,0 %** | 43,3 % | 93,3 % | 7,5 s | 26,6 s | 2026-10-16 |
 | qwen2.5-coder:1.5b | **58,3 %** | 38,3 % | 91,7 % | 3,9 s | 13,1 s | 2026-10-14 |
 | qwen2.5-coder:3b · sans libellés exacts | **56,7 %** | 41,7 % | 91,7 % | 7,4 s | 25,2 s | 2026-10-12 |
 | qwen2.5-coder:1.5b · sans libellés exacts | **55,0 %** | 33,3 % | 95,0 % | 3,8 s | 11,1 s | 2026-10-14 |
