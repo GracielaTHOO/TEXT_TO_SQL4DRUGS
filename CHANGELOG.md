@@ -4,7 +4,12 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ## [Non publié]
 
+## [0.2.0] - 2026-10-16
+
+Premiers chiffres réels sur la BDPM, ablations et analyse d'erreurs.
+
 ### Résultats
+- Configuration par défaut (libellés exacts, few-shot, une auto-correction), 60 questions : Qwen2.5-Coder 7B 68,3 %, 3B 60,0 %, 1.5B 58,3 %. Jointures et agrégats concentrent 30 des 68 erreurs.
 - Premiers runs complets sur la BDPM réelle (12 octobre 2026, 60 questions) : Qwen2.5-Coder 7B 60,0 %, 3B 56,7 %, 1.5B 56,7 %. Détail et constats dans `docs/evaluation.md`.
 - Ablations du 14 octobre 2026 : les libellés exacts font gagner 5,0 points au 7B (68,3 %) et 3,3 points au 1.5B ; sans exemples, le 1.5B perd 6,7 points ; sans auto-correction, 1,7 à 3,3 points.
 

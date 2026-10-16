@@ -23,7 +23,7 @@ Légende : 🙋 = action de Graciela nécessaire.
       (entrées du workflow, colonne « configuration » du tableau de bord).
       Ablation supplémentaire : libellés exacts des colonnes catégorielles dans le schéma du prompt
       (constat de S2 sur `disponibilites.statut`).
-- [ ] **S4 · ven. 16 oct.** Libellés exacts retenus dans la configuration par défaut (constat de S3).
+- [x] **S4 · ven. 16 oct.** Libellés exacts retenus dans la configuration par défaut (constat de S3).
       Analyse d'erreurs automatique (`medsql.eval.errors`) : table manquante, mauvaise
       jointure, filtre texte, agrégat, lignes en trop ou en moins. Section dédiée du tableau de bord.
       Release **v0.2.0**.

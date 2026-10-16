@@ -117,6 +117,38 @@ configuration de base (few-shot, une auto-correction, sans libellés exacts).
   56,7 % le 12 octobre, sur une BDPM mise à jour entre-temps. Les écarts de un à deux points ne sont
   pas interprétables seuls ; les tests appariés arrivent en S6.
 
+## Analyse des erreurs (configuration par défaut, v0.2.0)
+
+`medsql.eval.errors` attribue à chaque réponse fausse **une** cause, la première qui s'applique
+dans cet ordre : pas de réponse du modèle, SQL non exécutable, table nécessaire absente, table en
+trop ou jointure sur d'autres colonnes, agrégat différent, valeur de filtre texte différente, puis,
+à structure identique, lignes en trop, lignes manquantes ou valeurs différentes. La comparaison
+porte sur les requêtes analysées par sqlglot (tables hors CTE, clés de jointure, agrégats, littéraux
+texte sans accents ni jokers) et sur les nombres de lignes enregistrés : rien n'est réexécuté.
+
+| Cause | 1.5B | 3B | 7B |
+|---|---:|---:|---:|
+| SQL non exécutable | 5 | 4 | 0 |
+| Table absente | 4 | 5 | 2 |
+| Jointure | 5 | 4 | 6 |
+| Agrégat | 4 | 6 | 5 |
+| Filtre texte | 1 | 2 | 4 |
+| Nombre de lignes | 1 | 1 | 1 |
+| Valeurs | 5 | 2 | 1 |
+| **Réponses fausses** | **25** | **24** | **19** |
+| Exactitude | 58,3 % | 60,0 % | 68,3 % |
+
+Runs : 1.5B et 7B du 14 octobre, 3B du 16 octobre (libellés exacts, few-shot, une auto-correction).
+
+- Les jointures et les agrégats concentrent 30 des 68 erreurs. Les agrégats sont surtout
+  `COUNT(*)` contre `COUNT(DISTINCT …)` : le modèle compte des spécialités là où la référence compte
+  des lignes, ou l'inverse (q056, q057). Une partie de ces cas relève d'une question ambiguë plus que
+  d'une erreur ; ils seront relus en S7, avec les paraphrases.
+- Le SQL non exécutable disparaît avec la taille : 5 requêtes pour le 1.5B, aucune pour le 7B.
+- La catégorie « jointure » inclut des jointures inutiles mais inoffensives (par exemple vers
+  `medicaments` alors que `avis_smr` suffit) quand la réponse est fausse pour une autre raison :
+  la cause retenue est la première dans l'ordre, pas forcément la seule.
+
 ## Limites connues
 
 - 60 questions donnent un intervalle de confiance à 95 % d'environ ±12 points autour de 50 % :
