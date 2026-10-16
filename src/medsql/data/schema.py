@@ -280,7 +280,7 @@ SOURCE_FILES: tuple[str, ...] = tuple(dict.fromkeys(t.source_file for t in TABLE
 
 
 # Colonnes catégorielles : valeurs publiées dans le profil des données et, en option,
-# libellés exacts donnés au modèle dans le prompt (ablation « libellés exacts »).
+# libellés exacts donnés au modèle dans le prompt.
 CATEGORICAL: tuple[tuple[str, str], ...] = (
     ("medicaments", "etat_commercialisation"),
     ("medicaments", "statut_amm"),

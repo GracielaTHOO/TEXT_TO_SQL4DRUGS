@@ -12,7 +12,7 @@ on:
         description: "Nombre de questions (vide = toutes)"
         default: ""
       configs:
-        description: "Configurations, séparées par des virgules : base, zero-shot, sans-correction, libelles"
+        description: "Configurations, séparées par des virgules : base, zero-shot, sans-correction, sans-libelles"
         default: "base"
   schedule:
     - cron: "17 3 2 * *" # le 2 de chaque mois, après la mise à jour mensuelle de la BDPM
@@ -66,7 +66,7 @@ jobs:
                 base) flags="" ;;
                 zero-shot) flags="--zero-shot" ;;
                 sans-correction) flags="--repairs 0" ;;
-                libelles) flags="--value-hints" ;;
+                sans-libelles) flags="--no-value-hints" ;;
                 *) echo "::error::configuration inconnue : $config"; exit 1 ;;
               esac
               echo "::group::$model · $config"

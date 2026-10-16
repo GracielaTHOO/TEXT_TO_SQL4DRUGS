@@ -9,11 +9,15 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Ablations du 14 octobre 2026 : les libellés exacts font gagner 5,0 points au 7B (68,3 %) et 3,3 points au 1.5B ; sans exemples, le 1.5B perd 6,7 points ; sans auto-correction, 1,7 à 3,3 points.
 
 ### Ajouté
-- Ablations : option `--value-hints` (libellés exacts des colonnes catégorielles dans le prompt), entrée `configs` du workflow d'évaluation (`base`, `zero-shot`, `sans-correction`, `libelles`) et section *Ablations* du tableau de bord (écart à la configuration de base de chaque modèle).
+- Analyse automatique des erreurs (`medsql.eval.errors`) : chaque réponse fausse reçoit une cause (pas de réponse du modèle, SQL invalide, table manquante, jointure, agrégat, filtre texte, lignes en trop ou en moins, valeurs) par comparaison avec la requête de référence. Section *Analyse des erreurs* du tableau de bord, applicable aussi aux runs anciens.
+- Ablations : option `--value-hints/--no-value-hints` (libellés exacts des colonnes catégorielles dans le prompt), entrée `configs` du workflow d'évaluation (`base`, `zero-shot`, `sans-correction`, `sans-libelles`) et section *Ablations* du tableau de bord : effet de chaque facteur retiré seul, par rapport au run qui ne diffère que par ce facteur.
 - Workflow *Tableau de bord (GitHub Pages)* : publie `results/dashboard.html` sans relancer l'évaluation.
 - `medsql profile` : profil de la base réelle (volumétrie, complétude, plages de dates, valeurs fréquentes) publié dans `docs/donnees-profil.md`.
 - `medsql check-questions` : exécution des requêtes de référence sur la base réelle et liste des questions à revoir (`results/questions_check.json`).
 - Variable `MEDSQL_MAX_TOKENS` (512 par défaut) : plafond de génération transmis à Ollama (`num_predict`) et aux API compatibles OpenAI (`max_tokens`).
+
+### Modifié
+- Les libellés exacts sont désormais inclus par défaut dans le prompt (CLI, démo et évaluation), après le gain mesuré en S3. Les runs antérieurs, faits sans eux, sont étiquetés « sans libellés exacts ».
 
 ### Corrigé
 - Un délai dépassé ou une panne du serveur LLM n'interrompt plus l'évaluation : la question est comptée fausse avec l'erreur `LLMError`, et le banc continue (constaté sur le premier run réel, bloqué à la 10e question).

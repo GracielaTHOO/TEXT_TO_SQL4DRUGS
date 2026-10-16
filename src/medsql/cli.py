@@ -163,7 +163,7 @@ def evaluate(
             "--value-hints/--no-value-hints",
             help="Ajouter au prompt les libellés exacts des colonnes catégorielles",
         ),
-    ] = False,
+    ] = True,
     repairs: Annotated[int, typer.Option(help="Tours d'auto-correction sur erreur SQL")] = 1,
     out: Annotated[Path, typer.Option(help="Dossier des runs")] = Path("results/runs"),
     questions: Annotated[Path | None, typer.Option(help="Jeu de questions YAML")] = None,

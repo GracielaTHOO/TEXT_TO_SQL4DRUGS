@@ -20,7 +20,9 @@ from tests.conftest import OracleLLM
 def _make_run(conn: sqlite3.Connection, out: Path) -> None:
     engine = Text2SQL(OracleLLM(), conn, max_rows=10_000)
     results = [evaluate_item(engine, conn, item) for item in load_questions()[:5]]
-    summary = summarize(results, model="oracle", backend="test", config={"few_shot": True})
+    summary = summarize(
+        results, model="oracle", backend="test", config={"few_shot": True, "value_hints": True}
+    )
     save_run(summary, results, out)
     assert asdict(summary)["n"] == 5
 
@@ -50,13 +52,25 @@ def _summary(model: str, accuracy: float, **config: object) -> dict[str, object]
 
 def test_ablations_compare_variants_to_the_model_baseline() -> None:
     board = [
-        {"summary": _summary("m", 0.50, few_shot=True, max_repairs=1)},
+        {"summary": _summary("m", 0.50, few_shot=True, max_repairs=1)},  # run ancien, sans clé
         {"summary": _summary("m", 0.60, few_shot=True, max_repairs=1, value_hints=True)},
-        {"summary": _summary("m", 0.40, few_shot=False, max_repairs=1)},
+        {"summary": _summary("m", 0.40, few_shot=False, max_repairs=1, value_hints=True)},
         {"summary": _summary("seul", 0.30, few_shot=False)},  # pas de base : ignoré
     ]
     rows = ablations(board)  # type: ignore[arg-type]
-    assert [(r[1], round(r[3], 1)) for r in rows] == [
-        ("libellés exacts", 10.0),
-        ("zero-shot", -10.0),
+    # zero-shot n'est comparé qu'au run qui ne diffère que par les exemples (ici, la base).
+    assert [(r[1], r[2], round(r[4], 1)) for r in rows] == [
+        ("sans libellés exacts", "base", -10.0),
+        ("zero-shot", "base", -20.0),
+    ]
+
+
+def test_ablations_compare_runs_differing_by_one_factor_only() -> None:
+    board = [
+        {"summary": _summary("m", 0.50, few_shot=True, max_repairs=1)},
+        {"summary": _summary("m", 0.40, few_shot=False, max_repairs=1)},
+    ]
+    rows = ablations(board)  # type: ignore[arg-type]
+    assert [(r[1], r[2], round(r[4], 1)) for r in rows] == [
+        ("zero-shot", "sans libellés exacts", -10.0)
     ]

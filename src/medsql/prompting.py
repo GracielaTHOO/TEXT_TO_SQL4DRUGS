@@ -5,8 +5,8 @@ Choix de conception :
   approximative qui ferait échouer les jointures ;
 - les règles métier propres à la BDPM sont explicites (majuscules accentuées, dates ISO…) ;
 - les exemples few-shot sont **disjoints** du jeu d'évaluation (vérifié par un test) ;
-- en option, les libellés exacts des colonnes catégorielles sont lus dans la base et ajoutés
-  au schéma, pour que le modèle ne devine pas « Rupture » au lieu de « Rupture de stock ».
+- les libellés exacts des colonnes catégorielles sont lus dans la base et ajoutés au schéma
+  (désactivables pour l'ablation), pour que le modèle ne devine pas « Rupture » au lieu de « Rupture de stock ».
 """
 
 from __future__ import annotations
@@ -69,7 +69,7 @@ MAX_HINT_VALUES = 12
 @dataclass(frozen=True)
 class PromptConfig:
     few_shot: bool = True
-    value_hints: bool = False
+    value_hints: bool = True  # gain mesuré en S3 : +5 points sur le 7B
 
 
 def _sql_literal(value: object) -> str:

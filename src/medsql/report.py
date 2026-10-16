@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from medsql.eval.dataset import CATEGORIES, DIFFICULTIES
+from medsql.eval.errors import ERROR_TYPES, error_breakdown
 
 README_START = "<!-- RESULTS:START -->"
 README_END = "<!-- RESULTS:END -->"
@@ -47,8 +48,9 @@ def config_label(summary: dict[str, Any]) -> str:
         parts.append("zero-shot")
     if cfg.get("max_repairs", 1) == 0:
         parts.append("sans auto-correction")
-    if cfg.get("value_hints", False):
-        parts.append("libellés exacts")
+    # Les runs antérieurs à l'option n'ont pas la clé : ils ont été faits sans libellés.
+    if not cfg.get("value_hints", False):
+        parts.append("sans libellés exacts")
     return " · ".join(parts)
 
 
@@ -63,32 +65,57 @@ def latest_per_config(runs: Sequence[Run]) -> list[Run]:
     return sorted(latest.values(), key=lambda r: -float(r["summary"]["accuracy"]))
 
 
-def _is_baseline(summary: dict[str, Any]) -> bool:
+# Les trois facteurs d'ablation : (clé, libellé de la variante qui le retire).
+FACTORS: tuple[tuple[str, str], ...] = (
+    ("few_shot", "zero-shot"),
+    ("repairs", "sans auto-correction"),
+    ("value_hints", "sans libellés exacts"),
+)
+
+
+def _factors(summary: dict[str, Any]) -> dict[str, bool]:
     cfg = summary.get("config", {})
-    return (
-        bool(cfg.get("few_shot", True))
-        and cfg.get("max_repairs", 1) != 0
-        and not cfg.get("value_hints", False)
-    )
+    return {
+        "few_shot": bool(cfg.get("few_shot", True)),
+        "repairs": cfg.get("max_repairs", 1) != 0,
+        # Les runs antérieurs à l'option n'ont pas la clé : ils ont été faits sans libellés.
+        "value_hints": bool(cfg.get("value_hints", False)),
+    }
 
 
-def ablations(board: Sequence[Run]) -> list[tuple[str, str, float, float]]:
-    """Écart de chaque variante à la configuration de base du même modèle.
+def _is_baseline(summary: dict[str, Any]) -> bool:
+    return all(_factors(summary).values())
 
-    Renvoie (modèle, variante, exactitude, écart en points) ; les modèles sans run de base
-    ou sans variante sont ignorés.
+
+def _variant(summary: dict[str, Any]) -> str:
+    return config_label(summary).removeprefix(str(summary["model"])).removeprefix(" · ") or "base"
+
+
+def ablations(board: Sequence[Run]) -> list[tuple[str, str, str, float, float]]:
+    """Effet de chaque facteur retiré seul, toutes choses égales par ailleurs.
+
+    Pour chaque run, et chaque facteur absent de sa configuration, cherche le run du même
+    modèle qui ne diffère que par ce facteur. Renvoie (modèle, facteur retiré, configuration
+    de référence, exactitude, écart en points).
     """
-    base = {r["summary"]["model"]: r["summary"] for r in board if _is_baseline(r["summary"])}
+    by_key = {
+        (r["summary"]["model"], tuple(_factors(r["summary"]).values())): r["summary"] for r in board
+    }
     rows = []
     for run in board:
         s = run["summary"]
-        ref = base.get(s["model"])
-        if ref is None or _is_baseline(s):
-            continue
-        variant = config_label(s).removeprefix(f"{s['model']} · ")
-        acc = float(s["accuracy"])
-        rows.append((str(s["model"]), variant, acc, 100 * (acc - float(ref["accuracy"]))))
-    return sorted(rows, key=lambda r: (r[0], -r[3]))
+        factors = _factors(s)
+        for key, removed in FACTORS:
+            if factors[key]:
+                continue
+            ref_key = tuple(v or k == key for k, v in factors.items())
+            ref = by_key.get((s["model"], ref_key))
+            if ref is None:
+                continue
+            acc = float(s["accuracy"])
+            delta = 100 * (acc - float(ref["accuracy"]))
+            rows.append((str(s["model"]), removed, _variant(ref), acc, delta))
+    return sorted(rows, key=lambda r: (r[0], r[2] != "base", -r[4]))
 
 
 # --------------------------------------------------------------------------- README
@@ -280,21 +307,44 @@ def _leaderboard(board: list[Run]) -> str:
     )
 
 
-def _ablation_table(rows: list[tuple[str, str, float, float]]) -> str:
+def _ablation_table(rows: list[tuple[str, str, str, float, float]]) -> str:
     body = []
-    for model, variant, acc, delta in rows:
+    for model, removed, reference, acc, delta in rows:
         cls = "ok" if delta > 0 else "ko" if delta < 0 else ""
-        sign = "+" if delta > 0 else ""
-        points = f"{sign}{delta:.1f}".replace(".", ",")
+        points = f"{'+' if delta > 0 else ''}{delta:.1f}".replace(".", ",")
         body.append(
-            f"<tr><td>{_e(model)}</td><td>{_e(variant)}</td><td class='n'>{_pct(acc)}</td>"
-            f"<td class='n'><span class='{cls}'>{points} pt</span></td></tr>"
+            f"<tr><td>{_e(model)}</td><td>{_e(removed)}</td><td>{_e(reference)}</td>"
+            f"<td class='n'>{_pct(acc)}</td><td class='n'><span class='{cls}'>{points} pt</span></td></tr>"
         )
     return (
-        "<table><thead><tr><th>Modèle</th><th>Variante</th><th class='n'>Exactitude</th>"
-        "<th class='n'>Écart à la base</th></tr></thead>"
+        "<table><thead><tr><th>Modèle</th><th>Facteur retiré</th><th>Par rapport à</th>"
+        "<th class='n'>Exactitude</th><th class='n'>Écart</th></tr></thead>"
         f"<tbody>{''.join(body)}</tbody></table>"
     )
+
+
+def _error_table(runs: Sequence[Run]) -> str:
+    """Causes des réponses fausses (lignes) pour chaque configuration (colonnes)."""
+    breakdowns = [error_breakdown(r["items"]) for r in runs]
+    head = "".join(f'<th class="n">{_e(config_label(r["summary"]))}</th>' for r in runs)
+    body = []
+    for key, label in ERROR_TYPES:
+        if not any(key in b for b in breakdowns):
+            continue
+        cells = []
+        for run, found in zip(runs, breakdowns, strict=True):
+            ids = found.get(key, [])
+            if not ids:
+                cells.append('<td class="n">–</td>')
+                continue
+            tip = f"{config_label(run['summary'])} · {label} : {', '.join(ids)}"
+            cells.append(f'<td class="n" data-tip="{_e(tip)}">{len(ids)}</td>')
+        body.append(f"<tr><th>{_e(label)}</th>{''.join(cells)}</tr>")
+    totals = "".join(
+        f'<td class="n"><b>{sum(len(v) for v in b.values())}</b></td>' for b in breakdowns
+    )
+    body.append(f"<tr><th>Total des réponses fausses</th>{totals}</tr>")
+    return f"<table><thead><tr><th></th>{head}</tr></thead><tbody>{''.join(body)}</tbody></table>"
 
 
 def _questions(run: Run) -> str:
@@ -355,14 +405,23 @@ def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | N
         if deltas:
             sections.append("<h2>Ablations</h2>")
             sections.append(
-                "<p class='note'>Écart de chaque variante à la configuration de base du même modèle "
-                "(few-shot, une auto-correction, sans libellés exacts), en points d'exactitude.</p>"
+                "<p class='note'>Effet de chaque facteur retiré seul, par rapport au run du même modèle "
+                "qui ne diffère que par ce facteur, en points d'exactitude. La base combine exemples "
+                "few-shot, une auto-correction et libellés exacts.</p>"
             )
             sections.append(f'<div class="card">{_ablation_table(deltas)}</div>')
         sections.append("<h2>Par difficulté</h2>")
         sections.append(f'<div class="card">{_heatmap(board, "by_difficulty", DIFFICULTIES)}</div>')
         sections.append("<h2>Par catégorie de question</h2>")
         sections.append(f'<div class="card">{_heatmap(board, "by_category", CATEGORIES)}</div>')
+        baselines = [r for r in board if _is_baseline(r["summary"])] or board[:3]
+        sections.append("<h2>Analyse des erreurs</h2>")
+        sections.append(
+            "<p class='note'>Une cause par réponse fausse, la première qui s'applique de haut en bas "
+            "(comparaison automatique avec la requête de référence). Survoler un nombre pour voir "
+            "les questions.</p>"
+        )
+        sections.append(f'<div class="card">{_error_table(baselines)}</div>')
         sections.append(f"<h2>Détail des questions · {_e(config_label(best))}</h2>")
         sections.append(f'<div class="card">{_questions(board[0])}</div>')
         if best.get("warnings"):

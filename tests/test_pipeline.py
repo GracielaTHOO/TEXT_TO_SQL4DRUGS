@@ -93,11 +93,11 @@ def test_value_hints_list_exact_labels(conn: sqlite3.Connection) -> None:
     assert all(len(line.split(", ")) <= MAX_HINT_VALUES for line in hints.splitlines())
 
 
-def test_value_hints_reach_the_prompt_only_when_enabled(conn: sqlite3.Connection) -> None:
+def test_value_hints_are_on_by_default_and_can_be_disabled(conn: sqlite3.Connection) -> None:
     sql = "```sql\nSELECT COUNT(*) FROM medicaments\n```"
     plain, hinted = ScriptedLLM(sql), ScriptedLLM(sql)
-    Text2SQL(plain, conn).ask("Combien ?")
-    Text2SQL(hinted, conn, prompt=PromptConfig(value_hints=True)).ask("Combien ?")
+    Text2SQL(plain, conn, prompt=PromptConfig(value_hints=False)).ask("Combien ?")
+    Text2SQL(hinted, conn).ask("Combien ?")
     assert "Valeurs exactes" not in plain.calls[0][0].content
     assert "Valeurs exactes" in hinted.calls[0][0].content
 
