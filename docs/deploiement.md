@@ -41,6 +41,11 @@ Le dossier `space/` contient une image Docker qui embarque Ollama, le modèle et
    `GracielaTHOO/text2sql-medicaments` ;
 4. chaque push sur `main` qui touche le code publie le Space (workflow *Déploiement Hugging Face Space*).
 
+Avant toute publication, le même workflow construit l'image sur le runner GitHub, la démarre et pose
+une vraie question au modèle embarqué (`medsql ask`). Ce test tourne aussi sans jeton : une image
+cassée est repérée avant d'atteindre le Space. Pour assembler le Space en local sans le publier :
+`python scripts/deploy_space.py --out build/space`, puis `docker build build/space`.
+
 Le Space gratuit (2 vCPU, 16 Go) utilise `qwen2.5-coder:1.5b` : la première question prend
 une trentaine de secondes (chargement du modèle et du schéma), les suivantes quelques secondes.
 Pour un modèle plus gros, changer `MEDSQL_MODEL` dans le Dockerfile et passer sur un matériel payant.

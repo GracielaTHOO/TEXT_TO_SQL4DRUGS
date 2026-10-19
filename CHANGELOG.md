@@ -4,6 +4,12 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ## [Non publié]
 
+### Ajouté
+- Test de l'image du Space dans le workflow de déploiement : construction, démarrage et question réelle au modèle embarqué, avant toute publication et même sans jeton Hugging Face. Option `--out` de `scripts/deploy_space.py` pour assembler le Space sans le publier.
+
+### Corrigé
+- Démo : une seule question traitée à la fois. Deux questions simultanées partageaient la connexion SQLite et pouvaient écraser le délai d'exécution l'une de l'autre.
+
 ## [0.2.0] - 2026-10-16
 
 Premiers chiffres réels sur la BDPM, ablations et analyse d'erreurs.

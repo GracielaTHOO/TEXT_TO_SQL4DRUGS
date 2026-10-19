@@ -115,7 +115,9 @@ with gr.Blocks(title="Text-to-SQL médicaments") as demo:
         )
 
 if __name__ == "__main__":
-    demo.queue(default_concurrency_limit=2).launch(
+    # Une question à la fois : la connexion SQLite est partagée (son délai d'exécution est
+    # porté par la connexion) et Ollama sur CPU traite de toute façon les requêtes en série.
+    demo.queue(default_concurrency_limit=1).launch(
         server_name=os.environ.get("GRADIO_SERVER_NAME", "127.0.0.1"),
         theme=gr.themes.Soft(primary_hue="blue"),
     )
