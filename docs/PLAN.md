@@ -32,6 +32,8 @@ Légende : 🙋 = action de Graciela nécessaire.
 
 - [ ] **S5 · lun. 19 oct.** Démo en ligne sur Hugging Face Spaces.
       🙋 Créer un jeton d'écriture Hugging Face et l'ajouter en secret `HF_TOKEN` du dépôt.
+      Image testée sur GitHub le 19 octobre (question réelle : 13 650 spécialités commercialisées, 1,1 s) ;
+      publication **en attente du jeton**.
 - [ ] **S6 · mer. 21 oct.** Intervalles de confiance par bootstrap et test de McNemar entre deux modèles ;
       barres d'erreur dans le tableau de bord.
 - [ ] **S7 · ven. 23 oct.** Jeu porté à 90 questions : paraphrases d'une même intention pour mesurer la robustesse
