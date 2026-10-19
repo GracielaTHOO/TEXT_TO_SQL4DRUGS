@@ -4,18 +4,9 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ## [Non publié]
 
-### Ajouté
-- Workflow *Image Docker de la démo* : construction de l'image, démarrage et question réelle au modèle embarqué à chaque push qui touche le code. `scripts/stage_demo.py` assemble le contexte de construction pour un lancement en local.
+## [0.2.0] - 2026-10-19
 
-### Modifié
-- La démo n'est plus publiée sur Hugging Face Spaces : elle se lance en local depuis l'image Docker autonome (`docker/`, ex-`space/`). Le workflow de déploiement et le secret `HF_TOKEN` ne servent plus.
-
-### Corrigé
-- Démo : une seule question traitée à la fois. Deux questions simultanées partageaient la connexion SQLite et pouvaient écraser le délai d'exécution l'une de l'autre.
-
-## [0.2.0] - 2026-10-16
-
-Premiers chiffres réels sur la BDPM, ablations et analyse d'erreurs.
+Premiers chiffres réels sur la BDPM, ablations, analyse d'erreurs et démo Docker autonome.
 
 ### Résultats
 - Configuration par défaut (libellés exacts, few-shot, une auto-correction), 60 questions : Qwen2.5-Coder 7B 68,3 %, 3B 60,0 %, 1.5B 58,3 %. Jointures et agrégats concentrent 30 des 68 erreurs.
@@ -23,6 +14,7 @@ Premiers chiffres réels sur la BDPM, ablations et analyse d'erreurs.
 - Ablations du 14 octobre 2026 : les libellés exacts font gagner 5,0 points au 7B (68,3 %) et 3,3 points au 1.5B ; sans exemples, le 1.5B perd 6,7 points ; sans auto-correction, 1,7 à 3,3 points.
 
 ### Ajouté
+- Workflow *Image Docker de la démo* : construction de l'image, démarrage et question réelle au modèle embarqué à chaque push qui touche le code. `scripts/stage_demo.py` assemble le contexte de construction pour un lancement en local.
 - Analyse automatique des erreurs (`medsql.eval.errors`) : chaque réponse fausse reçoit une cause (pas de réponse du modèle, SQL invalide, table manquante, jointure, agrégat, filtre texte, lignes en trop ou en moins, valeurs) par comparaison avec la requête de référence. Section *Analyse des erreurs* du tableau de bord, applicable aussi aux runs anciens.
 - Ablations : option `--value-hints/--no-value-hints` (libellés exacts des colonnes catégorielles dans le prompt), entrée `configs` du workflow d'évaluation (`base`, `zero-shot`, `sans-correction`, `sans-libelles`) et section *Ablations* du tableau de bord : effet de chaque facteur retiré seul, par rapport au run qui ne diffère que par ce facteur.
 - Workflow *Tableau de bord (GitHub Pages)* : publie `results/dashboard.html` sans relancer l'évaluation.
@@ -31,9 +23,11 @@ Premiers chiffres réels sur la BDPM, ablations et analyse d'erreurs.
 - Variable `MEDSQL_MAX_TOKENS` (512 par défaut) : plafond de génération transmis à Ollama (`num_predict`) et aux API compatibles OpenAI (`max_tokens`).
 
 ### Modifié
+- La démo n'est plus publiée sur Hugging Face Spaces : elle se lance en local depuis l'image Docker autonome (`docker/`, ex-`space/`). Le workflow de déploiement et le secret `HF_TOKEN` ne servent plus.
 - Les libellés exacts sont désormais inclus par défaut dans le prompt (CLI, démo et évaluation), après le gain mesuré en S3. Les runs antérieurs, faits sans eux, sont étiquetés « sans libellés exacts ».
 
 ### Corrigé
+- Démo : une seule question traitée à la fois. Deux questions simultanées partageaient la connexion SQLite et pouvaient écraser le délai d'exécution l'une de l'autre.
 - Un délai dépassé ou une panne du serveur LLM n'interrompt plus l'évaluation : la question est comptée fausse avec l'erreur `LLMError`, et le banc continue (constaté sur le premier run réel, bloqué à la 10e question).
 - Une requête générée avec une chaîne non fermée (`TokenError` de sqlglot) est désormais refusée proprement puis réparée, au lieu d'interrompre l'évaluation ; toute autre erreur inattendue sur une question est enregistrée sans arrêter le banc.
 - Question q021 : sa référence renvoyait 0 ligne sur la BDPM réelle (DOLIPRANE absent du répertoire des génériques). Elle porte désormais sur TAHOR 10 mg (15 génériques).
