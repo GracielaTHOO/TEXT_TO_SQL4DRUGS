@@ -2,7 +2,7 @@
 
 **Objectif final (v1.0.0, vendredi 13 novembre 2026)** : un banc Text-to-SQL reproductible sur la BDPM qui
 compare au moins 6 LLM locaux sur 120 questions, avec intervalles de confiance et analyse d'erreurs, une démo
-publique sur Hugging Face Spaces, un tableau de bord public sur GitHub Pages et une note de synthèse prête à
+prête à lancer en local (image Docker testée en CI), un tableau de bord public sur GitHub Pages et une note de synthèse prête à
 publier.
 
 Le travail avance en **séances le lundi, le mercredi et le vendredi**. Chaque séance livre un incrément
@@ -28,12 +28,11 @@ Légende : 🙋 = action de Graciela nécessaire.
       jointure, filtre texte, agrégat, lignes en trop ou en moins. Section dédiée du tableau de bord.
       Release **v0.2.0**.
 
-## Jalon 2 : démo publique et rigueur statistique (v0.3, 19 → 30 octobre)
+## Jalon 2 : démo et rigueur statistique (v0.3, 19 → 30 octobre)
 
-- [ ] **S5 · lun. 19 oct.** Démo en ligne sur Hugging Face Spaces.
-      🙋 Créer un jeton d'écriture Hugging Face et l'ajouter en secret `HF_TOKEN` du dépôt.
-      Image testée sur GitHub le 19 octobre (question réelle : 13 650 spécialités commercialisées, 1,1 s) ;
-      publication **en attente du jeton**.
+- [x] **S5 · lun. 19 oct.** Démo dans une image Docker autonome, testée en CI par une vraie question
+      (13 650 spécialités commercialisées, 1,1 s). Pas de publication sur Hugging Face : choix de
+      Graciela le 19 octobre.
 - [ ] **S6 · mer. 21 oct.** Intervalles de confiance par bootstrap et test de McNemar entre deux modèles ;
       barres d'erreur dans le tableau de bord.
 - [ ] **S7 · ven. 23 oct.** Jeu porté à 90 questions : paraphrases d'une même intention pour mesurer la robustesse

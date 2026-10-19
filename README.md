@@ -12,7 +12,6 @@
 ![Python](https://img.shields.io/badge/python-3.10%20%E2%86%92%203.13-2a78d6)
 ![Typage](https://img.shields.io/badge/mypy-strict-2a78d6)
 ![Licence](https://img.shields.io/badge/licence-MIT-2a78d6)
-[![Démo](https://img.shields.io/badge/%F0%9F%A4%97%20d%C3%A9mo-Hugging%20Face-ffcc4d)](https://huggingface.co/spaces/GracielaTHOO/text2sql-medicaments)
 [![Tableau de bord](https://img.shields.io/badge/%F0%9F%93%88%20tableau%20de%20bord-GitHub%20Pages-2a78d6)](https://gracielathoo.github.io/TEXT_TO_SQL4DRUGS/)
 
 </div>
@@ -39,7 +38,7 @@ LIMIT 10
 | 🧠 **Modèles** | LLM locaux servis par [Ollama](https://ollama.com) ou toute API compatible OpenAI ([vLLM](https://docs.vllm.ai), llama.cpp) |
 | 🧪 **Évaluation** | 60 questions en français, 3 niveaux, 10 catégories, exactitude mesurée par exécution |
 | 🛡️ **Sécurité** | SQL en lecture seule garanti par trois barrières indépendantes |
-| 🖥️ **Interfaces** | CLI `medsql`, démo Gradio sur Hugging Face Spaces, tableau de bord HTML |
+| 🖥️ **Interfaces** | CLI `medsql`, démo Gradio (aussi en image Docker autonome), tableau de bord HTML |
 | ✅ **Qualité** | 146 tests, mypy strict, ruff, CI sur Python 3.10 à 3.13 |
 
 ## 📊 Résultats
@@ -97,6 +96,9 @@ medsql ask "Combien de médicaments sont sous surveillance renforcée ?"
 python app/app.py                  # démo sur http://127.0.0.1:7860
 ```
 
+Sans rien installer d'autre que Docker : `python scripts/stage_demo.py --out build/demo`, puis
+`docker build -t medsql-demo build/demo` et `docker run -p 7860:7860 medsql-demo`.
+
 ## 🧰 Commandes
 
 | Commande | Rôle |
@@ -140,7 +142,7 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 │   ├── report.py        tableau de bord HTML et tableau du README
 │   └── cli.py           commande medsql
 ├── app/app.py           démo Gradio
-├── space/               image Docker Hugging Face Spaces (Ollama embarqué)
+├── docker/              image Docker autonome de la démo (Ollama embarqué)
 ├── results/runs/        un fichier JSON par évaluation
 ├── tests/               146 tests, échantillon synthétique au format BDPM
 └── docs/                architecture, données, évaluation, déploiement, feuille de route
@@ -151,7 +153,7 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 - [Architecture et choix de conception](docs/architecture.md)
 - [Dictionnaire de données](docs/data.md)
 - [Méthodologie d'évaluation](docs/evaluation.md)
-- [Déploiement (local, vLLM, Hugging Face, GitHub Pages)](docs/deploiement.md)
+- [Déploiement (local, vLLM, Docker, GitHub Pages)](docs/deploiement.md)
 - [Plan de développement](docs/PLAN.md) · [Feuille de route](docs/roadmap.md)
 - [Contribuer](CONTRIBUTING.md) · [Journal des modifications](CHANGELOG.md)
 

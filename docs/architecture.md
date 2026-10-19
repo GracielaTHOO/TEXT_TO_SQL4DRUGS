@@ -46,7 +46,7 @@ flowchart LR
 ## Choix de conception
 
 **SQLite plutôt que PostgreSQL.** La BDPM pèse quelques dizaines de Mo : un fichier unique,
-sans serveur, se reconstruit en quelques secondes et s'embarque dans l'image du Space.
+sans serveur, se reconstruit en quelques secondes et s'embarque dans l'image Docker de la démo.
 
 **Schéma complet dans le prompt.** Avec 12 tables (~4 000 tokens), la sélection de tables par
 recherche sémantique fait plus de mal que de bien : elle rate des jointures. Le préfixe du prompt

@@ -1,5 +1,5 @@
-# Image Hugging Face Spaces (SDK Docker) : Ollama + base BDPM + démo Gradio.
-# Le modèle et la base sont préparés au build : le Space démarre en quelques secondes.
+# Image de la démo : Ollama + base BDPM + démo Gradio, à lancer en local.
+# Le modèle et la base sont préparés au build : le conteneur démarre en quelques secondes.
 FROM python:3.11-slim
 
 ARG MEDSQL_MODEL=qwen2.5-coder:1.5b
@@ -16,7 +16,7 @@ RUN apt-get update \
     && curl -fsSL https://ollama.com/install.sh | sh \
     && rm -rf /var/lib/apt/lists/*
 
-# Hugging Face exécute le conteneur avec l'UID 1000.
+# Utilisateur non root (UID 1000).
 RUN useradd -m -u 1000 user
 USER user
 ENV HOME=/home/user \

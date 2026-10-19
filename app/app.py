@@ -1,7 +1,7 @@
 """Démo Gradio : posez une question en français sur les médicaments.
 
 Lancement local :  python app/app.py   (nécessite `medsql setup` et un serveur Ollama)
-Sur Hugging Face Spaces, voir space/ (image Docker avec Ollama embarqué).
+Image Docker autonome (Ollama embarqué) : voir docker/ et docs/deploiement.md.
 """
 
 from __future__ import annotations

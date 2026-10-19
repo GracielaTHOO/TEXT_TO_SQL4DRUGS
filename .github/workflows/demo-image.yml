@@ -1,0 +1,29 @@
+name: Image Docker de la démo
+
+# Construit l'image de la démo, la démarre et pose une vraie question au modèle embarqué.
+# L'image n'est publiée nulle part : elle se construit et se lance en local (docs/deploiement.md).
+on:
+  push:
+    branches: [main]
+    paths: ["src/**", "app/**", "docker/**", "scripts/stage_demo.py", "pyproject.toml"]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemblage du contexte
+        run: python scripts/stage_demo.py --out build/demo
+      - name: Construction de l'image
+        run: docker build -t medsql-demo build/demo
+      - name: Démarrage et question de test
+        run: |
+          docker run -d --name demo -p 7860:7860 medsql-demo
+          for i in $(seq 1 120); do curl -sf http://127.0.0.1:7860/ > /dev/null && break; sleep 2; done
+          curl -sf http://127.0.0.1:7860/ > /dev/null || { docker logs demo; exit 1; }
+          docker exec demo medsql ask "Combien de spécialités sont commercialisées ?"
+      - name: Journaux du conteneur
+        if: failure()
+        run: docker logs demo || true
