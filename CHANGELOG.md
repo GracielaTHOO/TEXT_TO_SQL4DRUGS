@@ -4,6 +4,13 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ## [Non publié]
 
+### Ajouté
+- Intervalles de confiance à 95 % par bootstrap (`medsql.eval.significance`) dans le README, le classement et le graphique du tableau de bord (moustaches).
+- Test exact de McNemar apparié : comparaison des modèles deux à deux (section *Les écarts sont-ils réels ?*) et p-valeur de chaque ablation.
+
+### Résultats
+- Aucun écart n'est significatif sur 60 questions, pas même Qwen2.5-Coder 7B contre 1.5B (p = 0,26). Puissance estimée : 42 % à 120 questions, 84 % à 300.
+
 ## [0.2.0] - 2026-10-19
 
 Premiers chiffres réels sur la BDPM, ablations, analyse d'erreurs et démo Docker autonome.

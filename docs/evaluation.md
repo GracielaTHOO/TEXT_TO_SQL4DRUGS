@@ -149,10 +149,43 @@ Runs : 1.5B et 7B du 14 octobre, 3B du 16 octobre (libellés exacts, few-shot, u
   `medicaments` alors que `avis_smr` suffit) quand la réponse est fausse pour une autre raison :
   la cause retenue est la première dans l'ordre, pas forcément la seule.
 
+## Incertitude et significativité (S6)
+
+`medsql.eval.significance` ajoute deux mesures, calculées à partir des runs enregistrés :
+
+- **Intervalle de confiance à 95 %** de l'exactitude, par bootstrap percentile sur les questions
+  (10 000 rééchantillonnages, graine fixe : le résultat est reproductible). Il figure dans le README,
+  le classement et, sous forme de moustaches, dans le graphique du tableau de bord.
+- **Test exact de McNemar** entre deux runs, sur leurs questions communes appariées par identifiant.
+  Seules comptent les questions discordantes (juste pour l'un, faux pour l'autre) ; la p-valeur est
+  binomiale bilatérale. Il compare les modèles deux à deux (section *Les écarts sont-ils réels ?*) et
+  chaque ablation à son run de référence.
+
+Résultats sur la configuration par défaut :
+
+| Comparaison | Justes pour A seul | Justes pour B seul | p |
+|---|---:|---:|---:|
+| 7B contre 3B | 10 | 5 | 0,30 |
+| 7B contre 1.5B | 13 | 7 | 0,26 |
+| 3B contre 1.5B | 8 | 7 | 1,00 |
+| 7B avec contre sans libellés exacts | 3 | 0 | 0,25 |
+
+- Aucun écart n'est significatif au seuil de 5 %, pas même 7B contre 1.5B (10 points d'écart).
+  Les intervalles se recouvrent largement : 7B 56,7 – 80,0 %, 1.5B 46,7 – 70,0 %.
+- Le gain des libellés exacts sur le 7B est en revanche **expliqué** : les trois questions gagnées
+  sont celles que le constat de S2 avait prédites. Une cause identifiée vaut ici plus qu'une p-valeur
+  calculée sur trois questions.
+- **Puissance.** Avec le profil observé entre 7B et 1.5B (un tiers de questions discordantes,
+  partagées 65/35), la probabilité de détecter l'écart au seuil de 5 % est d'environ 20 % avec 60
+  questions, 42 % avec 120, 66 % avec 200 et 84 % avec 300. Le passage à 120 questions (S7, S8) ne
+  suffira donc pas à départager deux modèles proches.
+- Les runs comparés datent de jours différents (14 et 16 octobre) : la BDPM a pu changer entre-temps,
+  ce qui ajoute une source de variation que le test ne voit pas.
+
 ## Limites connues
 
-- 60 questions donnent un intervalle de confiance à 95 % d'environ ±12 points autour de 50 % :
-  un écart de quelques points entre deux modèles n'est pas significatif.
+- 60 questions donnent un intervalle de confiance à 95 % d'environ ±12 points : aucun des écarts
+  mesurés jusqu'ici n'est significatif (voir *Incertitude et significativité*).
 - Les questions ont été rédigées par l'auteur du projet, avec un biais possible vers des
   formulations proches du schéma.
 - Une question ambiguë peut admettre plusieurs requêtes correctes ; la référence en retient une.

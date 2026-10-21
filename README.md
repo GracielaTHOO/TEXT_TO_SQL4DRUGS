@@ -44,20 +44,20 @@ LIMIT 10
 ## 📊 Résultats
 
 <!-- RESULTS:START -->
-| Modèle | Exactitude | Exactitude stricte | SQL exécutable | Latence p50 | Latence p95 | Date |
-|---|---:|---:|---:|---:|---:|---|
-| qwen2.5-coder:7b | **68,3 %** | 55,0 % | 100,0 % | 16,6 s | 35,0 s | 2026-10-14 |
-| qwen2.5-coder:7b · sans libellés exacts | **63,3 %** | 51,7 % | 100,0 % | 14,7 s | 36,9 s | 2026-10-14 |
-| qwen2.5-coder:7b · zero-shot · sans libellés exacts | **63,3 %** | 50,0 % | 100,0 % | 14,0 s | 24,9 s | 2026-10-14 |
-| qwen2.5-coder:7b · sans auto-correction · sans libellés exacts | **61,7 %** | 50,0 % | 95,0 % | 15,2 s | 27,3 s | 2026-10-14 |
-| qwen2.5-coder:3b | **60,0 %** | 43,3 % | 93,3 % | 7,5 s | 26,6 s | 2026-10-16 |
-| qwen2.5-coder:1.5b | **58,3 %** | 38,3 % | 91,7 % | 3,9 s | 13,1 s | 2026-10-14 |
-| qwen2.5-coder:3b · sans libellés exacts | **56,7 %** | 41,7 % | 91,7 % | 7,4 s | 25,2 s | 2026-10-12 |
-| qwen2.5-coder:1.5b · sans libellés exacts | **55,0 %** | 33,3 % | 95,0 % | 3,8 s | 11,1 s | 2026-10-14 |
-| qwen2.5-coder:1.5b · sans auto-correction · sans libellés exacts | **51,7 %** | 33,3 % | 88,3 % | 3,6 s | 5,8 s | 2026-10-14 |
-| qwen2.5-coder:1.5b · zero-shot · sans libellés exacts | **48,3 %** | 41,7 % | 91,7 % | 3,4 s | 8,6 s | 2026-10-14 |
+| Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Latence p50 | Latence p95 | Date |
+|---|---:|---:|---:|---:|---:|---:|---|
+| qwen2.5-coder:7b | **68,3 %** | 56,7 – 80,0 % | 55,0 % | 100,0 % | 16,6 s | 35,0 s | 2026-10-14 |
+| qwen2.5-coder:7b · sans libellés exacts | **63,3 %** | 51,7 – 75,0 % | 51,7 % | 100,0 % | 14,7 s | 36,9 s | 2026-10-14 |
+| qwen2.5-coder:7b · zero-shot · sans libellés exacts | **63,3 %** | 51,7 – 75,0 % | 50,0 % | 100,0 % | 14,0 s | 24,9 s | 2026-10-14 |
+| qwen2.5-coder:7b · sans auto-correction · sans libellés exacts | **61,7 %** | 48,3 – 73,3 % | 50,0 % | 95,0 % | 15,2 s | 27,3 s | 2026-10-14 |
+| qwen2.5-coder:3b | **60,0 %** | 46,7 – 71,7 % | 43,3 % | 93,3 % | 7,5 s | 26,6 s | 2026-10-16 |
+| qwen2.5-coder:1.5b | **58,3 %** | 46,7 – 70,0 % | 38,3 % | 91,7 % | 3,9 s | 13,1 s | 2026-10-14 |
+| qwen2.5-coder:3b · sans libellés exacts | **56,7 %** | 43,3 – 68,3 % | 41,7 % | 91,7 % | 7,4 s | 25,2 s | 2026-10-12 |
+| qwen2.5-coder:1.5b · sans libellés exacts | **55,0 %** | 41,7 – 66,7 % | 33,3 % | 95,0 % | 3,8 s | 11,1 s | 2026-10-14 |
+| qwen2.5-coder:1.5b · sans auto-correction · sans libellés exacts | **51,7 %** | 38,3 – 65,0 % | 33,3 % | 88,3 % | 3,6 s | 5,8 s | 2026-10-14 |
+| qwen2.5-coder:1.5b · zero-shot · sans libellés exacts | **48,3 %** | 35,0 – 61,7 % | 41,7 % | 91,7 % | 3,4 s | 8,6 s | 2026-10-14 |
 
-_60 questions · exactitude = résultat d'exécution identique à la référence (voir [docs/evaluation.md](docs/evaluation.md))._
+_60 questions · exactitude = résultat d'exécution identique à la référence · IC 95 % par bootstrap sur les questions (voir [docs/evaluation.md](docs/evaluation.md))._
 <!-- RESULTS:END -->
 
 Ce tableau est régénéré par `medsql report` à chaque évaluation. Le détail par difficulté,

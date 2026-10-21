@@ -15,6 +15,7 @@ from typing import Any
 
 from medsql.eval.dataset import CATEGORIES, DIFFICULTIES
 from medsql.eval.errors import ERROR_TYPES, error_breakdown
+from medsql.eval.significance import McNemar, mcnemar, run_ci
 
 README_START = "<!-- RESULTS:START -->"
 README_END = "<!-- RESULTS:END -->"
@@ -91,16 +92,14 @@ def _variant(summary: dict[str, Any]) -> str:
     return config_label(summary).removeprefix(str(summary["model"])).removeprefix(" · ") or "base"
 
 
-def ablations(board: Sequence[Run]) -> list[tuple[str, str, str, float, float]]:
+def ablations(board: Sequence[Run]) -> list[tuple[str, str, str, float, float, float]]:
     """Effet de chaque facteur retiré seul, toutes choses égales par ailleurs.
 
     Pour chaque run, et chaque facteur absent de sa configuration, cherche le run du même
     modèle qui ne diffère que par ce facteur. Renvoie (modèle, facteur retiré, configuration
-    de référence, exactitude, écart en points).
+    de référence, exactitude, écart en points, p-valeur de McNemar).
     """
-    by_key = {
-        (r["summary"]["model"], tuple(_factors(r["summary"]).values())): r["summary"] for r in board
-    }
+    by_key = {(r["summary"]["model"], tuple(_factors(r["summary"]).values())): r for r in board}
     rows = []
     for run in board:
         s = run["summary"]
@@ -109,12 +108,14 @@ def ablations(board: Sequence[Run]) -> list[tuple[str, str, str, float, float]]:
             if factors[key]:
                 continue
             ref_key = tuple(v or k == key for k, v in factors.items())
-            ref = by_key.get((s["model"], ref_key))
-            if ref is None:
+            ref_run = by_key.get((s["model"], ref_key))
+            if ref_run is None:
                 continue
+            ref = ref_run["summary"]
             acc = float(s["accuracy"])
             delta = 100 * (acc - float(ref["accuracy"]))
-            rows.append((str(s["model"]), removed, _variant(ref), acc, delta))
+            p = mcnemar(run["items"], ref_run["items"]).p_value
+            rows.append((str(s["model"]), removed, _variant(ref), acc, delta, p))
     return sorted(rows, key=lambda r: (r[0], r[2] != "base", -r[4]))
 
 
@@ -123,6 +124,24 @@ def ablations(board: Sequence[Run]) -> list[tuple[str, str, str, float, float]]:
 
 def _pct(x: float) -> str:
     return f"{100 * x:.1f} %".replace(".", ",")
+
+
+def _ci(run: Run) -> str:
+    lo, hi = run_ci(run["items"])
+    return f"{100 * lo:.1f} – {100 * hi:.1f} %".replace(".", ",")
+
+
+def _p(p: float) -> str:
+    return ("< 0,001" if p < 0.001 else f"{p:.3f}".replace(".", ",")) + (" ✱" if p < 0.05 else "")
+
+
+def pairwise(runs: Sequence[Run]) -> list[tuple[str, str, McNemar]]:
+    """Test de McNemar pour chaque paire de runs, dans l'ordre donné."""
+    return [
+        (config_label(a["summary"]), config_label(b["summary"]), mcnemar(a["items"], b["items"]))
+        for i, a in enumerate(runs)
+        for b in runs[i + 1 :]
+    ]
 
 
 def _sec(x: float) -> str:
@@ -134,21 +153,21 @@ def readme_table(runs: Sequence[Run]) -> str:
     if not board:
         return "_Aucun run d'évaluation complet pour l'instant. Lancez `medsql eval`._"
     lines = [
-        "| Modèle | Exactitude | Exactitude stricte | SQL exécutable | Latence p50 | Latence p95 | Date |",
-        "|---|---:|---:|---:|---:|---:|---|",
+        "| Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Latence p50 | Latence p95 | Date |",
+        "|---|---:|---:|---:|---:|---:|---:|---|",
     ]
     for run in board:
         s = run["summary"]
         lines.append(
-            f"| {config_label(s)} | **{_pct(s['accuracy'])}** | {_pct(s['accuracy_strict'])} "
+            f"| {config_label(s)} | **{_pct(s['accuracy'])}** | {_ci(run)} | {_pct(s['accuracy_strict'])} "
             f"| {_pct(s['executable_rate'])} | {_sec(s['latency_p50_s'])} "
             f"| {_sec(s['latency_p95_s'])} | {s['created_at'][:10]} |"
         )
     n = board[0]["summary"]["n"]
     lines.append("")
     lines.append(
-        f"_{n} questions · exactitude = résultat d'exécution identique à la référence "
-        "(voir [docs/evaluation.md](docs/evaluation.md))._"
+        f"_{n} questions · exactitude = résultat d'exécution identique à la référence · "
+        "IC 95 % par bootstrap sur les questions (voir [docs/evaluation.md](docs/evaluation.md))._"
     )
     return "\n".join(lines)
 
@@ -233,8 +252,8 @@ def _tile(value: str, label: str) -> str:
     )
 
 
-def _bar_chart(rows: list[tuple[str, float]]) -> str:
-    """Barres horizontales (une série) : exactitude par configuration."""
+def _bar_chart(rows: list[tuple[str, float, float, float]]) -> str:
+    """Barres horizontales (une série) : exactitude par configuration, avec son IC 95 %."""
     label_w, bar_w, row_h = 260, 560, 34
     height = row_h * len(rows) + 28
     parts = [
@@ -245,15 +264,24 @@ def _bar_chart(rows: list[tuple[str, float]]) -> str:
         x = label_w + t * bar_w
         parts.append(f'<line x1="{x}" x2="{x}" y1="0" y2="{height - 22}" stroke="var(--grid)"/>')
         parts.append(f'<text x="{x}" y="{height - 6}" text-anchor="middle">{int(t * 100)} %</text>')
-    for i, (name, acc) in enumerate(rows):
+    for i, (name, acc, lo, hi) in enumerate(rows):
         y = i * row_h + 6
         w = max(acc * bar_w, 2)
+        x_lo, x_hi = label_w + lo * bar_w, label_w + hi * bar_w
+        tip = f"{name} : {_pct(acc)} (IC 95 % {_pct(lo)} – {_pct(hi)})"
         parts.append(f'<text x="{label_w - 10}" y="{y + 16}" text-anchor="end">{_e(name)}</text>')
         parts.append(
             f'<rect x="{label_w}" y="{y + 3}" width="{w:.1f}" height="18" rx="4" fill="var(--accent)" '
-            f'data-tip="{_e(name)} : {_pct(acc)}"/>'
+            f'data-tip="{_e(tip)}"/>'
         )
-        parts.append(f'<text class="val" x="{label_w + w + 8:.1f}" y="{y + 16}">{_pct(acc)}</text>')
+        # Moustache de l'intervalle de confiance, par-dessus la barre.
+        parts.append(
+            f'<path d="M{x_lo:.1f} {y + 12}H{x_hi:.1f}M{x_lo:.1f} {y + 7}V{y + 17}M{x_hi:.1f} {y + 7}V{y + 17}" '
+            'stroke="var(--ink)" stroke-width="1.5" fill="none"/>'
+        )
+        parts.append(
+            f'<text class="val" x="{max(label_w + w, x_hi) + 8:.1f}" y="{y + 16}">{_pct(acc)}</text>'
+        )
     parts.append("</svg>")
     return "".join(parts)
 
@@ -293,33 +321,51 @@ def _leaderboard(board: list[Run]) -> str:
         s = run["summary"]
         rows.append(
             f"<tr><td class='n'>{rank}</td><td>{_e(config_label(s))}</td><td>{_e(s['backend'])}</td>"
-            f"<td class='n'><b>{_pct(s['accuracy'])}</b></td><td class='n'>{_pct(s['accuracy_strict'])}</td>"
+            f"<td class='n'><b>{_pct(s['accuracy'])}</b></td><td class='n'>{_ci(run)}</td>"
+            f"<td class='n'>{_pct(s['accuracy_strict'])}</td>"
             f"<td class='n'>{_pct(s['executable_rate'])}</td><td class='n'>{s['repaired']}</td>"
             f"<td class='n'>{_sec(s['latency_p50_s'])}</td><td class='n'>{_sec(s['latency_p95_s'])}</td>"
             f"<td class='n'>{s['tokens_per_question']:.0f}</td><td>{_e(s['created_at'][:10])}</td></tr>"
         )
     return (
         "<table><thead><tr><th class='n'>#</th><th>Configuration</th><th>Backend</th>"
-        "<th class='n'>Exactitude</th><th class='n'>Stricte</th><th class='n'>Exécutable</th>"
+        "<th class='n'>Exactitude</th><th class='n'>IC 95 %</th><th class='n'>Stricte</th>"
+        "<th class='n'>Exécutable</th>"
         "<th class='n'>Réparées</th><th class='n'>p50</th><th class='n'>p95</th>"
         "<th class='n'>Tokens/question</th><th>Date</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table>"
     )
 
 
-def _ablation_table(rows: list[tuple[str, str, str, float, float]]) -> str:
+def _ablation_table(rows: list[tuple[str, str, str, float, float, float]]) -> str:
     body = []
-    for model, removed, reference, acc, delta in rows:
+    for model, removed, reference, acc, delta, p in rows:
         cls = "ok" if delta > 0 else "ko" if delta < 0 else ""
         points = f"{'+' if delta > 0 else ''}{delta:.1f}".replace(".", ",")
         body.append(
             f"<tr><td>{_e(model)}</td><td>{_e(removed)}</td><td>{_e(reference)}</td>"
-            f"<td class='n'>{_pct(acc)}</td><td class='n'><span class='{cls}'>{points} pt</span></td></tr>"
+            f"<td class='n'>{_pct(acc)}</td><td class='n'><span class='{cls}'>{points} pt</span></td>"
+            f"<td class='n'>{_p(p)}</td></tr>"
         )
     return (
         "<table><thead><tr><th>Modèle</th><th>Facteur retiré</th><th>Par rapport à</th>"
-        "<th class='n'>Exactitude</th><th class='n'>Écart</th></tr></thead>"
+        "<th class='n'>Exactitude</th><th class='n'>Écart</th><th class='n'>p (McNemar)</th></tr></thead>"
         f"<tbody>{''.join(body)}</tbody></table>"
+    )
+
+
+def _pairwise_table(rows: list[tuple[str, str, McNemar]]) -> str:
+    body = "".join(
+        f"<tr><td>{_e(a)}</td><td>{_e(b)}</td><td class='n'>{m.n}</td><td class='n'>{m.only_a}</td>"
+        f"<td class='n'>{m.only_b}</td><td class='n'>{_p(m.p_value)}</td>"
+        f"<td>{'écart significatif' if m.significant else 'non significatif'}</td></tr>"
+        for a, b, m in rows
+    )
+    return (
+        "<table><thead><tr><th>A</th><th>B</th><th class='n'>Questions communes</th>"
+        "<th class='n'>Justes pour A seul</th><th class='n'>Justes pour B seul</th>"
+        "<th class='n'>p (McNemar)</th><th>Conclusion au seuil de 5 %</th></tr></thead>"
+        f"<tbody>{body}</tbody></table>"
     )
 
 
@@ -397,24 +443,34 @@ def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | N
         sections.append(
             "<p class='note'>Part des questions dont le résultat d'exécution est identique à la référence.</p>"
         )
-        bars = [(config_label(r["summary"]), float(r["summary"]["accuracy"])) for r in board]
+        bars = [
+            (config_label(r["summary"]), float(r["summary"]["accuracy"]), *run_ci(r["items"]))
+            for r in board
+        ]
         sections.append(f'<div class="card">{_bar_chart(bars)}</div>')
         sections.append("<h2>Classement détaillé</h2>")
         sections.append(f'<div class="card">{_leaderboard(board)}</div>')
+        baselines = [r for r in board if _is_baseline(r["summary"])] or board[:3]
+        if len(baselines) > 1:
+            sections.append("<h2>Les écarts sont-ils réels ?</h2>")
+            sections.append(
+                "<p class='note'>Test exact de McNemar sur les questions communes : seules comptent "
+                "celles où un modèle a juste et l'autre faux. ✱ = significatif au seuil de 5 %.</p>"
+            )
+            sections.append(f'<div class="card">{_pairwise_table(pairwise(baselines))}</div>')
         deltas = ablations(board)
         if deltas:
             sections.append("<h2>Ablations</h2>")
             sections.append(
                 "<p class='note'>Effet de chaque facteur retiré seul, par rapport au run du même modèle "
                 "qui ne diffère que par ce facteur, en points d'exactitude. La base combine exemples "
-                "few-shot, une auto-correction et libellés exacts.</p>"
+                "few-shot, une auto-correction et libellés exacts ; p : test de McNemar apparié.</p>"
             )
             sections.append(f'<div class="card">{_ablation_table(deltas)}</div>')
         sections.append("<h2>Par difficulté</h2>")
         sections.append(f'<div class="card">{_heatmap(board, "by_difficulty", DIFFICULTIES)}</div>')
         sections.append("<h2>Par catégorie de question</h2>")
         sections.append(f'<div class="card">{_heatmap(board, "by_category", CATEGORIES)}</div>')
-        baselines = [r for r in board if _is_baseline(r["summary"])] or board[:3]
         sections.append("<h2>Analyse des erreurs</h2>")
         sections.append(
             "<p class='note'>Une cause par réponse fausse, la première qui s'applique de haut en bas "

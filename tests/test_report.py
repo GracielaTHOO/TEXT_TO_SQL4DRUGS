@@ -52,10 +52,19 @@ def _summary(model: str, accuracy: float, **config: object) -> dict[str, object]
 
 def test_ablations_compare_variants_to_the_model_baseline() -> None:
     board = [
-        {"summary": _summary("m", 0.50, few_shot=True, max_repairs=1)},  # run ancien, sans clé
-        {"summary": _summary("m", 0.60, few_shot=True, max_repairs=1, value_hints=True)},
-        {"summary": _summary("m", 0.40, few_shot=False, max_repairs=1, value_hints=True)},
-        {"summary": _summary("seul", 0.30, few_shot=False)},  # pas de base : ignoré
+        {
+            "items": [],
+            "summary": _summary("m", 0.50, few_shot=True, max_repairs=1),
+        },  # run ancien, sans clé
+        {
+            "items": [],
+            "summary": _summary("m", 0.60, few_shot=True, max_repairs=1, value_hints=True),
+        },
+        {
+            "items": [],
+            "summary": _summary("m", 0.40, few_shot=False, max_repairs=1, value_hints=True),
+        },
+        {"items": [], "summary": _summary("seul", 0.30, few_shot=False)},  # pas de base : ignoré
     ]
     rows = ablations(board)  # type: ignore[arg-type]
     # zero-shot n'est comparé qu'au run qui ne diffère que par les exemples (ici, la base).
@@ -67,8 +76,8 @@ def test_ablations_compare_variants_to_the_model_baseline() -> None:
 
 def test_ablations_compare_runs_differing_by_one_factor_only() -> None:
     board = [
-        {"summary": _summary("m", 0.50, few_shot=True, max_repairs=1)},
-        {"summary": _summary("m", 0.40, few_shot=False, max_repairs=1)},
+        {"items": [], "summary": _summary("m", 0.50, few_shot=True, max_repairs=1)},
+        {"items": [], "summary": _summary("m", 0.40, few_shot=False, max_repairs=1)},
     ]
     rows = ablations(board)  # type: ignore[arg-type]
     assert [(r[1], r[2], round(r[4], 1)) for r in rows] == [

@@ -33,7 +33,7 @@ Légende : 🙋 = action de Graciela nécessaire.
 - [x] **S5 · lun. 19 oct.** Démo dans une image Docker autonome, testée en CI par une vraie question
       (13 650 spécialités commercialisées, 1,1 s). Pas de publication sur Hugging Face : choix de
       Graciela le 19 octobre.
-- [ ] **S6 · mer. 21 oct.** Intervalles de confiance par bootstrap et test de McNemar entre deux modèles ;
+- [x] **S6 · mer. 21 oct.** Intervalles de confiance par bootstrap et test de McNemar entre deux modèles ;
       barres d'erreur dans le tableau de bord.
 - [ ] **S7 · ven. 23 oct.** Jeu porté à 90 questions : paraphrases d'une même intention pour mesurer la robustesse
       à la formulation.
