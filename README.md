@@ -5,7 +5,7 @@
 # Text-to-SQL médicaments
 
 **Posez une question en français, un LLM local la traduit en SQL sur la Base de données publique des médicaments.**
-**Chaque modèle est mesuré sur un jeu de 60 questions de référence.**
+**Chaque modèle est mesuré sur un jeu de 90 questions de référence, dont 30 reformulations.**
 
 [![CI](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml)
 [![Évaluation](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml)
@@ -36,7 +36,7 @@ LIMIT 10
 |---|---|
 | 📦 **Données** | Les 11 fichiers open data de la [BDPM](https://base-donnees-publique.medicaments.gouv.fr/telechargement) (ANSM, HAS, Assurance maladie), normalisés en 12 tables SQLite documentées |
 | 🧠 **Modèles** | LLM locaux servis par [Ollama](https://ollama.com) ou toute API compatible OpenAI ([vLLM](https://docs.vllm.ai), llama.cpp) |
-| 🧪 **Évaluation** | 60 questions en français, 3 niveaux, 10 catégories, exactitude mesurée par exécution |
+| 🧪 **Évaluation** | 90 questions en français (60 + 30 reformulations), 3 niveaux, 10 catégories, exactitude mesurée par exécution, robustesse à la formulation |
 | 🛡️ **Sécurité** | SQL en lecture seule garanti par trois barrières indépendantes |
 | 🖥️ **Interfaces** | CLI `medsql`, démo Gradio (aussi en image Docker autonome), tableau de bord HTML |
 | ✅ **Qualité** | 146 tests, mypy strict, ruff, CI sur Python 3.10 à 3.13 |
@@ -106,7 +106,7 @@ Sans rien installer d'autre que Docker : `python scripts/stage_demo.py --out bui
 | `medsql setup` | Télécharge la BDPM puis construit la base |
 | `medsql stats` | Affiche les chiffres clés de la base |
 | `medsql ask "…"` | Pose une question, affiche le SQL et le résultat |
-| `medsql eval --model …` | Évalue un modèle sur les 60 questions |
+| `medsql eval --model …` | Évalue un modèle sur les 90 questions |
 | `medsql report` | Génère le tableau de bord et met à jour ce README |
 | `medsql profile` | Génère le profil de la base réelle ([docs/donnees-profil.md](docs/donnees-profil.md)) |
 | `medsql check-questions` | Vérifie les requêtes de référence sur la base réelle |

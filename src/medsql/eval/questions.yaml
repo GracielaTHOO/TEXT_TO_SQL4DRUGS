@@ -12,6 +12,8 @@
 #   categorie   comptage | filtrage | jointure | agregation | classement | dates | prix |
 #               generiques | has | disponibilite
 #   ordonne     true si l'ordre des lignes fait partie de la réponse (classements)
+#   paraphrase_de  (reformulations q061…) identifiant de la question source ; la reformulation
+#               en hérite la requête, la difficulté, la catégorie et l'ordre
 #
 # Règle : aucune question ne doit reprendre un exemple few-shot du prompt (test automatisé).
 
@@ -447,7 +449,7 @@
   categorie: jointure
 
 - id: q057
-  question: Combien de ruptures de stock ont débuté en 2023 ?
+  question: Combien de déclarations de rupture de stock ont débuté en 2023 ?
   sql: |
     SELECT COUNT(*) FROM disponibilites
     WHERE code_statut = 1 AND strftime('%Y', date_debut) = '2023'
@@ -483,3 +485,127 @@
     )
   difficulte: difficile
   categorie: jointure
+
+# --------------------------------------------------------------------------
+# Reformulations (S7) : même intention, autre formulation. Mesure la robustesse à la
+# formulation ; chaque entrée hérite de la requête de référence de sa source.
+
+- id: q061
+  question: Quel est le nombre total de spécialités pharmaceutiques dans la BDPM ?
+  paraphrase_de: q001
+
+- id: q062
+  question: Combien de spécialités sont encore sur le marché ?
+  paraphrase_de: q002
+
+- id: q063
+  question: Combien de spécialités portent la mention de surveillance renforcée ?
+  paraphrase_de: q003
+
+- id: q064
+  question: Combien de spécialités ont le statut non commercialisé ?
+  paraphrase_de: q005
+
+- id: q065
+  question: Dans combien de spécialités le paracétamol est-il une substance active ?
+  paraphrase_de: q007
+
+- id: q066
+  question: Donne-moi la liste des médicaments qui s'appliquent sur la peau (voie cutanée).
+  paraphrase_de: q008
+
+- id: q067
+  question: Combien de médicaments peuvent être administrés par voie intraveineuse ?
+  paraphrase_de: q009
+
+- id: q068
+  question: Combien coûte, au minimum, une boîte de DOLIPRANE 1000 mg ?
+  paraphrase_de: q011
+
+- id: q069
+  question: Quel est le prix maximum d'une boîte de médicament dans la base ?
+  paraphrase_de: q012
+
+- id: q070
+  question: Combien de boîtes de médicaments sont remboursées à 100 % par l'Assurance maladie ?
+  paraphrase_de: q014
+
+- id: q071
+  question: Comment se répartissent les présentations remboursées selon leur taux de remboursement ?
+  paraphrase_de: q015
+
+- id: q072
+  question: Quels sont les médicaments signalés en rupture de stock ?
+  paraphrase_de: q017
+
+- id: q073
+  question: Combien de médicaments connaissent une tension d'approvisionnement ?
+  paraphrase_de: q018
+
+- id: q074
+  question: Combien de médicaments de référence (princeps) figurent au répertoire des génériques ?
+  paraphrase_de: q020
+
+- id: q075
+  question: Quel laboratoire détient le plus de médicaments génériques ?
+  paraphrase_de: q022
+
+- id: q076
+  question: Combien de spécialités ont un SMR jugé insuffisant par la HAS ?
+  paraphrase_de: q023
+
+- id: q077
+  question: Combien d'avis sur le service médical rendu la HAS a-t-elle émis au cours de l'année 2020 ?
+  paraphrase_de: q025
+
+- id: q078
+  question: Combien de spécialités relèvent de la liste I ?
+  paraphrase_de: q027
+
+- id: q079
+  question: Combien la base compte-t-elle de MITM (médicaments d'intérêt thérapeutique majeur) ?
+  paraphrase_de: q029
+
+- id: q080
+  question: "LEVOTHYROX : quel est son code ATC ?"
+  paraphrase_de: q030
+
+- id: q081
+  question: Combien de spécialités ont une date d'AMM en 2020 ?
+  paraphrase_de: q032
+
+- id: q082
+  question: Quelle est la substance active la plus utilisée, en nombre de spécialités ?
+  paraphrase_de: q036
+
+- id: q083
+  question: Donne le top 5 des substances actives que l'on retrouve dans le plus grand nombre de spécialités.
+  paraphrase_de: q037
+
+- id: q084
+  question: Parmi les génériques, combien ont au moins une boîte remboursée ?
+  paraphrase_de: q040
+
+- id: q085
+  question: Combien de médicaments peuvent être administrés par plus d'une voie ?
+  paraphrase_de: q043
+
+- id: q086
+  question: Quelles voies d'administration sont les plus courantes ? Donne les 5 premières.
+  paraphrase_de: q044
+
+- id: q087
+  question: Quel est, en moyenne, l'écart entre le prix TTC et le prix hors honoraires d'une boîte remboursée ?
+  paraphrase_de: q048
+
+- id: q088
+  question: Combien de spécialités cumulent un SMR important et une ASMR de niveau I ou II ?
+  paraphrase_de: q052
+
+- id: q089
+  question: Combien de médicaments commercialisés sont des comprimés pelliculés ?
+  paraphrase_de: q054
+
+- id: q090
+  question: Combien de médicaments contiennent à la fois du paracétamol et de la codéine ?
+  paraphrase_de: q060

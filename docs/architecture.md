@@ -20,7 +20,7 @@ flowchart LR
     end
     C --> R
     subgraph Évaluation
-        D[60 questions<br/>+ SQL de référence] --> V[medsql eval]
+        D[90 questions<br/>+ SQL de référence] --> V[medsql eval]
         V --> J[results/runs/*.json]
         J -->|medsql report| H[Tableau de bord<br/>+ README]
     end

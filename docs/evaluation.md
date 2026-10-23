@@ -2,8 +2,11 @@
 
 ## Jeu de questions
 
-`src/medsql/eval/questions.yaml` contient **60 questions** rédigées comme un utilisateur les
-poserait, chacune avec une requête SQL de référence.
+`src/medsql/eval/questions.yaml` contient **90 questions** rédigées comme un utilisateur les
+poserait : 60 questions originales (q001 à q060), chacune avec une requête SQL de référence, et
+30 reformulations (q061 à q090). Une reformulation exprime la même intention avec d'autres mots
+(synonymes, registre familier, ordre inversé, sigle) ; elle déclare sa source (`paraphrase_de`) et en
+hérite la requête, la difficulté et la catégorie.
 
 | Difficulté | Définition |
 |---|---|

@@ -15,6 +15,7 @@ from typing import Any
 
 from medsql.eval.dataset import CATEGORIES, DIFFICULTIES
 from medsql.eval.errors import ERROR_TYPES, error_breakdown
+from medsql.eval.robustness import robustness
 from medsql.eval.significance import McNemar, mcnemar, run_ci
 
 README_START = "<!-- RESULTS:START -->"
@@ -369,6 +370,29 @@ def _pairwise_table(rows: list[tuple[str, str, McNemar]]) -> str:
     )
 
 
+def _robustness_table(runs: Sequence[Run]) -> str:
+    rows = []
+    for run in runs:
+        r = robustness(run["items"])
+        if not r:
+            continue
+        rows.append(
+            f"<tr><td>{_e(config_label(run['summary']))}</td><td class='n'>{r['pairs']:.0f}</td>"
+            f"<td class='n'>{r['both']:.0f}</td><td class='n'>{r['only_original']:.0f}</td>"
+            f"<td class='n'>{r['only_paraphrase']:.0f}</td><td class='n'>{r['neither']:.0f}</td>"
+            f"<td class='n'><b>{_pct(r['consistency'])}</b></td><td class='n'>{_pct(r['kept'])}</td></tr>"
+        )
+    if not rows:
+        return ""
+    return (
+        "<table><thead><tr><th>Configuration</th><th class='n'>Paires</th>"
+        "<th class='n'>Justes les deux</th><th class='n'>Source seule</th>"
+        "<th class='n'>Reformulation seule</th><th class='n'>Fausses les deux</th>"
+        "<th class='n'>Cohérence</th><th class='n'>Justes conservées</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
+
+
 def _error_table(runs: Sequence[Run]) -> str:
     """Causes des réponses fausses (lignes) pour chaque configuration (colonnes)."""
     breakdowns = [error_breakdown(r["items"]) for r in runs]
@@ -471,6 +495,15 @@ def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | N
         sections.append(f'<div class="card">{_heatmap(board, "by_difficulty", DIFFICULTIES)}</div>')
         sections.append("<h2>Par catégorie de question</h2>")
         sections.append(f'<div class="card">{_heatmap(board, "by_category", CATEGORIES)}</div>')
+        robust = _robustness_table(baselines)
+        if robust:
+            sections.append("<h2>Robustesse à la formulation</h2>")
+            sections.append(
+                "<p class='note'>Chaque reformulation partage la requête de référence de sa question "
+                "source. Cohérence : les deux formulations ont le même sort. Justes conservées : part "
+                "des sources justes dont la reformulation reste juste.</p>"
+            )
+            sections.append(f'<div class="card">{robust}</div>')
         sections.append("<h2>Analyse des erreurs</h2>")
         sections.append(
             "<p class='note'>Une cause par réponse fausse, la première qui s'applique de haut en bas "

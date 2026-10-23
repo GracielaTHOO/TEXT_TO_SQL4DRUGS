@@ -17,6 +17,7 @@ from pathlib import Path
 from medsql import __version__
 from medsql.eval.dataset import EvalItem
 from medsql.eval.metrics import soft_match, strict_match
+from medsql.eval.robustness import robustness
 from medsql.pipeline import Answer, Text2SQL
 from medsql.sql_guard import run_query
 
@@ -42,6 +43,7 @@ class ItemResult:
     completion_tokens: int
     gold_rows: int
     pred_rows: int | None
+    paraphrase_de: str | None = None
 
 
 @dataclass
@@ -64,6 +66,7 @@ class RunSummary:
     by_difficulty: dict[str, dict[str, float]]
     by_category: dict[str, dict[str, float]]
     warnings: list[str] = field(default_factory=list)
+    robustness: dict[str, float] = field(default_factory=dict)
 
 
 def _percentile(values: list[float], q: float) -> float:
@@ -135,6 +138,7 @@ def evaluate_item(engine: Text2SQL, conn: sqlite3.Connection, item: EvalItem) ->
         completion_tokens=answer.completion_tokens,
         gold_rows=len(gold.rows),
         pred_rows=len(pred_rows) if pred_rows is not None else None,
+        paraphrase_de=item.paraphrase_de,
     )
 
 
@@ -176,6 +180,7 @@ def summarize(
         by_difficulty=_group(results, lambda r: r.difficulte),
         by_category=_group(results, lambda r: r.categorie),
         warnings=warnings,
+        robustness=robustness([asdict(r) for r in results]),
     )
 
 

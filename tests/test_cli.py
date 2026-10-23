@@ -78,6 +78,6 @@ def test_profile_and_check_questions(data_dir: Path, tmp_path: Path) -> None:
     result = runner.invoke(app, ["check-questions", "--out", str(report)])
     assert result.exit_code == 0, result.output
     data = json.loads(report.read_text("utf-8"))
-    assert len(data["questions"]) == 60
+    assert len(data["questions"]) == 90
     # Sur l'échantillon synthétique, quelques références sont vides : elles sont signalées.
     assert "q024" in data["to_review"]
