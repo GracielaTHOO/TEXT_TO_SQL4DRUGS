@@ -5,10 +5,16 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 ## [Non publié]
 
 ### Ajouté
+- Jeu porté à 90 questions : 30 reformulations (q061 à q090, champ `paraphrase_de`) qui héritent de la requête de référence de leur source.
+- Robustesse à la formulation (`medsql.eval.robustness`) : cohérence des paires et part des réponses justes conservées, dans le résumé des runs et le tableau de bord.
 - Intervalles de confiance à 95 % par bootstrap (`medsql.eval.significance`) dans le README, le classement et le graphique du tableau de bord (moustaches).
 - Test exact de McNemar apparié : comparaison des modèles deux à deux (section *Les écarts sont-ils réels ?*) et p-valeur de chaque ablation.
 
+### Modifié
+- Question q057 précisée : « déclarations de rupture de stock », ce que compte la requête de référence.
+
 ### Résultats
+- 90 questions (23 octobre 2026) : 7B 67,8 %, 3B 61,1 %, 1.5B 52,2 %. Cohérence des paires source et reformulation : 90 %, 87 % et 83 %.
 - Aucun écart n'est significatif sur 60 questions, pas même Qwen2.5-Coder 7B contre 1.5B (p = 0,26). Puissance estimée : 42 % à 120 questions, 84 % à 300.
 
 ## [0.2.0] - 2026-10-19

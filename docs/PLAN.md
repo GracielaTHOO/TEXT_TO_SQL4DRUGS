@@ -35,7 +35,7 @@ Légende : 🙋 = action de Graciela nécessaire.
       Graciela le 19 octobre.
 - [x] **S6 · mer. 21 oct.** Intervalles de confiance par bootstrap et test de McNemar entre deux modèles ;
       barres d'erreur dans le tableau de bord.
-- [ ] **S7 · ven. 23 oct.** Jeu porté à 90 questions : paraphrases d'une même intention pour mesurer la robustesse
+- [x] **S7 · ven. 23 oct.** Jeu porté à 90 questions : paraphrases d'une même intention pour mesurer la robustesse
       à la formulation.
 - [ ] **S8 · lun. 26 oct.** Jeu porté à 120 questions, dont 10 hors périmètre : le modèle doit s'abstenir
       (métrique d'abstention correcte).

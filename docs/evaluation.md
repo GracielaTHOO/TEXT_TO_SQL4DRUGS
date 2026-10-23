@@ -185,6 +185,27 @@ Résultats sur la configuration par défaut :
 - Les runs comparés datent de jours différents (14 et 16 octobre) : la BDPM a pu changer entre-temps,
   ce qui ajoute une source de variation que le test ne voit pas.
 
+## Robustesse à la formulation (runs du 23 octobre 2026, 90 questions)
+
+Configuration par défaut, même jour, même BDPM. Fichiers sources : `results/runs/20261023T*.json`.
+
+| Modèle | Exactitude (90) | IC 95 % | 60 originales | 30 reformulations | Cohérence des paires | Justes conservées |
+|---|---:|---:|---:|---:|---:|---:|
+| 1.5B | 52,2 % | 42,2 – 62,2 % | 51,7 % | 53,3 % | 83 % (25/30) | 82 % (14/17) |
+| 3B | 61,1 % | 51,1 – 71,1 % | 60,0 % | 63,3 % | 87 % (26/30) | 94 % (16/17) |
+| 7B | 67,8 % | 57,8 – 76,7 % | 65,0 % | 73,3 % | 90 % (27/30) | 95 % (20/21) |
+
+- Les reformulations ne sont pas plus difficiles que leurs sources : chaque modèle fait aussi bien,
+  voire mieux, sur elles. Un modèle qui aurait appris la formulation exacte perdrait au contraire des
+  points.
+- La robustesse croît avec la taille : le 1.5B perd 3 de ses 17 réponses justes quand la question
+  change de mots (q062 « encore sur le marché », q070 « remboursées à 100 % par l'Assurance
+  maladie », q078 « relèvent de la liste I ») ; le 7B n'en perd qu'une (q087, écart entre prix TTC et
+  prix hors honoraires).
+- Les gains inverses (fausse en version d'origine, juste reformulée) montrent qu'une partie des
+  erreurs tient aussi à la formulation de la question source : c'est le même bruit, dans l'autre sens.
+- Avec 30 paires, ces écarts restent indicatifs.
+
 ## Limites connues
 
 - 60 questions donnent un intervalle de confiance à 95 % d'environ ±12 points : aucun des écarts
