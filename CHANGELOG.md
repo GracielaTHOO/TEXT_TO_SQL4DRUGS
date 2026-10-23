@@ -14,7 +14,7 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Question q057 précisée : « déclarations de rupture de stock », ce que compte la requête de référence.
 
 ### Résultats
-- 90 questions (23 octobre 2026) : 7B 67,8 %, 3B 61,1 %, 1.5B 52,2 %. Cohérence des paires source et reformulation : 90 %, 87 % et 83 %.
+- 90 questions (23 octobre 2026) : 7B 67,8 %, 3B 61,1 %, 1.5B 52,2 %. Cohérence des paires source et reformulation : 90 %, 87 % et 83 %. Premier écart significatif, 7B contre 1.5B (p = 0,02, optimiste car les reformulations ne sont pas indépendantes ; p = 0,13 sur les 60 originales).
 - Aucun écart n'est significatif sur 60 questions, pas même Qwen2.5-Coder 7B contre 1.5B (p = 0,26). Puissance estimée : 42 % à 120 questions, 84 % à 300.
 
 ## [0.2.0] - 2026-10-19

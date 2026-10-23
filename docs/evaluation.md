@@ -205,6 +205,12 @@ Configuration par défaut, même jour, même BDPM. Fichiers sources : `results/r
 - Les gains inverses (fausse en version d'origine, juste reformulée) montrent qu'une partie des
   erreurs tient aussi à la formulation de la question source : c'est le même bruit, dans l'autre sens.
 - Avec 30 paires, ces écarts restent indicatifs.
+- **Significativité sur 90 questions.** Le test de McNemar donne pour la première fois un écart
+  significatif : 7B contre 1.5B, 23 questions justes pour le 7B seul contre 9 (p = 0,02). 7B contre
+  3B (p = 0,24) et 3B contre 1.5B (p = 0,20) ne le sont pas. Prudence : une reformulation n'est pas
+  une question indépendante de sa source, le nombre effectif de questions est donc inférieur à 90
+  et cette p-valeur est optimiste. Sur les 60 originales seules, l'écart reste non significatif
+  (15 contre 7, p = 0,13).
 
 ## Limites connues
 
