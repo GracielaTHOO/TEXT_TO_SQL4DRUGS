@@ -669,7 +669,7 @@
   categorie: agregation
 
 - id: q098
-  question: Combien d'avis de la commission de la transparence ont un lien vers le site de la HAS ?
+  question: Combien de liens vers des avis de la commission de la transparence la base recense-t-elle ?
   sql: |
     SELECT COUNT(*) FROM liens_avis_ct
   difficulte: facile
@@ -742,11 +742,13 @@
   categorie: agregation
 
 - id: q107
-  question: Combien de spécialités ont fait l'objet d'une information de sécurité importante de l'ANSM ?
+  question: Combien de spécialités sont soumises à au moins trois conditions de prescription ou de délivrance ?
   sql: |
-    SELECT COUNT(DISTINCT cis) FROM informations_importantes
-  difficulte: facile
-  categorie: comptage
+    SELECT COUNT(*) FROM (
+      SELECT cis FROM conditions_prescription GROUP BY cis HAVING COUNT(*) >= 3
+    )
+  difficulte: moyen
+  categorie: agregation
 
 - id: q108
   question: Combien de groupes génériques n'ont aucun générique commercialisé ?
