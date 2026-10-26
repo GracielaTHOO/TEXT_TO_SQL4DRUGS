@@ -15,9 +15,11 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ### Modifié
 - L'exactitude, l'exécutabilité, les intervalles de confiance et les tests de McNemar ne portent que sur les questions du périmètre.
+- Questions q098 (liens vers les avis) et q107 (remplacée : la table des informations importantes est publiée vide) corrigées après le premier run de S8.
 - Question q057 précisée : « déclarations de rupture de stock », ce que compte la requête de référence.
 
 ### Résultats
+- 120 questions (26 octobre 2026), exactitude sur les 110 du périmètre : 7B 72,7 %, 3B 61,8 %, 1.5B 50,0 %. Abstentions correctes : 10/10, 4/10 et 7/10 ; abstentions à tort : 0, 0 et 8. Sur les 80 questions originales, 7B contre 1.5B p < 0,001.
 - 90 questions (23 octobre 2026) : 7B 67,8 %, 3B 61,1 %, 1.5B 52,2 %. Cohérence des paires source et reformulation : 90 %, 87 % et 83 %. Premier écart significatif, 7B contre 1.5B (p = 0,02, optimiste car les reformulations ne sont pas indépendantes ; p = 0,13 sur les 60 originales).
 - Aucun écart n'est significatif sur 60 questions, pas même Qwen2.5-Coder 7B contre 1.5B (p = 0,26). Puissance estimée : 42 % à 120 questions, 84 % à 300.
 

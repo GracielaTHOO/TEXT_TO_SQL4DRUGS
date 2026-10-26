@@ -37,7 +37,7 @@ Légende : 🙋 = action de Graciela nécessaire.
       barres d'erreur dans le tableau de bord.
 - [x] **S7 · ven. 23 oct.** Jeu porté à 90 questions : paraphrases d'une même intention pour mesurer la robustesse
       à la formulation.
-- [ ] **S8 · lun. 26 oct.** Jeu porté à 120 questions, dont 10 hors périmètre : le modèle doit s'abstenir
+- [x] **S8 · lun. 26 oct.** Jeu porté à 120 questions, dont 10 hors périmètre : le modèle doit s'abstenir
       (métrique d'abstention correcte).
 - [ ] **S9 · mer. 28 oct.** Comparaison multi-familles : Llama 3.1 8B, Mistral 7B, Gemma 2 9B, SQLCoder, Qwen2.5-Coder.
 - [ ] **S10 · ven. 30 oct.** Sélection dynamique des exemples few-shot par similarité (embeddings locaux),

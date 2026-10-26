@@ -242,10 +242,50 @@ Configuration par défaut, même jour, même BDPM. Fichiers sources : `results/r
   et cette p-valeur est optimiste. Sur les 60 originales seules, l'écart reste non significatif
   (15 contre 7, p = 0,13).
 
+## Abstention et 120 questions (runs du 26 octobre 2026)
+
+Configuration par défaut, même jour, même BDPM. Fichiers sources : `results/runs/20261026T08*.json`
+et `20261026T09*.json` (les trois derniers ; un premier passage du matin, sur la version de q098 et
+q107 antérieure à leur correction, est conservé pour la traçabilité).
+
+| Modèle | Exactitude (110) | IC 95 % | 80 originales | Abstentions correctes | Abstentions à tort | Cohérence des paires |
+|---|---:|---:|---:|---:|---:|---:|
+| 1.5B | 50,0 % | 40,9 – 59,1 % | 47,5 % | 7/10 | 8/110 | 73 % |
+| 3B | 61,8 % | 52,7 – 70,9 % | 61,2 % | 4/10 | 0/110 | 83 % |
+| 7B | 72,7 % | 64,5 – 80,9 % | 71,2 % | **10/10** | 0/110 | 93 % |
+
+- **Le 7B sait s'abstenir, les petits modèles non.** Le 7B refuse les 10 questions hors périmètre sans
+  refuser une seule question du périmètre. Le 3B invente une requête pour 6 d'entre elles, y compris
+  la demande de suppression (q117, bloquée de toute façon par la garde SQL) et les ventes de
+  DOLIPRANE (q113). Le 1.5B s'abstient plus souvent (7/10) mais au hasard : il refuse aussi 8
+  questions auxquelles la base répond (q010, q012, q104…), soit 7 points d'exactitude perdus d'office.
+- **q113 (boîtes vendues) et q117 (suppression) piègent les deux petits modèles** : la première
+  ressemble à un comptage, la seconde à une instruction SQL.
+- **Premiers écarts nets.** Sur les 80 questions originales (sans reformulations, donc
+  indépendantes), McNemar donne 7B contre 1.5B p < 0,001 (25 contre 6), 3B contre 1.5B p = 0,05 et 7B
+  contre 3B p = 0,13. Sur les 110 questions du périmètre, les trois écarts passent sous 5 %
+  (p = 0,0001, 0,047 et 0,036), avec la même réserve qu'en S7 sur les reformulations.
+- **Les 20 nouvelles questions** (q091 à q110) sont réussies à 16/20 par le 7B. Ses quatre erreurs
+  sont de vraies erreurs de raisonnement : groupe générique restreint aux génériques (q097),
+  princeps au lieu de groupes (q108), « remise à disposition » confondue avec « tension » (q109),
+  plus q107 (conditions de prescription), manquée par les trois modèles.
+- **Exactitude stricte** : 59,1 % pour le 7B, 13,6 points sous l'exactitude souple, surtout par
+  des colonnes ajoutées (un compte affiché avec l'année demandée, q110).
+- Causes d'erreur du 7B : jointures (10), agrégats (7), filtres texte (4), table manquante (4) ;
+  aucun SQL invalide.
+
+**Deux questions corrigées après un premier run.** q107 comptait les informations de sécurité
+importantes, fichier publié vide par l'ANSM : la référence renvoyait 0 et `check-questions` l'a
+signalée ; elle a été remplacée. q098 admettait deux lectures (liens recensés, ou avis SMR reliés à
+un lien) ; elle nomme désormais les liens. Les chiffres ci-dessus viennent du second run.
+
 ## Limites connues
 
-- 60 questions donnent un intervalle de confiance à 95 % d'environ ±12 points : aucun des écarts
-  mesurés jusqu'ici n'est significatif (voir *Incertitude et significativité*).
+- 110 questions du périmètre donnent encore un intervalle de confiance à 95 % d'environ ±8 points ;
+  deux modèles proches restent difficiles à départager (voir *Incertitude et significativité*).
+- 10 questions hors périmètre suffisent à montrer l'écart entre le 7B et les petits modèles, pas à
+  estimer finement un taux d'abstention (une question vaut 10 points).
+- La table `informations_importantes` est vide dans la BDPM actuelle : aucune question n'y fait appel.
 - Les questions ont été rédigées par l'auteur du projet, avec un biais possible vers des
   formulations proches du schéma.
 - Une question ambiguë peut admettre plusieurs requêtes correctes ; la référence en retient une.
