@@ -78,6 +78,13 @@ def test_profile_and_check_questions(data_dir: Path, tmp_path: Path) -> None:
     result = runner.invoke(app, ["check-questions", "--out", str(report)])
     assert result.exit_code == 0, result.output
     data = json.loads(report.read_text("utf-8"))
-    assert len(data["questions"]) == 90
+    assert len(data["questions"]) == 110  # les 10 questions hors périmètre n'ont pas de requête
     # Sur l'échantillon synthétique, quelques références sont vides : elles sont signalées.
     assert "q024" in data["to_review"]
+
+
+def test_ask_abstains_without_error(data_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(medsql.llm, "make_client", lambda _s: ScriptedLLM("HORS_PERIMETRE"))
+    result = runner.invoke(app, ["ask", "Quel temps fera-t-il demain ?"])
+    assert result.exit_code == 0, result.output
+    assert "périmètre" in result.output

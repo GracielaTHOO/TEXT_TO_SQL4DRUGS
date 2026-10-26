@@ -69,3 +69,10 @@ def test_breakdown_groups_ids_in_display_order() -> None:
     ]
     assert error_breakdown(items) == {"erreur_llm": ["q1"], "filtre_texte": ["q2"]}
     assert set(ERROR_LABELS) >= set(error_breakdown(items))
+
+
+def test_abstention_causes_come_first() -> None:
+    assert classify(_item("SELECT 1", hors_perimetre=True, gold_sql="")) == "abstention_manquee"
+    assert classify(_item(None, abstained=True)) == "abstention_a_tort"
+    assert classify(_item(None, hors_perimetre=True, abstained=True, correct=True)) is None
+    assert {"abstention_manquee", "abstention_a_tort"} <= ERROR_LABELS.keys()

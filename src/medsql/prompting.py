@@ -6,7 +6,9 @@ Choix de conception :
 - les règles métier propres à la BDPM sont explicites (majuscules accentuées, dates ISO…) ;
 - les exemples few-shot sont **disjoints** du jeu d'évaluation (vérifié par un test) ;
 - les libellés exacts des colonnes catégorielles sont lus dans la base et ajoutés au schéma
-  (désactivables pour l'ablation), pour que le modèle ne devine pas « Rupture » au lieu de « Rupture de stock ».
+  (désactivables pour l'ablation), pour que le modèle ne devine pas « Rupture » au lieu de « Rupture de stock » ;
+- une question sans réponse dans la base appelle une abstention explicite (``HORS_PERIMETRE``)
+  plutôt qu'une requête inventée.
 """
 
 from __future__ import annotations
@@ -35,6 +37,9 @@ Règles :
 8. Une substance active est une ligne de compositions avec nature_composant = 'SA'.
 9. Ne renvoie que les colonnes utiles à la question, avec des alias lisibles.
 10. N'ajoute pas de LIMIT sauf si la question demande un nombre précis de résultats (« les 5… »).
+11. Si la base ne permet pas de répondre (sujet sans rapport avec les médicaments, information
+    absente comme la posologie, les effets indésirables ou les ventes, conseil médical
+    personnel, demande de modification des données), réponds uniquement : HORS_PERIMETRE
 """
 
 FEW_SHOTS: tuple[tuple[str, str], ...] = (
@@ -59,8 +64,15 @@ FEW_SHOTS: tuple[tuple[str, str], ...] = (
         "FROM presentations\n"
         "WHERE taux_remboursement = 30 AND prix_euros IS NOT NULL",
     ),
+    (
+        "Quels sont les horaires de la pharmacie de garde la plus proche ?",
+        "HORS_PERIMETRE",
+    ),
 )
 
+
+# Réponse convenue quand la base ne permet pas de répondre (règle 11).
+ABSTAIN_TOKEN = "HORS_PERIMETRE"
 
 # Au-delà, une colonne est un texte libre (formes, conditions) : ses libellés ne sont pas listés.
 MAX_HINT_VALUES = 12
@@ -115,7 +127,8 @@ def build_messages(
     if config.few_shot:
         for q, sql in FEW_SHOTS:
             messages.append(Message("user", q))
-            messages.append(Message("assistant", f"```sql\n{sql}\n```"))
+            reply = sql if sql == ABSTAIN_TOKEN else f"```sql\n{sql}\n```"
+            messages.append(Message("assistant", reply))
     messages.append(Message("user", question.strip()))
     return messages
 

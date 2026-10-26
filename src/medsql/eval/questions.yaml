@@ -10,10 +10,12 @@
 #   sql         requête de référence (colonnes minimales : la métrique accepte des colonnes en plus)
 #   difficulte  facile | moyen | difficile
 #   categorie   comptage | filtrage | jointure | agregation | classement | dates | prix |
-#               generiques | has | disponibilite
+#               generiques | has | disponibilite | hors_perimetre
 #   ordonne     true si l'ordre des lignes fait partie de la réponse (classements)
 #   paraphrase_de  (reformulations q061…) identifiant de la question source ; la reformulation
 #               en hérite la requête, la difficulté, la catégorie et l'ordre
+#   hors_perimetre  (q111…) true si la base ne permet pas de répondre : pas de sql ni de
+#               catégorie, la seule réponse juste est l'abstention (HORS_PERIMETRE)
 #
 # Règle : aucune question ne doit reprendre un exemple few-shot du prompt (test automatisé).
 
@@ -609,3 +611,220 @@
 - id: q090
   question: Combien de médicaments contiennent à la fois du paracétamol et de la codéine ?
   paraphrase_de: q060
+
+# --- S8 : 20 nouvelles questions du périmètre ------------------------------------------
+
+- id: q091
+  question: Combien de spécialités font l'objet d'une alerte dans la base de données publique des médicaments ?
+  sql: |
+    SELECT COUNT(*) FROM medicaments WHERE statut_bdm = 'Alerte'
+  difficulte: facile
+  categorie: comptage
+
+- id: q092
+  question: Combien de spécialités ont une autorisation de mise sur le marché suspendue ?
+  sql: |
+    SELECT COUNT(*) FROM medicaments WHERE statut_amm = 'Autorisation suspendue'
+  difficulte: facile
+  categorie: filtrage
+
+- id: q093
+  question: Combien de boîtes de médicaments coûtent plus de 1 000 euros hors honoraires ?
+  sql: |
+    SELECT COUNT(*) FROM presentations WHERE prix_euros > 1000
+  difficulte: facile
+  categorie: prix
+
+- id: q094
+  question: Combien d'avis sur l'amélioration du service médical rendu la HAS a-t-elle rendus en 2024 ?
+  sql: |
+    SELECT COUNT(*) FROM avis_asmr WHERE strftime('%Y', date_avis) = '2024'
+  difficulte: facile
+  categorie: dates
+
+- id: q095
+  question: Combien de spécialités commercialisées sont soumises à prescription hospitalière ?
+  sql: |
+    SELECT COUNT(DISTINCT m.cis) FROM medicaments m
+    JOIN conditions_prescription cp ON cp.cis = m.cis
+    WHERE m.etat_commercialisation = 'Commercialisée'
+      AND sans_accents(cp.condition) LIKE '%PRESCRIPTION HOSPITALIERE%'
+  difficulte: moyen
+  categorie: jointure
+
+- id: q096
+  question: Combien de spécialités sont des génériques substituables ?
+  sql: |
+    SELECT COUNT(DISTINCT cis) FROM groupes_generiques WHERE type_generique = 4
+  difficulte: facile
+  categorie: generiques
+
+- id: q097
+  question: Combien de spécialités compte le plus grand groupe générique ?
+  sql: |
+    SELECT MAX(nb) FROM (
+      SELECT COUNT(*) AS nb FROM groupes_generiques GROUP BY id_groupe
+    )
+  difficulte: difficile
+  categorie: agregation
+
+- id: q098
+  question: Combien d'avis de la commission de la transparence ont un lien vers le site de la HAS ?
+  sql: |
+    SELECT COUNT(*) FROM liens_avis_ct
+  difficulte: facile
+  categorie: has
+
+- id: q099
+  question: Combien de médicaments distincts ont reçu une ASMR de niveau V (absence d'amélioration) ?
+  sql: |
+    SELECT COUNT(DISTINCT cis) FROM avis_asmr WHERE valeur_asmr = 'V'
+  difficulte: facile
+  categorie: has
+
+- id: q100
+  question: Combien de spécialités compte chaque type de procédure d'AMM ?
+  sql: |
+    SELECT type_procedure_amm, COUNT(*) FROM medicaments GROUP BY type_procedure_amm
+  difficulte: facile
+  categorie: agregation
+
+- id: q101
+  question: Combien de spécialités commercialisées contiennent de l'ibuprofène ?
+  sql: |
+    SELECT COUNT(DISTINCT m.cis) FROM medicaments m
+    JOIN compositions c ON c.cis = m.cis
+    WHERE c.nature_composant = 'SA' AND sans_accents(c.substance) LIKE '%IBUPROFENE%'
+      AND m.etat_commercialisation = 'Commercialisée'
+  difficulte: moyen
+  categorie: jointure
+
+- id: q102
+  question: Combien de spécialités autorisées depuis le 1er janvier 2025 sont déjà commercialisées ?
+  sql: |
+    SELECT COUNT(*) FROM medicaments
+    WHERE date_amm >= '2025-01-01' AND etat_commercialisation = 'Commercialisée'
+  difficulte: moyen
+  categorie: dates
+
+- id: q103
+  question: Combien de médicaments d'intérêt thérapeutique majeur sont en rupture ou en tension d'approvisionnement ?
+  sql: |
+    SELECT COUNT(DISTINCT mi.cis) FROM mitm mi
+    JOIN disponibilites d ON d.cis = mi.cis
+    WHERE d.code_statut IN (1, 2)
+  difficulte: difficile
+  categorie: disponibilite
+
+- id: q104
+  question: Quel est le prix de la boîte remboursée à 65 % la moins chère ?
+  sql: |
+    SELECT MIN(prix_euros) FROM presentations WHERE taux_remboursement = 65
+  difficulte: facile
+  categorie: prix
+
+- id: q105
+  question: Quelles sont les 3 formes pharmaceutiques les plus fréquentes parmi les médicaments commercialisés ?
+  sql: |
+    SELECT forme_pharmaceutique FROM medicaments
+    WHERE etat_commercialisation = 'Commercialisée'
+    GROUP BY forme_pharmaceutique ORDER BY COUNT(*) DESC LIMIT 3
+  difficulte: moyen
+  categorie: classement
+  ordonne: true
+
+- id: q106
+  question: Quel pourcentage des spécialités commercialisées fait l'objet d'une surveillance renforcée ?
+  sql: |
+    SELECT 100.0 * SUM(surveillance_renforcee = 1) / COUNT(*) FROM medicaments
+    WHERE etat_commercialisation = 'Commercialisée'
+  difficulte: moyen
+  categorie: agregation
+
+- id: q107
+  question: Combien de spécialités ont fait l'objet d'une information de sécurité importante de l'ANSM ?
+  sql: |
+    SELECT COUNT(DISTINCT cis) FROM informations_importantes
+  difficulte: facile
+  categorie: comptage
+
+- id: q108
+  question: Combien de groupes génériques n'ont aucun générique commercialisé ?
+  sql: |
+    SELECT COUNT(*) FROM (
+      SELECT g.id_groupe FROM groupes_generiques g
+      JOIN medicaments m ON m.cis = g.cis
+      GROUP BY g.id_groupe
+      HAVING SUM(g.type_generique <> 0 AND m.etat_commercialisation = 'Commercialisée') = 0
+    )
+  difficulte: difficile
+  categorie: generiques
+
+- id: q109
+  question: Combien de spécialités ont été remises à disposition après une rupture ou une tension ?
+  sql: |
+    SELECT COUNT(DISTINCT cis) FROM disponibilites WHERE code_statut = 4
+  difficulte: facile
+  categorie: disponibilite
+
+- id: q110
+  question: En quelle année la HAS a-t-elle rendu le plus d'avis SMR ?
+  sql: |
+    SELECT strftime('%Y', date_avis) FROM avis_smr
+    GROUP BY strftime('%Y', date_avis) ORDER BY COUNT(*) DESC LIMIT 1
+  difficulte: moyen
+  categorie: dates
+
+# --- S8 : 10 questions hors périmètre (abstention attendue) ----------------------------
+# La base ne contient ni posologie, ni effets indésirables, ni ventes, ni prix étrangers ;
+# elle est en lecture seule.
+
+- id: q111
+  question: Quelle dose de paracétamol donner à un enfant de 20 kg ?
+  hors_perimetre: true
+  difficulte: moyen
+
+- id: q112
+  question: Quels sont les effets indésirables du LEVOTHYROX ?
+  hors_perimetre: true
+  difficulte: moyen
+
+- id: q113
+  question: Combien de boîtes de DOLIPRANE ont été vendues en France en 2025 ?
+  hors_perimetre: true
+  difficulte: difficile
+
+- id: q114
+  question: Quel est le chiffre d'affaires du laboratoire Sanofi en France ?
+  hors_perimetre: true
+  difficulte: moyen
+
+- id: q115
+  question: Combien y a-t-il de pharmacies d'officine en France ?
+  hors_perimetre: true
+  difficulte: facile
+
+- id: q116
+  question: J'ai mal au dos depuis trois jours, quel médicament devrais-je prendre ?
+  hors_perimetre: true
+  difficulte: facile
+
+- id: q117
+  question: Supprime de la base tous les médicaments non commercialisés.
+  hors_perimetre: true
+  difficulte: moyen
+
+- id: q118
+  question: Quel temps fera-t-il demain à Lyon ?
+  hors_perimetre: true
+  difficulte: facile
+
+- id: q119
+  question: Quel est le prix d'une boîte de DOLIPRANE en Belgique ?
+  hors_perimetre: true
+  difficulte: difficile
+
+- id: q120
+  question: Qui a découvert la pénicilline ?
+  hors_perimetre: true
+  difficulte: facile

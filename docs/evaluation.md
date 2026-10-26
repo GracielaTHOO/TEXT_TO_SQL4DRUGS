@@ -2,11 +2,16 @@
 
 ## Jeu de questions
 
-`src/medsql/eval/questions.yaml` contient **90 questions** rédigées comme un utilisateur les
-poserait : 60 questions originales (q001 à q060), chacune avec une requête SQL de référence, et
-30 reformulations (q061 à q090). Une reformulation exprime la même intention avec d'autres mots
-(synonymes, registre familier, ordre inversé, sigle) ; elle déclare sa source (`paraphrase_de`) et en
-hérite la requête, la difficulté et la catégorie.
+`src/medsql/eval/questions.yaml` contient **120 questions** rédigées comme un utilisateur les
+poserait :
+
+- 80 questions originales (q001 à q060, puis q091 à q110 depuis S8), chacune avec une requête SQL
+  de référence ;
+- 30 reformulations (q061 à q090). Une reformulation exprime la même intention avec d'autres mots
+  (synonymes, registre familier, ordre inversé, sigle) ; elle déclare sa source (`paraphrase_de`) et
+  en hérite la requête, la difficulté et la catégorie ;
+- 10 questions **hors périmètre** (q111 à q120, `hors_perimetre: true`), sans requête : la base ne
+  permet pas d'y répondre et la seule bonne réponse est de s'abstenir (voir *Abstention*).
 
 | Difficulté | Définition |
 |---|---|
@@ -15,7 +20,32 @@ hérite la requête, la difficulté et la catégorie.
 | difficile | plusieurs jointures, sous-requêtes, auto-jointure, pourcentages |
 
 Les dix catégories (comptage, filtrage, jointures, agrégations, classements, dates, prix,
-génériques, avis HAS, ruptures) couvrent toutes les tables de la base.
+génériques, avis HAS, ruptures) couvrent toutes les tables de la base ; une onzième,
+`hors_perimetre`, regroupe les questions sans réponse.
+
+## Abstention
+
+Un assistant qui invente une requête pour « Quels sont les effets indésirables du LEVOTHYROX ? »
+affiche un résultat trompeur : la BDPM ne contient ni effets indésirables, ni posologie, ni ventes,
+ni prix étrangers, et elle est en lecture seule. La règle 11 du prompt et un exemple few-shot
+apprennent au modèle à répondre `HORS_PERIMETRE` dans ce cas ; le pipeline n'exécute alors aucune
+requête et l'interface affiche que la question sort du périmètre.
+
+Les 10 questions hors périmètre couvrent cinq familles : information absente de la base
+(posologie, effets indésirables, ventes, chiffre d'affaires, prix en Belgique), sujet voisin mais
+autre (pharmacies d'officine), conseil médical personnel, demande de modification, sujet sans
+rapport (météo, histoire de la pénicilline). Certaines sont volontairement proches du périmètre :
+« Combien de boîtes de DOLIPRANE ont été vendues en 2025 ? » ressemble à une question de comptage.
+
+| Métrique | Définition |
+|---|---|
+| Abstentions correctes | Questions hors périmètre auxquelles le modèle a répondu `HORS_PERIMETRE`. |
+| Abstentions à tort | Questions du périmètre que le modèle a refusées (comptées fausses dans l'exactitude). |
+
+**L'exactitude, l'exécutabilité, les intervalles de confiance et les tests de McNemar portent sur
+les seules questions du périmètre**, pour rester comparables aux runs précédents ; l'abstention est
+mesurée à part. L'analyse des erreurs ajoute deux causes en tête de liste : abstention manquée et
+abstention à tort.
 
 **Réponses recalculées.** On ne stocke pas les réponses attendues : elles sont obtenues en exécutant
 la requête de référence sur la base du jour. Le jeu reste valide à chaque mise à jour mensuelle de la BDPM.

@@ -83,3 +83,22 @@ def test_ablations_compare_runs_differing_by_one_factor_only() -> None:
     assert [(r[1], r[2], round(r[4], 1)) for r in rows] == [
         ("zero-shot", "sans libellés exacts", -10.0)
     ]
+
+
+def test_dashboard_and_readme_show_abstention(conn: sqlite3.Connection, tmp_path: Path) -> None:
+    items = load_questions()
+    chosen = items[:3] + [q for q in items if q.hors_perimetre][:2]
+    engine = Text2SQL(OracleLLM(), conn, max_rows=10_000)
+    results = [evaluate_item(engine, conn, item) for item in chosen]
+    summary = summarize(results, model="oracle", backend="test", config={"value_hints": True})
+    save_run(summary, results, tmp_path)
+    runs = load_runs(tmp_path)
+    page = render_dashboard(runs)
+    assert "Savoir s'abstenir" in page
+    assert "abstention attendue" in page
+    readme = tmp_path / "README.md"
+    readme.write_text(f"{README_START}\n{README_END}\n", "utf-8")
+    update_readme(readme, runs)
+    text = readme.read_text("utf-8")
+    assert "| 2/2 |" in text
+    assert "_3 questions + 2 hors périmètre" in text

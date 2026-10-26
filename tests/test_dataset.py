@@ -17,7 +17,7 @@ def test_dataset_size_and_balance() -> None:
     assert levels == {"facile", "moyen", "difficile"}
 
 
-@pytest.mark.parametrize("item", QUESTIONS, ids=lambda q: q.id)
+@pytest.mark.parametrize("item", [q for q in QUESTIONS if not q.hors_perimetre], ids=lambda q: q.id)
 def test_gold_sql_is_safe_and_executes(item, conn: sqlite3.Connection) -> None:  # type: ignore[no-untyped-def]
     validate(item.sql)
     run_query(conn, item.sql, max_rows=None)

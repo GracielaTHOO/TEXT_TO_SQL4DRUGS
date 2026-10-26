@@ -97,9 +97,14 @@ class QuestionCheck:
 
 
 def check_questions(conn: sqlite3.Connection, items: list[EvalItem]) -> list[QuestionCheck]:
-    """Exécute chaque requête de référence sur la base et signale celles à revoir."""
+    """Exécute chaque requête de référence sur la base et signale celles à revoir.
+
+    Les questions hors périmètre n'ont pas de requête : elles ne sont pas vérifiées.
+    """
     checks = []
     for item in items:
+        if item.hors_perimetre:
+            continue
         start = time.perf_counter()
         rows: int | None = None
         error: str | None = None

@@ -5,12 +5,16 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 ## [Non publié]
 
 ### Ajouté
+- Abstention : règle 11 du prompt et exemple few-shot `HORS_PERIMETRE` ; le pipeline n'exécute aucune requête quand le modèle juge la question hors du périmètre de la base (`Answer.abstained`), la CLI et la démo l'affichent.
+- Jeu porté à 120 questions : 20 nouvelles questions du périmètre (q091 à q110) et 10 questions hors périmètre (q111 à q120, champ `hors_perimetre`) dont la seule réponse juste est l'abstention.
+- Mesure de l'abstention (`medsql.eval.abstention`) : abstentions correctes et à tort dans le résumé des runs, colonne *Abstention* du README, section *Savoir s'abstenir* du tableau de bord, deux nouvelles causes dans l'analyse des erreurs.
 - Jeu porté à 90 questions : 30 reformulations (q061 à q090, champ `paraphrase_de`) qui héritent de la requête de référence de leur source.
 - Robustesse à la formulation (`medsql.eval.robustness`) : cohérence des paires et part des réponses justes conservées, dans le résumé des runs et le tableau de bord.
 - Intervalles de confiance à 95 % par bootstrap (`medsql.eval.significance`) dans le README, le classement et le graphique du tableau de bord (moustaches).
 - Test exact de McNemar apparié : comparaison des modèles deux à deux (section *Les écarts sont-ils réels ?*) et p-valeur de chaque ablation.
 
 ### Modifié
+- L'exactitude, l'exécutabilité, les intervalles de confiance et les tests de McNemar ne portent que sur les questions du périmètre.
 - Question q057 précisée : « déclarations de rupture de stock », ce que compte la requête de référence.
 
 ### Résultats

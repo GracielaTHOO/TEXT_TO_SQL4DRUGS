@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from medsql import __version__
+from medsql.eval.abstention import abstention_stats
 from medsql.eval.dataset import EvalItem
 from medsql.eval.metrics import soft_match, strict_match
 from medsql.eval.robustness import robustness
@@ -44,6 +45,8 @@ class ItemResult:
     gold_rows: int
     pred_rows: int | None
     paraphrase_de: str | None = None
+    hors_perimetre: bool = False
+    abstained: bool = False
 
 
 @dataclass
@@ -67,6 +70,7 @@ class RunSummary:
     by_category: dict[str, dict[str, float]]
     warnings: list[str] = field(default_factory=list)
     robustness: dict[str, float] = field(default_factory=dict)
+    abstention: dict[str, float] = field(default_factory=dict)
 
 
 def _percentile(values: list[float], q: float) -> float:
@@ -110,16 +114,21 @@ def dataset_fingerprint(items: list[EvalItem]) -> str:
 
 
 def evaluate_item(engine: Text2SQL, conn: sqlite3.Connection, item: EvalItem) -> ItemResult:
-    gold = run_query(conn, item.sql, max_rows=EVAL_ROW_CAP, timeout_s=60)
+    """Pose la question ; hors périmètre, la seule réponse juste est l'abstention."""
+    gold_rows: list[tuple[object, ...]] = []
+    if not item.hors_perimetre:
+        gold_rows = run_query(conn, item.sql, max_rows=EVAL_ROW_CAP, timeout_s=60).rows
     try:
         answer = engine.ask(item.question)
     except Exception as exc:
         answer = Answer(question=item.question, error=f"{type(exc).__name__}: {exc}", attempts=1)
     pred_rows = answer.result.rows if answer.result else None
     correct = strict = False
-    if pred_rows is not None:
-        correct = soft_match(gold.rows, pred_rows, ordered=item.ordonne)
-        strict = strict_match(gold.rows, pred_rows, ordered=item.ordonne)
+    if item.hors_perimetre:
+        correct = strict = answer.abstained
+    elif pred_rows is not None:
+        correct = soft_match(gold_rows, pred_rows, ordered=item.ordonne)
+        strict = strict_match(gold_rows, pred_rows, ordered=item.ordonne)
     return ItemResult(
         id=item.id,
         question=item.question,
@@ -136,9 +145,11 @@ def evaluate_item(engine: Text2SQL, conn: sqlite3.Connection, item: EvalItem) ->
         total_latency_s=round(answer.total_latency_s, 3),
         prompt_tokens=answer.prompt_tokens,
         completion_tokens=answer.completion_tokens,
-        gold_rows=len(gold.rows),
+        gold_rows=len(gold_rows),
         pred_rows=len(pred_rows) if pred_rows is not None else None,
         paraphrase_de=item.paraphrase_de,
+        hors_perimetre=item.hors_perimetre,
+        abstained=answer.abstained,
     )
 
 
@@ -150,11 +161,15 @@ def summarize(
     config: dict[str, object],
     environment: dict[str, str] | None = None,
 ) -> RunSummary:
+    """Agrège un run. Exactitude, exécutabilité et difficulté portent sur les questions du
+    périmètre ; les questions hors périmètre sont mesurées à part (``abstention``)."""
     n = len(results)
+    inside = [r for r in results if not r.hors_perimetre]
+    n_in = len(inside)
     latencies = [r.total_latency_s for r in results]
     warnings = [
         f"{r.id} : la requête de référence renvoie 0 ligne (question à revoir)"
-        for r in results
+        for r in inside
         if r.gold_rows == 0
     ]
     now = datetime.now(timezone.utc)
@@ -167,20 +182,21 @@ def summarize(
         config=config,
         environment=environment or {},
         n=n,
-        accuracy=sum(r.correct for r in results) / n if n else 0.0,
-        accuracy_strict=sum(r.correct_strict for r in results) / n if n else 0.0,
-        executable_rate=sum(r.executable for r in results) / n if n else 0.0,
-        repaired=sum(r.attempts > 1 and r.executable for r in results),
+        accuracy=sum(r.correct for r in inside) / n_in if n_in else 0.0,
+        accuracy_strict=sum(r.correct_strict for r in inside) / n_in if n_in else 0.0,
+        executable_rate=sum(r.executable for r in inside) / n_in if n_in else 0.0,
+        repaired=sum(r.attempts > 1 and r.executable for r in inside),
         latency_p50_s=round(_percentile(latencies, 0.5), 3),
         latency_p95_s=round(_percentile(latencies, 0.95), 3),
         latency_mean_s=round(statistics.fmean(latencies), 3) if latencies else 0.0,
         tokens_per_question=(
             round(sum(r.prompt_tokens + r.completion_tokens for r in results) / n, 1) if n else 0.0
         ),
-        by_difficulty=_group(results, lambda r: r.difficulte),
+        by_difficulty=_group(inside, lambda r: r.difficulte),
         by_category=_group(results, lambda r: r.categorie),
         warnings=warnings,
         robustness=robustness([asdict(r) for r in results]),
+        abstention=abstention_stats([asdict(r) for r in results]),
     )
 
 

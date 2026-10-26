@@ -21,6 +21,8 @@ from sqlglot import exp
 from sqlglot.errors import SqlglotError
 
 ERROR_TYPES: tuple[tuple[str, str], ...] = (
+    ("abstention_manquee", "Question hors périmètre : requête inventée au lieu de s'abstenir"),
+    ("abstention_a_tort", "Question du périmètre jugée hors périmètre"),
     ("erreur_llm", "Pas de réponse du modèle (délai, panne)"),
     ("sql_invalide", "SQL non exécutable, même après auto-correction"),
     ("table_manquante", "Table nécessaire absente de la requête"),
@@ -88,10 +90,21 @@ def sql_shape(sql: str) -> SqlShape | None:
     return SqlShape(tables, frozenset(join_keys), aggregates, literals)
 
 
+def _abstention_cause(item: Mapping[str, Any]) -> str | None:
+    if item.get("hors_perimetre"):
+        return "abstention_manquee"
+    if item.get("abstained"):
+        return "abstention_a_tort"
+    return None
+
+
 def classify(item: Mapping[str, Any]) -> str | None:  # noqa: PLR0911 (une sortie par cause)
     """Cause de l'erreur d'une réponse du run, ``None`` si la réponse est juste."""
     if item.get("correct"):
         return None
+    abstention = _abstention_cause(item)
+    if abstention is not None:
+        return abstention
     error = item.get("error") or ""
     if error.startswith("LLMError"):
         return "erreur_llm"

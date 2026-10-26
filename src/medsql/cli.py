@@ -127,7 +127,7 @@ def ask(
 ) -> None:
     """💬 Pose une question en français et affiche le SQL et le résultat."""
     from medsql.llm import make_client
-    from medsql.pipeline import Text2SQL
+    from medsql.pipeline import OUT_OF_SCOPE_MESSAGE, Text2SQL
     from medsql.sql_guard import connect_readonly
 
     s = _settings(model, backend, base_url)
@@ -135,6 +135,9 @@ def ask(
         engine = Text2SQL(make_client(s), conn, max_rows=s.max_rows)
         with console.status(f"Génération avec {s.model}…"):
             answer = engine.ask(question)
+    if answer.abstained:
+        console.print(f"[yellow]⊘ {OUT_OF_SCOPE_MESSAGE}[/]")
+        return
     if answer.sql:
         console.print(Syntax(answer.sql, "sql", theme="ansi_dark", word_wrap=True))
     if answer.error or answer.result is None:

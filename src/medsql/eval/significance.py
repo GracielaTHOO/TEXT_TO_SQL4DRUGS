@@ -10,6 +10,8 @@ qu'elles répondent aux **mêmes** questions. D'où deux outils :
   l'autre), p-valeur binomiale bilatérale. Les questions communes sont appariées par identifiant.
 
 Tout est calculé à partir des réponses enregistrées dans les runs : rien n'est réexécuté.
+Les questions hors périmètre (abstention attendue) sont écartées : l'intervalle et le test
+portent sur l'exactitude d'exécution, comme le chiffre qu'ils accompagnent.
 """
 
 from __future__ import annotations
@@ -19,6 +21,8 @@ import random
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
+
+from medsql.eval.abstention import answerable
 
 BOOTSTRAP_SAMPLES = 10_000
 SEED = 20261021
@@ -45,7 +49,7 @@ def bootstrap_ci(
 
 
 def run_ci(items: Iterable[Mapping[str, Any]], **kwargs: Any) -> tuple[float, float]:
-    return bootstrap_ci([bool(i["correct"]) for i in items], **kwargs)
+    return bootstrap_ci([bool(i["correct"]) for i in answerable(items)], **kwargs)
 
 
 @dataclass(frozen=True)
@@ -73,8 +77,8 @@ def _binomial_two_sided(k: int, n: int) -> float:
 
 def mcnemar(items_a: Iterable[Mapping[str, Any]], items_b: Iterable[Mapping[str, Any]]) -> McNemar:
     """Compare deux runs sur leurs questions communes (appariées par identifiant)."""
-    a = {str(i["id"]): bool(i["correct"]) for i in items_a}
-    b = {str(i["id"]): bool(i["correct"]) for i in items_b}
+    a = {str(i["id"]): bool(i["correct"]) for i in answerable(items_a)}
+    b = {str(i["id"]): bool(i["correct"]) for i in answerable(items_b)}
     common = sorted(a.keys() & b.keys())
     only_a = sum(a[q] and not b[q] for q in common)
     only_b = sum(b[q] and not a[q] for q in common)

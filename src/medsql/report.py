@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from medsql.eval.abstention import abstention_stats
 from medsql.eval.dataset import CATEGORIES, DIFFICULTIES
 from medsql.eval.errors import ERROR_TYPES, error_breakdown
 from medsql.eval.robustness import robustness
@@ -37,6 +38,7 @@ LABELS = {
     "generiques": "Génériques",
     "has": "Avis HAS",
     "disponibilite": "Ruptures de stock",
+    "hors_perimetre": "Hors périmètre (abstention)",
 }
 
 
@@ -132,6 +134,13 @@ def _ci(run: Run) -> str:
     return f"{100 * lo:.1f} – {100 * hi:.1f} %".replace(".", ",")
 
 
+def _abstention(run: Run) -> str:
+    stats = abstention_stats(run["items"])
+    if not stats:
+        return "–"
+    return f"{stats['correct']:.0f}/{stats['out_of_scope']:.0f}"
+
+
 def _p(p: float) -> str:
     return ("< 0,001" if p < 0.001 else f"{p:.3f}".replace(".", ",")) + (" ✱" if p < 0.05 else "")
 
@@ -154,21 +163,25 @@ def readme_table(runs: Sequence[Run]) -> str:
     if not board:
         return "_Aucun run d'évaluation complet pour l'instant. Lancez `medsql eval`._"
     lines = [
-        "| Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Latence p50 | Latence p95 | Date |",
-        "|---|---:|---:|---:|---:|---:|---:|---|",
+        "| Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Abstention | Latence p50 | Latence p95 | Date |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for run in board:
         s = run["summary"]
         lines.append(
             f"| {config_label(s)} | **{_pct(s['accuracy'])}** | {_ci(run)} | {_pct(s['accuracy_strict'])} "
-            f"| {_pct(s['executable_rate'])} | {_sec(s['latency_p50_s'])} "
+            f"| {_pct(s['executable_rate'])} | {_abstention(run)} | {_sec(s['latency_p50_s'])} "
             f"| {_sec(s['latency_p95_s'])} | {s['created_at'][:10]} |"
         )
-    n = board[0]["summary"]["n"]
+    stats = abstention_stats(board[0]["items"])
+    n = board[0]["summary"]["n"] - int(stats.get("out_of_scope", 0))
+    outside = f" + {stats['out_of_scope']:.0f} hors périmètre" if stats else ""
     lines.append("")
     lines.append(
-        f"_{n} questions · exactitude = résultat d'exécution identique à la référence · "
-        "IC 95 % par bootstrap sur les questions (voir [docs/evaluation.md](docs/evaluation.md))._"
+        f"_{n} questions{outside} · exactitude = résultat d'exécution identique à la référence, "
+        "sur les questions du périmètre · abstention = questions hors périmètre correctement "
+        "refusées · IC 95 % par bootstrap sur les questions "
+        "(voir [docs/evaluation.md](docs/evaluation.md))._"
     )
     return "\n".join(lines)
 
@@ -393,6 +406,28 @@ def _robustness_table(runs: Sequence[Run]) -> str:
     )
 
 
+def _abstention_table(runs: Sequence[Run]) -> str:
+    rows = []
+    for run in runs:
+        a = abstention_stats(run["items"])
+        if not a:
+            continue
+        rows.append(
+            f"<tr><td>{_e(config_label(run['summary']))}</td>"
+            f"<td class='n'><b>{a['correct']:.0f}/{a['out_of_scope']:.0f}</b></td>"
+            f"<td class='n'>{_pct(a['rate'])}</td>"
+            f"<td class='n'>{a['false_abstentions']:.0f}/{a['in_scope']:.0f}</td>"
+            f"<td class='n'>{_pct(a['false_rate'])}</td></tr>"
+        )
+    if not rows:
+        return ""
+    return (
+        "<table><thead><tr><th>Configuration</th><th class='n'>Abstentions correctes</th>"
+        "<th class='n'>Taux</th><th class='n'>Abstentions à tort</th><th class='n'>Taux</th>"
+        f"</tr></thead><tbody>{''.join(rows)}</tbody></table>"
+    )
+
+
 def _error_table(runs: Sequence[Run]) -> str:
     """Causes des réponses fausses (lignes) pour chaque configuration (colonnes)."""
     breakdowns = [error_breakdown(r["items"]) for r in runs]
@@ -425,9 +460,11 @@ def _questions(run: Run) -> str:
             if item["correct"]
             else '<span class="ko">✗ faux</span>'
         )
+        generated = "abstention" if item.get("abstained") else item["pred_sql"] or "—"
+        reference = "abstention attendue" if item.get("hors_perimetre") else item["gold_sql"]
         detail = (
-            f"<details><summary>SQL</summary><p><b>Généré</b></p><code>{_e(item['pred_sql'] or '—')}</code>"
-            f"<p><b>Référence</b></p><code>{_e(item['gold_sql'])}</code>"
+            f"<details><summary>SQL</summary><p><b>Généré</b></p><code>{_e(generated)}</code>"
+            f"<p><b>Référence</b></p><code>{_e(reference)}</code>"
             + (f"<p class='ko'>{_e(item['error'])}</p>" if item.get("error") else "")
             + "</details>"
         )
@@ -504,6 +541,16 @@ def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | N
                 "des sources justes dont la reformulation reste juste.</p>"
             )
             sections.append(f'<div class="card">{robust}</div>')
+        abstain = _abstention_table(baselines)
+        if abstain:
+            sections.append("<h2>Savoir s'abstenir</h2>")
+            sections.append(
+                "<p class='note'>Questions sans réponse dans la base (posologie, ventes, demande de "
+                "modification…) : la seule bonne réponse est de refuser. Une abstention à tort refuse "
+                "une question à laquelle la base répond. L'exactitude des autres sections ne porte "
+                "que sur les questions du périmètre.</p>"
+            )
+            sections.append(f'<div class="card">{abstain}</div>')
         sections.append("<h2>Analyse des erreurs</h2>")
         sections.append(
             "<p class='note'>Une cause par réponse fausse, la première qui s'applique de haut en bas "

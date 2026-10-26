@@ -17,7 +17,7 @@ from medsql.config import get_settings
 from medsql.data.schema import TABLES
 from medsql.eval.runner import load_runs
 from medsql.llm import make_client
-from medsql.pipeline import Text2SQL
+from medsql.pipeline import OUT_OF_SCOPE_MESSAGE, Text2SQL
 from medsql.report import render_dashboard
 from medsql.sql_guard import connect_readonly
 from medsql.stats import key_figures
@@ -33,6 +33,7 @@ EXAMPLES = [
     "Quel est le prix moyen d'une boîte de médicament à base de metformine ?",
     "Quels médicaments ont obtenu une ASMR de niveau I ?",
     "Combien de spécialités sont réservées à l'usage hospitalier ?",
+    "Quelle est la posologie de l'amoxicilline chez l'adulte ?",
 ]
 
 settings = get_settings()
@@ -44,6 +45,8 @@ def answer(question: str) -> tuple[str, pd.DataFrame, str]:
     if not question or not question.strip():
         return "", pd.DataFrame(), "✏️ Saisissez une question."
     result = engine.ask(question)
+    if result.abstained:
+        return "", pd.DataFrame(), f"⊘ {OUT_OF_SCOPE_MESSAGE}"
     sql = result.sql or ""
     if result.error or result.result is None:
         return sql, pd.DataFrame(), f"❌ {result.error}"

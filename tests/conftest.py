@@ -31,7 +31,7 @@ class ScriptedLLM:
 
 
 class OracleLLM:
-    """Faux LLM « parfait » : renvoie le SQL de référence de la question posée."""
+    """Faux LLM « parfait » : renvoie le SQL de référence, ou s'abstient hors périmètre."""
 
     model = "oracle"
 
@@ -39,7 +39,9 @@ class OracleLLM:
         self.gold = {q.question: q.sql for q in load_questions()}
 
     def complete(self, messages: list[Message], *, temperature: float = 0.0) -> Completion:
-        return Completion(f"```sql\n{self.gold[messages[-1].content]}\n```", latency_s=0.01)
+        sql = self.gold[messages[-1].content]
+        text = f"```sql\n{sql}\n```" if sql else "HORS_PERIMETRE"
+        return Completion(text, latency_s=0.01)
 
 
 @pytest.fixture(scope="session")

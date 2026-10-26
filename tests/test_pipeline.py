@@ -51,6 +51,9 @@ def test_oracle_scores_100_percent(conn: sqlite3.Connection) -> None:
     assert summary.accuracy_strict == 1.0
     assert summary.executable_rate == 1.0
     assert set(summary.by_difficulty) == {"facile", "moyen", "difficile"}
+    assert summary.abstention["rate"] == 1.0
+    assert summary.abstention["false_abstentions"] == 0
+    assert summary.by_category["hors_perimetre"]["accuracy"] == 1.0
 
 
 class _TimeoutLLM:
@@ -108,3 +111,62 @@ def test_value_hints_quote_like_sql() -> None:
     conn.execute("INSERT INTO disponibilites VALUES ('Tension d''approvisionnement')")
     assert "'Tension d''approvisionnement'" in value_hints(conn)
     conn.close()
+
+
+def test_abstention_executes_nothing(conn: sqlite3.Connection) -> None:
+    llm = ScriptedLLM("HORS_PERIMETRE")
+    answer = Text2SQL(llm, conn).ask("Quel temps fera-t-il demain ?")
+    assert answer.abstained
+    assert answer.sql is None and answer.result is None and answer.error is None
+    assert answer.attempts == 1
+
+
+def test_abstention_during_repair_clears_the_error(conn: sqlite3.Connection) -> None:
+    llm = ScriptedLLM("SELECT ventes FROM medicaments", "```sql\nHORS_PERIMETRE\n```")
+    answer = Text2SQL(llm, conn, max_repairs=1).ask("Combien de boîtes vendues ?")
+    assert answer.abstained
+    assert answer.error is None
+    assert answer.attempts == 2
+
+
+def test_prompt_teaches_abstention() -> None:
+    messages = build_messages("Ma question ?")
+    assert "HORS_PERIMETRE" in messages[0].content
+    assert any(m.role == "assistant" and m.content == "HORS_PERIMETRE" for m in messages)
+
+
+def _outside_item():  # type: ignore[no-untyped-def]
+    return next(q for q in load_questions() if q.hors_perimetre)
+
+
+def test_out_of_scope_is_correct_only_when_abstaining(conn: sqlite3.Connection) -> None:
+    item = _outside_item()
+    abstains = evaluate_item(Text2SQL(ScriptedLLM("HORS_PERIMETRE"), conn), conn, item)
+    invents = evaluate_item(
+        Text2SQL(ScriptedLLM("SELECT COUNT(*) FROM medicaments"), conn), conn, item
+    )
+    assert abstains.correct and abstains.correct_strict and abstains.abstained
+    assert not invents.correct and invents.executable
+    assert abstains.gold_rows == 0 and abstains.gold_sql == ""
+
+
+def test_false_abstention_is_wrong_and_out_of_scope_is_excluded_from_accuracy(
+    conn: sqlite3.Connection,
+) -> None:
+    inside = load_questions()[0]
+    refused = evaluate_item(Text2SQL(ScriptedLLM("HORS_PERIMETRE"), conn), conn, inside)
+    outside = evaluate_item(Text2SQL(ScriptedLLM("HORS_PERIMETRE"), conn), conn, _outside_item())
+    assert not refused.correct
+    summary = summarize([refused, outside], model="m", backend="test", config={})
+    assert summary.n == 2
+    assert summary.accuracy == 0.0  # seule la question du périmètre compte
+    assert summary.executable_rate == 0.0
+    assert summary.abstention == {
+        "out_of_scope": 1,
+        "correct": 1,
+        "rate": 1.0,
+        "in_scope": 1,
+        "false_abstentions": 1,
+        "false_rate": 1.0,
+    }
+    assert summary.warnings == []

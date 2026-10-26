@@ -9,13 +9,24 @@ from dataclasses import dataclass, field
 import httpx
 
 from medsql.llm.base import LLMClient
-from medsql.prompting import PromptConfig, build_messages, build_repair_messages, value_hints
+from medsql.prompting import (
+    ABSTAIN_TOKEN,
+    PromptConfig,
+    build_messages,
+    build_repair_messages,
+    value_hints,
+)
 from medsql.sql_guard import (
     ForbiddenQueryError,
     QueryResult,
     UnsafeQueryError,
     extract_sql,
     run_query,
+)
+
+OUT_OF_SCOPE_MESSAGE = (
+    "Cette question sort du périmètre de la base publique des médicaments : "
+    "aucune requête n'a été exécutée."
 )
 
 
@@ -31,6 +42,7 @@ class Answer:
     prompt_tokens: int = 0
     completion_tokens: int = 0
     sql_history: list[str] = field(default_factory=list)
+    abstained: bool = False  # le modèle a jugé la question hors du périmètre de la base
 
     @property
     def ok(self) -> bool:
@@ -76,6 +88,12 @@ class Text2SQL:
             answer.llm_latency_s += completion.latency_s
             answer.prompt_tokens += completion.prompt_tokens or 0
             answer.completion_tokens += completion.completion_tokens or 0
+            if ABSTAIN_TOKEN in completion.text.upper():
+                # Abstention : aucune requête n'est exécutée.
+                answer.abstained = True
+                answer.sql = None
+                answer.error = None
+                break
             sql = extract_sql(completion.text)
             answer.sql = sql
             answer.sql_history.append(sql)
