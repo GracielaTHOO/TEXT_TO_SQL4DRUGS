@@ -1,6 +1,8 @@
 {
-  "checked_at": "2026-10-23T06:58:52+00:00",
-  "to_review": [],
+  "checked_at": "2026-10-26T08:03:30+00:00",
+  "to_review": [
+    "q107"
+  ],
   "questions": [
     {
       "id": "q001",
@@ -40,14 +42,14 @@
     {
       "id": "q006",
       "rows": 68,
-      "seconds": 0.053,
+      "seconds": 0.021,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q007",
       "rows": 1,
-      "seconds": 0.054,
+      "seconds": 0.052,
       "error": null,
       "degenerate": false
     },
@@ -75,7 +77,7 @@
     {
       "id": "q011",
       "rows": 1,
-      "seconds": 0.05,
+      "seconds": 0.048,
       "error": null,
       "degenerate": false
     },
@@ -145,7 +147,7 @@
     {
       "id": "q021",
       "rows": 15,
-      "seconds": 0.007,
+      "seconds": 0.006,
       "error": null,
       "degenerate": false
     },
@@ -194,21 +196,21 @@
     {
       "id": "q028",
       "rows": 1,
-      "seconds": 0.061,
+      "seconds": 0.066,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q029",
       "rows": 1,
-      "seconds": 0.001,
+      "seconds": 0.0,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q030",
       "rows": 1,
-      "seconds": 0.029,
+      "seconds": 0.028,
       "error": null,
       "degenerate": false
     },
@@ -222,7 +224,7 @@
     {
       "id": "q032",
       "rows": 1,
-      "seconds": 0.004,
+      "seconds": 0.003,
       "error": null,
       "degenerate": false
     },
@@ -236,7 +238,7 @@
     {
       "id": "q034",
       "rows": 7,
-      "seconds": 0.003,
+      "seconds": 0.002,
       "error": null,
       "degenerate": false
     },
@@ -250,14 +252,14 @@
     {
       "id": "q036",
       "rows": 1,
-      "seconds": 0.016,
+      "seconds": 0.015,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q037",
       "rows": 5,
-      "seconds": 0.016,
+      "seconds": 0.015,
       "error": null,
       "degenerate": false
     },
@@ -271,7 +273,7 @@
     {
       "id": "q039",
       "rows": 1,
-      "seconds": 0.057,
+      "seconds": 0.053,
       "error": null,
       "degenerate": false
     },
@@ -341,14 +343,14 @@
     {
       "id": "q049",
       "rows": 8,
-      "seconds": 0.085,
+      "seconds": 0.083,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q050",
       "rows": 1,
-      "seconds": 0.002,
+      "seconds": 0.003,
       "error": null,
       "degenerate": false
     },
@@ -390,7 +392,7 @@
     {
       "id": "q056",
       "rows": 1,
-      "seconds": 0.048,
+      "seconds": 0.045,
       "error": null,
       "degenerate": false
     },
@@ -411,14 +413,14 @@
     {
       "id": "q059",
       "rows": 1,
-      "seconds": 0.005,
+      "seconds": 0.004,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q060",
       "rows": 1,
-      "seconds": 0.111,
+      "seconds": 0.11,
       "error": null,
       "degenerate": false
     },
@@ -474,7 +476,7 @@
     {
       "id": "q068",
       "rows": 1,
-      "seconds": 0.05,
+      "seconds": 0.048,
       "error": null,
       "degenerate": false
     },
@@ -558,7 +560,7 @@
     {
       "id": "q080",
       "rows": 1,
-      "seconds": 0.029,
+      "seconds": 0.028,
       "error": null,
       "degenerate": false
     },
@@ -572,21 +574,21 @@
     {
       "id": "q082",
       "rows": 1,
-      "seconds": 0.016,
+      "seconds": 0.015,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q083",
       "rows": 5,
-      "seconds": 0.016,
+      "seconds": 0.015,
       "error": null,
       "degenerate": false
     },
     {
       "id": "q084",
       "rows": 1,
-      "seconds": 0.011,
+      "seconds": 0.01,
       "error": null,
       "degenerate": false
     },
@@ -628,7 +630,147 @@
     {
       "id": "q090",
       "rows": 1,
-      "seconds": 0.115,
+      "seconds": 0.106,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q091",
+      "rows": 1,
+      "seconds": 0.002,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q092",
+      "rows": 1,
+      "seconds": 0.001,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q093",
+      "rows": 1,
+      "seconds": 0.002,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q094",
+      "rows": 1,
+      "seconds": 0.003,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q095",
+      "rows": 1,
+      "seconds": 0.058,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q096",
+      "rows": 1,
+      "seconds": 0.001,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q097",
+      "rows": 1,
+      "seconds": 0.001,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q098",
+      "rows": 1,
+      "seconds": 0.0,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q099",
+      "rows": 1,
+      "seconds": 0.004,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q100",
+      "rows": 8,
+      "seconds": 0.003,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q101",
+      "rows": 1,
+      "seconds": 0.052,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q102",
+      "rows": 1,
+      "seconds": 0.004,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q103",
+      "rows": 1,
+      "seconds": 0.001,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q104",
+      "rows": 1,
+      "seconds": 0.002,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q105",
+      "rows": 3,
+      "seconds": 0.005,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q106",
+      "rows": 1,
+      "seconds": 0.003,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q107",
+      "rows": 1,
+      "seconds": 0.0,
+      "error": null,
+      "degenerate": true
+    },
+    {
+      "id": "q108",
+      "rows": 1,
+      "seconds": 0.008,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q109",
+      "rows": 1,
+      "seconds": 0.0,
+      "error": null,
+      "degenerate": false
+    },
+    {
+      "id": "q110",
+      "rows": 1,
+      "seconds": 0.005,
       "error": null,
       "degenerate": false
     }
