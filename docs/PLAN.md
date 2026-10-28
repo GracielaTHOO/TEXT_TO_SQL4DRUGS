@@ -39,7 +39,7 @@ Légende : 🙋 = action de Graciela nécessaire.
       à la formulation.
 - [x] **S8 · lun. 26 oct.** Jeu porté à 120 questions, dont 10 hors périmètre : le modèle doit s'abstenir
       (métrique d'abstention correcte).
-- [ ] **S9 · mer. 28 oct.** Comparaison multi-familles : Llama 3.1 8B, Mistral 7B, Gemma 2 9B, SQLCoder, Qwen2.5-Coder.
+- [x] **S9 · mer. 28 oct.** Comparaison multi-familles : Llama 3.1 8B, Mistral 7B, Gemma 2 9B, SQLCoder, Qwen2.5-Coder.
 - [ ] **S10 · ven. 30 oct.** Sélection dynamique des exemples few-shot par similarité (embeddings locaux),
       mesurée contre les exemples fixes. Release **v0.3.0**.
 

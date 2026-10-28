@@ -290,7 +290,7 @@ Configuration par défaut, même prompt, même jour, même BDPM, chaque modèle 
 | Llama 3.1 8B | généraliste | 59,1 % | 50,0 – 68,2 % | 9/10 | 70 % | 15,7 s | 33,8 s |
 | Mistral 7B | généraliste | 47,3 % | 38,2 – 56,4 % | 1/10 | 73 % | 11,5 s | 117,2 s |
 | SQLCoder 7B | SQL | 1,8 % | 0,0 – 4,5 % | 4/10 (25 à tort) | — | 127,1 s | 256,6 s |
-| Gemma 2 9B | généraliste | — | — | — | — | — | — |
+| Gemma 2 9B | généraliste | non mesuré (aucune réponse en moins de 180 s) | — | — | — | > 180 s | — |
 
 - **À taille égale, le modèle de code l'emporte nettement.** Qwen2.5-Coder 7B devance Llama 3.1 8B
   de 12,7 points (24 questions justes pour Qwen seul contre 10, p = 0,02 sur 110 questions, 0,09 sur
@@ -308,9 +308,14 @@ Configuration par défaut, même prompt, même jour, même BDPM, chaque modèle 
   qui n'en parlent pas) et dépasse le délai de 180 s sur certaines questions. Son 1,8 % mesure
   l'inadéquation du format, pas sa compétence en SQL ; l'évaluer équitablement demanderait son
   gabarit dédié, hors du protocole commun.
-- **Gemma 2 9B** a atteint la limite de 5 h 40 du runner sans terminer : les réponses n'avaient pas
-  été enregistrées. L'évaluation a été rendue interruptible (run partiel enregistré) et Gemma est
-  relancé seul.
+- **Gemma 2 9B ne tient pas sur un runner sans GPU.** Au premier essai, il a atteint la limite de
+  5 h 40 du runner. Relancé seul, il a dépassé le délai de 180 s à chacune des 90 premières
+  questions, soit une question toutes les trois minutes, sans une seule réponse. Les autres modèles
+  de cette taille répondent en 12 à 16 s (médiane), parce qu'Ollama réutilise d'une question à
+  l'autre le calcul du long préfixe commun (règles, schéma, exemples, environ 3 000 tokens). Cause
+  probable, non vérifiée : l'attention à fenêtre glissante de Gemma 2 empêche cette réutilisation,
+  et le préfixe est recalculé à chaque appel. Gemma 2 est donc exclu de la comparaison sur CPU ;
+  il reste évaluable sur une machine avec GPU (`medsql eval --model gemma2:9b`).
 
 ## Limites connues
 

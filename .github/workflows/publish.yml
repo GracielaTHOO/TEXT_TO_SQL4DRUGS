@@ -30,7 +30,11 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      # main à jour, pas le commit qui a lancé l'évaluation : des commits ont pu arriver pendant
+      # les heures d'évaluation, et les fichiers générés entreraient en conflit au rebase.
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

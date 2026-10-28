@@ -17,13 +17,14 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Test exact de McNemar apparié : comparaison des modèles deux à deux (section *Les écarts sont-ils réels ?*) et p-valeur de chaque ablation.
 
 ### Modifié
+- Le workflow d'évaluation arrête `medsql eval` par SIGTERM (`timeout 290m`) : le délai d'une étape GitHub ne transmet pas le signal au processus, le run partiel n'était donc pas enregistré. La publication part de `main` à jour et non du commit qui a lancé l'évaluation (conflit au rebase après plusieurs heures).
 - Au-delà de quatre modèles, la section *Les écarts sont-ils réels ?* compare chaque modèle au meilleur au lieu de toutes les paires.
 - L'exactitude, l'exécutabilité, les intervalles de confiance et les tests de McNemar ne portent que sur les questions du périmètre.
 - Questions q098 (liens vers les avis) et q107 (remplacée : la table des informations importantes est publiée vide) corrigées après le premier run de S8.
 - Question q057 précisée : « déclarations de rupture de stock », ce que compte la requête de référence.
 
 ### Résultats
-- Familles (28 octobre 2026), exactitude sur 110 questions : Qwen2.5-Coder 7B 71,8 %, Llama 3.1 8B 59,1 % (p = 0,02 contre Qwen), Mistral 7B 47,3 % (p < 0,001), SQLCoder 7B 1,8 % (modèle de complétion, inadapté au format conversationnel). Abstentions correctes : 10, 9, 1 et 4 sur 10.
+- Familles (28 octobre 2026), exactitude sur 110 questions : Qwen2.5-Coder 7B 71,8 %, Llama 3.1 8B 59,1 % (p = 0,02 contre Qwen), Mistral 7B 47,3 % (p < 0,001), SQLCoder 7B 1,8 % (modèle de complétion, inadapté au format conversationnel). Abstentions correctes : 10, 9, 1 et 4 sur 10. Gemma 2 9B n'a répondu à aucune question en moins de 180 s sur le runner CPU : exclu.
 - 120 questions (26 octobre 2026), exactitude sur les 110 du périmètre : 7B 72,7 %, 3B 61,8 %, 1.5B 50,0 %. Abstentions correctes : 10/10, 4/10 et 7/10 ; abstentions à tort : 0, 0 et 8. Sur les 80 questions originales, 7B contre 1.5B p < 0,001.
 - 90 questions (23 octobre 2026) : 7B 67,8 %, 3B 61,1 %, 1.5B 52,2 %. Cohérence des paires source et reformulation : 90 %, 87 % et 83 %. Premier écart significatif, 7B contre 1.5B (p = 0,02, optimiste car les reformulations ne sont pas indépendantes ; p = 0,13 sur les 60 originales).
 - Aucun écart n'est significatif sur 60 questions, pas même Qwen2.5-Coder 7B contre 1.5B (p = 0,26). Puissance estimée : 42 % à 120 questions, 84 % à 300.

@@ -66,9 +66,10 @@ jobs:
           ollama serve > /tmp/ollama.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/tags && break; sleep 1; done
       - name: Évaluation
-        # Sous la limite du job : un modèle trop lent est arrêté proprement (run partiel
-        # enregistré) et l'envoi des résultats a encore le temps de s'exécuter.
-        timeout-minutes: 300
+        # Sous la limite du job : un modèle trop lent reçoit SIGTERM (`timeout`), enregistre un
+        # run partiel, et l'envoi des résultats a encore le temps de s'exécuter. Le délai de
+        # l'étape n'est qu'un filet : il ne transmet pas le signal à medsql.
+        timeout-minutes: 310
         env:
           MODEL: ${{ matrix.model }}
         run: |
@@ -87,7 +88,7 @@ jobs:
             esac
             echo "::group::$MODEL · $config"
             # Une configuration en échec n'empêche pas d'évaluer les suivantes.
-            medsql eval --model "$MODEL" $flags $LIMIT_OPT --out new-runs || { echo "::warning::échec de $MODEL · $config"; status=1; }
+            timeout --signal=TERM 290m medsql eval --model "$MODEL" $flags $LIMIT_OPT --out new-runs || { echo "::warning::échec de $MODEL · $config"; status=1; }
             echo "::endgroup::"
           done
           exit $status
