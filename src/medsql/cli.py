@@ -217,6 +217,13 @@ def evaluate(
                 result = evaluate_item(engine, conn, item)
                 results.append(result)
                 progress.update(task, advance=1, ok=sum(r.correct for r in results))
+                if not console.is_terminal and len(results) % 10 == 0:
+                    # Journal de CI : la barre de progression ne s'y affiche qu'à la fin.
+                    console.print(
+                        f"{len(results)}/{len(items)} questions · "
+                        f"{sum(r.correct for r in results)} justes · "
+                        f"{progress.tasks[0].elapsed or 0:.0f} s"
+                    )
         except KeyboardInterrupt:
             interrupted = True
         finally:

@@ -60,7 +60,11 @@ change sur `main`.
 
 Le workflow *Évaluation des modèles* tourne le 2 de chaque mois (après la mise à jour de la BDPM)
 et à la demande. Chaque modèle de l'entrée `models` a son propre runner (CPU) : les modèles sont
-évalués en parallèle, chacun sur la BDPM téléchargée le jour même. Un dernier job rassemble les runs
-dans `results/runs/`, contrôle les questions, met à jour le README et republie le tableau de bord.
+évalués en parallèle, chacun sur la BDPM téléchargée le jour même. Le workflow *Publication des résultats*
+(`publish.yml`), appelé à la fin même si un modèle échoue, rassemble les runs dans `results/runs/`,
+contrôle les questions, met à jour le README et republie le tableau de bord. Il se lance aussi à la
+main pour republier les artefacts d'une évaluation passée : `gh workflow run publish.yml -f run_id=…`.
+Un modèle trop lent est arrêté au bout de 300 minutes ; ses réponses déjà obtenues sont
+enregistrées dans un run partiel, hors classement.
 Exemple pour comparer cinq familles en une fois :
 `gh workflow run eval.yml -f models=qwen2.5-coder:7b,llama3.1:8b,mistral:7b,gemma2:9b,sqlcoder:7b`.
