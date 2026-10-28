@@ -5,6 +5,8 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 ## [Non publié]
 
 ### Ajouté
+- Comparaison multi-familles : catalogue des modèles (`medsql.models` : famille, éditeur, taille, spécialité, licence) et section *Familles de modèles* du tableau de bord.
+- Workflow d'évaluation en matrice : un runner par modèle, en parallèle, puis un job qui rassemble les runs et publie.
 - Abstention : règle 11 du prompt et exemple few-shot `HORS_PERIMETRE` ; le pipeline n'exécute aucune requête quand le modèle juge la question hors du périmètre de la base (`Answer.abstained`), la CLI et la démo l'affichent.
 - Jeu porté à 120 questions : 20 nouvelles questions du périmètre (q091 à q110) et 10 questions hors périmètre (q111 à q120, champ `hors_perimetre`) dont la seule réponse juste est l'abstention.
 - Mesure de l'abstention (`medsql.eval.abstention`) : abstentions correctes et à tort dans le résumé des runs, colonne *Abstention* du README, section *Savoir s'abstenir* du tableau de bord, deux nouvelles causes dans l'analyse des erreurs.
@@ -14,6 +16,7 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Test exact de McNemar apparié : comparaison des modèles deux à deux (section *Les écarts sont-ils réels ?*) et p-valeur de chaque ablation.
 
 ### Modifié
+- Au-delà de quatre modèles, la section *Les écarts sont-ils réels ?* compare chaque modèle au meilleur au lieu de toutes les paires.
 - L'exactitude, l'exécutabilité, les intervalles de confiance et les tests de McNemar ne portent que sur les questions du périmètre.
 - Questions q098 (liens vers les avis) et q107 (remplacée : la table des informations importantes est publiée vide) corrigées après le premier run de S8.
 - Question q057 précisée : « déclarations de rupture de stock », ce que compte la requête de référence.

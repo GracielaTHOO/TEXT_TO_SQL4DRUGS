@@ -18,6 +18,7 @@ from medsql.eval.dataset import CATEGORIES, DIFFICULTIES
 from medsql.eval.errors import ERROR_TYPES, error_breakdown
 from medsql.eval.robustness import robustness
 from medsql.eval.significance import McNemar, mcnemar, run_ci
+from medsql.models import model_info
 
 README_START = "<!-- RESULTS:START -->"
 README_END = "<!-- RESULTS:END -->"
@@ -145,12 +146,23 @@ def _p(p: float) -> str:
     return ("< 0,001" if p < 0.001 else f"{p:.3f}".replace(".", ",")) + (" ✱" if p < 0.05 else "")
 
 
+# Au-delà, toutes les paires noieraient le tableau : on compare chaque run au meilleur.
+MAX_ALL_PAIRS = 4
+
+
 def pairwise(runs: Sequence[Run]) -> list[tuple[str, str, McNemar]]:
-    """Test de McNemar pour chaque paire de runs, dans l'ordre donné."""
+    """Test de McNemar pour chaque paire de runs (du meilleur au moins bon).
+
+    Au-delà de ``MAX_ALL_PAIRS`` runs, seul le premier (le meilleur) est comparé aux autres.
+    """
+    pairs = (
+        [(a, b) for i, a in enumerate(runs) for b in runs[i + 1 :]]
+        if len(runs) <= MAX_ALL_PAIRS
+        else [(runs[0], b) for b in runs[1:]]
+    )
     return [
         (config_label(a["summary"]), config_label(b["summary"]), mcnemar(a["items"], b["items"]))
-        for i, a in enumerate(runs)
-        for b in runs[i + 1 :]
+        for a, b in pairs
     ]
 
 
@@ -351,6 +363,32 @@ def _leaderboard(board: list[Run]) -> str:
     )
 
 
+def _families_table(runs: Sequence[Run]) -> str:
+    """Comparaison multi-familles : un run par modèle catalogué, du meilleur au moins bon."""
+    rows = []
+    for run in runs:
+        s = run["summary"]
+        info = model_info(str(s["model"]))
+        if info is None:
+            continue
+        size = f"{info.params_b:g}".replace(".", ",")
+        rows.append(
+            f"<tr><td>{_e(s['model'])}</td><td>{_e(info.family)}</td><td>{_e(info.publisher)}</td>"
+            f"<td class='n'>{size} Md</td><td>{_e(info.specialty)}</td>"
+            f"<td class='n'><b>{_pct(s['accuracy'])}</b></td><td class='n'>{_ci(run)}</td>"
+            f"<td class='n'>{_abstention(run)}</td><td class='n'>{_sec(s['latency_p50_s'])}</td>"
+            f"<td>{_e(info.licence)}</td></tr>"
+        )
+    if len(rows) < 2:
+        return ""
+    return (
+        "<table><thead><tr><th>Modèle</th><th>Famille</th><th>Éditeur</th>"
+        "<th class='n'>Paramètres</th><th>Spécialité</th><th class='n'>Exactitude</th>"
+        "<th class='n'>IC 95 %</th><th class='n'>Abstention</th><th class='n'>p50</th>"
+        f"<th>Licence</th></tr></thead><tbody>{''.join(rows)}</tbody></table>"
+    )
+
+
 def _ablation_table(rows: list[tuple[str, str, str, float, float, float]]) -> str:
     body = []
     for model, removed, reference, acc, delta, p in rows:
@@ -479,6 +517,34 @@ def _questions(run: Run) -> str:
     )
 
 
+def _comparison_sections(baselines: Sequence[Run]) -> list[str]:
+    """Sections « Familles de modèles » et « Les écarts sont-ils réels ? »."""
+    sections: list[str] = []
+    families = _families_table(baselines)
+    if families:
+        sections.append("<h2>Familles de modèles</h2>")
+        sections.append(
+            "<p class='note'>Configuration par défaut pour chaque modèle, quantifié en 4 bits et "
+            "servi par Ollama sur le même processeur. Spécialité : entraînement généraliste, "
+            "orienté code ou dédié au SQL.</p>"
+        )
+        sections.append(f'<div class="card">{families}</div>')
+    if len(baselines) > 1:
+        sections.append("<h2>Les écarts sont-ils réels ?</h2>")
+        vs_best = (
+            " Avec plus de quatre modèles, chacun est comparé au meilleur."
+            if len(baselines) > MAX_ALL_PAIRS
+            else ""
+        )
+        sections.append(
+            "<p class='note'>Test exact de McNemar sur les questions communes : seules comptent "
+            "celles où un modèle a juste et l'autre faux. ✱ = significatif au seuil de 5 %."
+            f"{vs_best}</p>"
+        )
+        sections.append(f'<div class="card">{_pairwise_table(pairwise(baselines))}</div>')
+    return sections
+
+
 def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | None = None) -> str:
     board = latest_per_config(runs)
     generated = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -512,13 +578,7 @@ def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | N
         sections.append("<h2>Classement détaillé</h2>")
         sections.append(f'<div class="card">{_leaderboard(board)}</div>')
         baselines = [r for r in board if _is_baseline(r["summary"])] or board[:3]
-        if len(baselines) > 1:
-            sections.append("<h2>Les écarts sont-ils réels ?</h2>")
-            sections.append(
-                "<p class='note'>Test exact de McNemar sur les questions communes : seules comptent "
-                "celles où un modèle a juste et l'autre faux. ✱ = significatif au seuil de 5 %.</p>"
-            )
-            sections.append(f'<div class="card">{_pairwise_table(pairwise(baselines))}</div>')
+        sections.extend(_comparison_sections(baselines))
         deltas = ablations(board)
         if deltas:
             sections.append("<h2>Ablations</h2>")

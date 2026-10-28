@@ -1,12 +1,13 @@
 name: Évaluation des modèles
 
-# Télécharge la BDPM du jour, sert les modèles avec Ollama sur le runner (CPU),
-# lance le banc d'évaluation, puis publie les résultats (dépôt + GitHub Pages).
+# Télécharge la BDPM du jour, sert chaque modèle avec Ollama sur son propre runner (CPU,
+# en parallèle), lance le banc d'évaluation, puis rassemble et publie les résultats
+# (dépôt + GitHub Pages).
 on:
   workflow_dispatch:
     inputs:
       models:
-        description: "Modèles Ollama, séparés par des virgules"
+        description: "Modèles Ollama, séparés par des virgules (un runner par modèle)"
         default: "qwen2.5-coder:1.5b,qwen2.5-coder:3b,qwen2.5-coder:7b"
       limit:
         description: "Nombre de questions (vide = toutes)"
@@ -26,12 +27,83 @@ concurrency:
   group: eval
   cancel-in-progress: false
 
+env:
+  MODELS: ${{ inputs.models || 'qwen2.5-coder:1.5b,qwen2.5-coder:3b,qwen2.5-coder:7b' }}
+
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      models: ${{ steps.models.outputs.models }}
+    steps:
+      - id: models
+        run: |
+          echo "models=$(jq -cn --arg m "$MODELS" '$m | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))')" >> "$GITHUB_OUTPUT"
+
   evaluate:
+    needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 340
-    env:
-      MODELS: ${{ inputs.models || 'qwen2.5-coder:1.5b,qwen2.5-coder:3b,qwen2.5-coder:7b' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        model: ${{ fromJSON(needs.plan.outputs.models) }}
+    name: évaluation · ${{ matrix.model }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Installation
+        run: pip install -e .
+      - name: Téléchargement de la BDPM et construction de la base
+        run: medsql setup
+      - name: Installation d'Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve > /tmp/ollama.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/tags && break; sleep 1; done
+      - name: Évaluation
+        env:
+          MODEL: ${{ matrix.model }}
+        run: |
+          LIMIT_OPT=""
+          if [ -n "${{ inputs.limit }}" ]; then LIMIT_OPT="--limit ${{ inputs.limit }}"; fi
+          ollama pull "$MODEL"
+          status=0
+          CONFIGS="${{ inputs.configs || 'base' }}"
+          for config in ${CONFIGS//,/ }; do
+            case "$config" in
+              base) flags="" ;;
+              zero-shot) flags="--zero-shot" ;;
+              sans-correction) flags="--repairs 0" ;;
+              sans-libelles) flags="--no-value-hints" ;;
+              *) echo "::error::configuration inconnue : $config"; exit 1 ;;
+            esac
+            echo "::group::$MODEL · $config"
+            # Une configuration en échec n'empêche pas d'évaluer les suivantes.
+            medsql eval --model "$MODEL" $flags $LIMIT_OPT --out new-runs || { echo "::warning::échec de $MODEL · $config"; status=1; }
+            echo "::endgroup::"
+          done
+          exit $status
+      - id: slug
+        if: always()
+        env:
+          MODEL: ${{ matrix.model }}
+        run: echo "slug=$(echo "$MODEL" | tr -c 'a-zA-Z0-9.\n' '-')" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runs-${{ steps.slug.outputs.slug }}
+          path: new-runs/*.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  publish:
+    needs: evaluate
+    if: always() && needs.evaluate.result != 'cancelled'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -48,44 +120,19 @@ jobs:
           mkdir -p results && cp data/raw/manifest.json results/bdpm_manifest.json
           medsql profile
           medsql check-questions
-      - name: Installation d'Ollama
-        run: |
-          curl -fsSL https://ollama.com/install.sh | sh
-          ollama serve > /tmp/ollama.log 2>&1 &
-          for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/tags && break; sleep 1; done
-      - name: Évaluation
-        run: |
-          LIMIT_OPT=""
-          if [ -n "${{ inputs.limit }}" ]; then LIMIT_OPT="--limit ${{ inputs.limit }}"; fi
-          status=0
-          CONFIGS="${{ inputs.configs || 'base' }}"
-          for model in ${MODELS//,/ }; do
-            ollama pull "$model"
-            for config in ${CONFIGS//,/ }; do
-              case "$config" in
-                base) flags="" ;;
-                zero-shot) flags="--zero-shot" ;;
-                sans-correction) flags="--repairs 0" ;;
-                sans-libelles) flags="--no-value-hints" ;;
-                *) echo "::error::configuration inconnue : $config"; exit 1 ;;
-              esac
-              echo "::group::$model · $config"
-              # Une configuration en échec n'empêche pas d'évaluer les suivantes.
-              medsql eval --model "$model" $flags $LIMIT_OPT || { echo "::warning::échec de $model · $config"; status=1; }
-              echo "::endgroup::"
-            done
-          done
-          exit $status
+      - name: Rassemblement des runs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: runs-*
+          path: results/runs
+          merge-multiple: true
       - name: Tableau de bord et README
-        if: always()
         run: medsql report
       - name: Résumé du run
-        if: always()
         run: |
           echo "## Résultats" >> "$GITHUB_STEP_SUMMARY"
           sed -n '/RESULTS:START/,/RESULTS:END/p' README.md | sed '1d;$d' >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrement des résultats
-        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -95,13 +142,10 @@ jobs:
           git pull --rebase origin main
           git push
       - name: Préparation de GitHub Pages
-        if: always()
         run: |
           mkdir -p site
           cp results/dashboard.html site/index.html
       - uses: actions/upload-pages-artifact@v3
-        if: always()
         with:
           path: site
       - uses: actions/deploy-pages@v4
-        if: always()
