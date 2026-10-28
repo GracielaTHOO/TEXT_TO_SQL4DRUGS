@@ -88,3 +88,30 @@ def test_ask_abstains_without_error(data_dir: Path, monkeypatch: pytest.MonkeyPa
     result = runner.invoke(app, ["ask", "Quel temps fera-t-il demain ?"])
     assert result.exit_code == 0, result.output
     assert "périmètre" in result.output
+
+
+class _InterruptedLLM(OracleLLM):
+    """Répond juste deux fois, puis simule un arrêt du runner."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.calls = 0
+
+    def complete(self, messages, *, temperature=0.0):  # type: ignore[no-untyped-def]
+        self.calls += 1
+        if self.calls > 2:
+            raise KeyboardInterrupt
+        return super().complete(messages, temperature=temperature)
+
+
+def test_interrupted_eval_saves_a_partial_run(
+    data_dir: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(medsql.llm, "make_client", lambda _s: _InterruptedLLM())
+    runs = tmp_path / "runs"
+    result = runner.invoke(app, ["eval", "--model", "lent", "--out", str(runs)])
+    assert result.exit_code == 130
+    saved = json.loads(next(runs.glob("*.json")).read_text("utf-8"))
+    assert saved["summary"]["n"] == 2
+    assert saved["summary"]["config"]["limit"] == 2
+    assert saved["summary"]["config"]["interrupted"] is True

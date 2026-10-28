@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import signal
+import types
 from contextlib import closing
 from dataclasses import replace
 from pathlib import Path
@@ -153,6 +155,10 @@ def ask(
     )
 
 
+def _interrupt(signum: int, frame: types.FrameType | None) -> None:
+    raise KeyboardInterrupt
+
+
 @app.command("eval")
 def evaluate(
     model: ModelOpt = None,
@@ -200,12 +206,23 @@ def evaluate(
         TimeElapsedColumn(),
         console=console,
     )
+    # Arrêt (Ctrl+C, délai du runner) : les réponses déjà obtenues sont enregistrées dans un
+    # run partiel, qui reste hors du classement comme un run --limit.
+    previous = signal.signal(signal.SIGTERM, _interrupt)
+    interrupted = False
     with progress:
         task = progress.add_task(s.model, total=len(items), ok=0)
-        for item in items:
-            result = evaluate_item(engine, conn, item)
-            results.append(result)
-            progress.update(task, advance=1, ok=sum(r.correct for r in results))
+        try:
+            for item in items:
+                result = evaluate_item(engine, conn, item)
+                results.append(result)
+                progress.update(task, advance=1, ok=sum(r.correct for r in results))
+        except KeyboardInterrupt:
+            interrupted = True
+        finally:
+            signal.signal(signal.SIGTERM, previous)
+    if not results:
+        raise typer.Exit(130)
     summary = summarize(
         results,
         model=s.model,
@@ -215,7 +232,8 @@ def evaluate(
             "value_hints": hints,
             "max_repairs": repairs,
             "temperature": s.temperature,
-            "limit": limit,
+            "limit": len(results) if interrupted else limit,
+            **({"interrupted": True} if interrupted else {}),
         },
         environment=default_environment(items, s.db_path),
     )
@@ -229,6 +247,9 @@ def evaluate(
     for warning in summary.warnings:
         console.print(f"[yellow]⚠ {warning}[/]")
     console.print(f"[green]✓[/] Run enregistré : {path}")
+    if interrupted:
+        console.print(f"[yellow]⚠ Run interrompu après {len(results)}/{len(items)} questions.[/]")
+        raise typer.Exit(130)
 
 
 @app.command()

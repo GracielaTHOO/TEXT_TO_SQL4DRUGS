@@ -65,6 +65,9 @@ jobs:
           ollama serve > /tmp/ollama.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/tags && break; sleep 1; done
       - name: Évaluation
+        # Sous la limite du job : un modèle trop lent est arrêté proprement (run partiel
+        # enregistré) et l'envoi des résultats a encore le temps de s'exécuter.
+        timeout-minutes: 300
         env:
           MODEL: ${{ matrix.model }}
         run: |

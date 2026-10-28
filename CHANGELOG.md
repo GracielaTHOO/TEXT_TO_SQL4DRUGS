@@ -6,6 +6,7 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ### Ajouté
 - Comparaison multi-familles : catalogue des modèles (`medsql.models` : famille, éditeur, taille, spécialité, licence) et section *Familles de modèles* du tableau de bord.
+- Évaluation interruptible : sur Ctrl+C ou arrêt du runner, `medsql eval` enregistre les réponses obtenues dans un run partiel (`interrupted`, hors classement) ; l'étape d'évaluation du workflow a son propre délai pour que l'envoi des résultats s'exécute.
 - Workflow d'évaluation en matrice : un runner par modèle, en parallèle, puis un job qui rassemble les runs et publie.
 - Abstention : règle 11 du prompt et exemple few-shot `HORS_PERIMETRE` ; le pipeline n'exécute aucune requête quand le modèle juge la question hors du périmètre de la base (`Answer.abstained`), la CLI et la démo l'affichent.
 - Jeu porté à 120 questions : 20 nouvelles questions du périmètre (q091 à q110) et 10 questions hors périmètre (q111 à q120, champ `hors_perimetre`) dont la seule réponse juste est l'abstention.
