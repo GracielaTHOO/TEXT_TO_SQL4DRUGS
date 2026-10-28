@@ -279,6 +279,39 @@ importantes, fichier publié vide par l'ANSM : la référence renvoyait 0 et `ch
 signalée ; elle a été remplacée. q098 admettait deux lectures (liens recensés, ou avis SMR reliés à
 un lien) ; elle nomme désormais les liens. Les chiffres ci-dessus viennent du second run.
 
+## Comparaison des familles (runs du 28 octobre 2026)
+
+Configuration par défaut, même prompt, même jour, même BDPM, chaque modèle sur son propre runner
+(4 cœurs, sans GPU), quantifié en 4 bits par Ollama. Fichiers sources : `results/runs/20261028T*.json`.
+
+| Modèle | Spécialité | Exactitude (110) | IC 95 % | Abstentions correctes | Cohérence des paires | Latence p50 | p95 |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Qwen2.5-Coder 7B | code | **71,8 %** | 63,6 – 80,0 % | 10/10 | 93 % | 12,5 s | 34,0 s |
+| Llama 3.1 8B | généraliste | 59,1 % | 50,0 – 68,2 % | 9/10 | 70 % | 15,7 s | 33,8 s |
+| Mistral 7B | généraliste | 47,3 % | 38,2 – 56,4 % | 1/10 | 73 % | 11,5 s | 117,2 s |
+| SQLCoder 7B | SQL | 1,8 % | 0,0 – 4,5 % | 4/10 (25 à tort) | — | 127,1 s | 256,6 s |
+| Gemma 2 9B | généraliste | — | — | — | — | — | — |
+
+- **À taille égale, le modèle de code l'emporte nettement.** Qwen2.5-Coder 7B devance Llama 3.1 8B
+  de 12,7 points (24 questions justes pour Qwen seul contre 10, p = 0,02 sur 110 questions, 0,09 sur
+  les 80 originales) et Mistral 7B de 24,5 points (p < 0,001 dans les deux cas). Le Qwen 7B du jour
+  (71,8 %) confirme celui du 26 octobre (72,7 %) à une question près.
+- **Les généralistes échouent surtout sur les jointures** : 22 erreurs de jointure pour Llama, 26 pour
+  Mistral, contre 10 pour Qwen.
+- **Savoir s'abstenir dépend de la famille, pas seulement de la taille.** Llama s'abstient sur 9
+  des 10 questions hors périmètre sans refus à tort ; Mistral invente une requête pour 9 d'entre
+  elles. Mistral est aussi le moins robuste aux reformulations et le plus instable en latence
+  (p95 de 117 s, tiré par les questions où une première requête échoue et passe par l'auto-correction).
+- **SQLCoder 7B n'est pas comparable dans ce protocole.** C'est un modèle de complétion entraîné
+  sur un gabarit de prompt qui lui est propre : en conversation, il ne s'arrête jamais (512 tokens,
+  le plafond, à chaque question), recopie les exemples few-shot (filtre `BIOGARAN` sur des questions
+  qui n'en parlent pas) et dépasse le délai de 180 s sur certaines questions. Son 1,8 % mesure
+  l'inadéquation du format, pas sa compétence en SQL ; l'évaluer équitablement demanderait son
+  gabarit dédié, hors du protocole commun.
+- **Gemma 2 9B** a atteint la limite de 5 h 40 du runner sans terminer : les réponses n'avaient pas
+  été enregistrées. L'évaluation a été rendue interruptible (run partiel enregistré) et Gemma est
+  relancé seul.
+
 ## Limites connues
 
 - 110 questions du périmètre donnent encore un intervalle de confiance à 95 % d'environ ±8 points ;
