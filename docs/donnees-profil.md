@@ -2,7 +2,7 @@
 
 > Fichier généré par `medsql profile` sur la base réelle. Ne pas éditer à la main.
 
-Généré le 2026-10-26 08:38 UTC, BDPM téléchargée le 2026-10-26T08:38:33+00:00.
+Généré le 2026-10-28 13:42 UTC, BDPM téléchargée le 2026-10-28T13:42:23+00:00.
 
 ## Volumétrie et complétude
 
@@ -10,13 +10,13 @@ Généré le 2026-10-26 08:38 UTC, BDPM téléchargée le 2026-10-26T08:38:33+00
 |---|---:|---|
 | `medicaments` | 15 883 | `statut_bdm` 86 %, `numero_autorisation_europeenne` 85 % |
 | `medicament_voies` | 19 648 | — |
-| `presentations` | 20 895 | `taux_remboursement` 35 %, `prix_euros` 35 %, `prix_ttc_euros` 35 %, `honoraires_euros` 35 %, `indications_remboursement` 96 % |
+| `presentations` | 20 882 | `taux_remboursement` 35 %, `prix_euros` 35 %, `prix_ttc_euros` 35 %, `honoraires_euros` 35 %, `indications_remboursement` 96 % |
 | `compositions` | 32 439 | `dosage` 9 %, `reference_dosage` 9 % |
 | `groupes_generiques` | 10 737 | — |
 | `avis_smr` | 15 547 | — |
 | `avis_asmr` | 10 117 | — |
 | `conditions_prescription` | 28 532 | — |
-| `disponibilites` | 703 | `cip13` 95 %, `date_remise_disposition` 83 % |
+| `disponibilites` | 706 | `cip13` 95 %, `date_remise_disposition` 84 % |
 | `mitm` | 7 855 | — |
 | `informations_importantes` | 0 | — |
 | `liens_avis_ct` | 10 465 | — |
@@ -30,8 +30,8 @@ Généré le 2026-10-26 08:38 UTC, BDPM téléchargée le 2026-10-26T08:38:33+00
 | `avis_smr.date_avis` | 2002-12-18 | 2026-09-16 |
 | `avis_asmr.date_avis` | 2002-12-18 | 2026-09-16 |
 | `disponibilites.date_debut` | 2011-11-17 | 2027-07-01 |
-| `disponibilites.date_mise_a_jour` | 2021-05-19 | 2026-10-21 |
-| `disponibilites.date_remise_disposition` | 2025-10-06 | 2026-10-15 |
+| `disponibilites.date_mise_a_jour` | 2021-05-19 | 2026-10-27 |
+| `disponibilites.date_remise_disposition` | 2025-10-06 | 2026-10-23 |
 | `informations_importantes.date_debut` | — | — |
 | `informations_importantes.date_fin` | — | — |
 
@@ -105,8 +105,8 @@ Généré le 2026-10-26 08:38 UTC, BDPM téléchargée le 2026-10-26T08:38:33+00
 
 | Valeur | Lignes |
 |---|---:|
-| 65 | 10 853 |
-| NULL | 7 272 |
+| 65 | 10 850 |
+| NULL | 7 262 |
 | 100 | 1 252 |
 | 30 | 1 145 |
 | 15 | 369 |
@@ -116,7 +116,7 @@ Généré le 2026-10-26 08:38 UTC, BDPM téléchargée le 2026-10-26T08:38:33+00
 
 | Valeur | Lignes |
 |---|---:|
-| Présentation active | 20 804 |
+| Présentation active | 20 791 |
 | Présentation abrogée | 91 |
 
 ### `compositions.nature_composant` (2 valeurs distinctes)
@@ -177,7 +177,7 @@ Généré le 2026-10-26 08:38 UTC, BDPM téléchargée le 2026-10-26T08:38:33+00
 
 | Valeur | Lignes |
 |---|---:|
-| Tension d'approvisionnement | 499 |
-| Remise à disposition | 119 |
-| Rupture de stock | 61 |
+| Tension d'approvisionnement | 503 |
+| Remise à disposition | 116 |
+| Rupture de stock | 63 |
 | Arrêt de commercialisation | 24 |
