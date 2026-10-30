@@ -46,16 +46,22 @@ LIMIT 10
 <!-- RESULTS:START -->
 | Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Abstention | Latence p50 | Latence p95 | Date |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
-| qwen2.5-coder:7b | **71,8 %** | 63,6 – 80,0 % | 58,2 % | 99,1 % | 10/10 | 12,5 s | 34,0 s | 2026-10-28 |
+| qwen2.5-coder:7b · exemples dynamiques (nomic-embed-text) | **76,4 %** | 68,2 – 83,6 % | 60,0 % | 100,0 % | 8/10 | 30,0 s | 55,1 s | 2026-10-30 |
+| qwen2.5-coder:7b · exemples dynamiques (lexical) | **74,5 %** | 66,4 – 82,7 % | 59,1 % | 99,1 % | 8/10 | 31,0 s | 45,0 s | 2026-10-30 |
+| qwen2.5-coder:7b | **70,9 %** | 62,7 – 79,1 % | 57,3 % | 99,1 % | 10/10 | 16,0 s | 43,0 s | 2026-10-30 |
+| qwen2.5-coder:3b · exemples dynamiques (nomic-embed-text) | **65,5 %** | 56,4 – 74,5 % | 50,9 % | 97,3 % | 2/10 | 13,9 s | 29,2 s | 2026-10-30 |
+| qwen2.5-coder:3b · exemples dynamiques (lexical) | **64,5 %** | 55,5 – 73,6 % | 49,1 % | 95,5 % | 1/10 | 14,3 s | 25,0 s | 2026-10-30 |
 | qwen2.5-coder:7b · sans libellés exacts | **63,3 %** | 51,7 – 75,0 % | 51,7 % | 100,0 % | – | 14,7 s | 36,9 s | 2026-10-14 |
 | qwen2.5-coder:7b · zero-shot · sans libellés exacts | **63,3 %** | 51,7 – 75,0 % | 50,0 % | 100,0 % | – | 14,0 s | 24,9 s | 2026-10-14 |
-| qwen2.5-coder:3b | **61,8 %** | 52,7 – 70,9 % | 47,3 % | 90,9 % | 4/10 | 7,9 s | 27,9 s | 2026-10-26 |
+| qwen2.5-coder:3b | **62,7 %** | 53,6 – 71,8 % | 47,3 % | 90,9 % | 4/10 | 6,4 s | 23,0 s | 2026-10-30 |
 | qwen2.5-coder:7b · sans auto-correction · sans libellés exacts | **61,7 %** | 48,3 – 73,3 % | 50,0 % | 95,0 % | – | 15,2 s | 27,3 s | 2026-10-14 |
 | llama3.1:8b | **59,1 %** | 50,0 – 68,2 % | 45,5 % | 98,2 % | 9/10 | 15,7 s | 33,8 s | 2026-10-28 |
+| qwen2.5-coder:1.5b · exemples dynamiques (nomic-embed-text) | **57,3 %** | 48,2 – 66,4 % | 46,4 % | 91,8 % | 2/10 | 3,3 s | 6,6 s | 2026-10-30 |
 | qwen2.5-coder:3b · sans libellés exacts | **56,7 %** | 43,3 – 68,3 % | 41,7 % | 91,7 % | – | 7,4 s | 25,2 s | 2026-10-12 |
 | qwen2.5-coder:1.5b · sans libellés exacts | **55,0 %** | 41,7 – 66,7 % | 33,3 % | 95,0 % | – | 3,8 s | 11,1 s | 2026-10-14 |
+| qwen2.5-coder:1.5b · exemples dynamiques (lexical) | **54,5 %** | 45,5 – 63,6 % | 40,0 % | 93,6 % | 4/10 | 3,2 s | 6,1 s | 2026-10-30 |
 | qwen2.5-coder:1.5b · sans auto-correction · sans libellés exacts | **51,7 %** | 38,3 – 65,0 % | 33,3 % | 88,3 % | – | 3,6 s | 5,8 s | 2026-10-14 |
-| qwen2.5-coder:1.5b | **50,0 %** | 40,9 – 59,1 % | 37,3 % | 82,7 % | 7/10 | 4,5 s | 13,6 s | 2026-10-26 |
+| qwen2.5-coder:1.5b | **50,0 %** | 40,9 – 59,1 % | 37,3 % | 82,7 % | 7/10 | 1,9 s | 5,7 s | 2026-10-30 |
 | qwen2.5-coder:1.5b · zero-shot · sans libellés exacts | **48,3 %** | 35,0 – 61,7 % | 41,7 % | 91,7 % | – | 3,4 s | 8,6 s | 2026-10-14 |
 | mistral:7b | **47,3 %** | 38,2 – 56,4 % | 37,3 % | 92,7 % | 1/10 | 11,5 s | 117,2 s | 2026-10-28 |
 | sqlcoder:7b | **1,8 %** | 0,0 – 4,5 % | 1,8 % | 70,0 % | 4/10 | 127,1 s | 256,6 s | 2026-10-28 |
