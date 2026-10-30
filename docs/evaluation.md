@@ -344,6 +344,34 @@ Configuration par défaut, même prompt, même jour, même BDPM, chaque modèle 
   et le préfixe est recalculé à chaque appel. Gemma 2 est donc exclu de la comparaison sur CPU ;
   il reste évaluable sur une machine avec GPU (`medsql eval --model gemma2:9b`).
 
+## Exemples fixes ou choisis par similarité (runs du 30 octobre 2026)
+
+Même jour, même BDPM, trois configurations par modèle : exemples fixes (défaut), exemples choisis par
+`nomic-embed-text`, exemples choisis par trigrammes. Fichiers sources : `results/runs/20261030T*.json`.
+
+| Modèle | Exemples fixes | Dynamiques (nomic) | Écart | p | Dynamiques (lexical) | Abstentions fixes → nomic |
+|---|---:|---:|---:|---:|---:|---:|
+| 1.5B | 50,0 % | 57,3 % | +7,3 pt | 0,20 | 54,5 % | 7/10 (8 à tort) → 2/10 (0 à tort) |
+| 3B | 62,7 % | 65,5 % | +2,8 pt | 0,69 | 64,5 % | 4/10 → 2/10 |
+| 7B | 70,9 % | **76,4 %** | +5,5 pt | 0,21 | 74,5 % | 10/10 → 8/10 |
+
+- **Un gain pour les trois tailles, aucun significatif.** Le 7B gagne 11 questions et en perd 5
+  (p = 0,21) ; sur les 80 originales, p = 0,42. Le sens est le même partout, ce qui rend un effet réel
+  plausible, mais 110 questions ne suffisent pas à le prouver. Les exemples fixes restent le défaut.
+- **Le sens compte un peu plus que les mots** : l'encodeur `nomic-embed-text` fait mieux que les
+  trigrammes pour les trois tailles (+1 à +3 points), sans écart significatif non plus.
+- **Moins de SQL invalide** : le taux de requêtes exécutables monte de 82,7 à 91,8 % pour le 1.5B
+  et de 90,9 à 97,3 % pour le 3B. Un exemple qui ressemble à la question donne la bonne structure.
+- **Mais l'abstention recule.** Le 7B ne refuse plus que 8 questions hors périmètre sur 10, le 3B
+  2 sur 10. Hypothèse : l'exemple d'abstention passe en tête des exemples, loin de la question, alors
+  qu'il est en dernier avec les exemples fixes ; et une question hors périmètre attire toujours trois
+  exemples SQL « proches ». Le 1.5B, lui, cesse ses 8 refus à tort.
+- **Coût** : la latence médiane du 7B double (16 s → 30 s). Les exemples changent à chaque question,
+  donc la partie du prompt qu'Ollama peut réutiliser d'une question à l'autre se réduit au schéma
+  et aux règles ; s'y ajoute l'appel d'embedding.
+- Les 32 exemples de la réserve servent tous au moins une fois ; le plus demandé (comptage BIOGARAN)
+  est retenu pour 32 des 120 questions.
+
 ## Limites connues
 
 - 110 questions du périmètre donnent encore un intervalle de confiance à 95 % d'environ ±8 points ;

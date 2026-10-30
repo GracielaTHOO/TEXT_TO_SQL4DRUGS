@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "medsql"
-version = "0.2.0"
+version = "0.3.0"
 description = "Text-to-SQL en français sur la Base de données publique des médicaments (BDPM), avec un LLM local et un banc d'évaluation reproductible."
 readme = "README.md"
 license = { text = "MIT" }

@@ -4,6 +4,8 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ## [Non publié]
 
+## [0.3.0] - 2026-10-30
+
 ### Ajouté
 - Exemples few-shot choisis par similarité (`medsql.fewshot`) : réserve de 32 exemples disjointe du jeu d'évaluation (`examples.yaml`), encodeur `nomic-embed-text` (Ollama) ou lexical (trigrammes), option `medsql eval --dynamic-examples [--embedder …]`, configurations `exemples-dynamiques` et `exemples-lexicaux` du workflow, section *Exemples choisis par similarité* du tableau de bord. Les exemples retenus sont enregistrés pour chaque réponse.
 - Comparaison multi-familles : catalogue des modèles (`medsql.models` : famille, éditeur, taille, spécialité, licence) et section *Familles de modèles* du tableau de bord.
@@ -25,6 +27,7 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Question q057 précisée : « déclarations de rupture de stock », ce que compte la requête de référence.
 
 ### Résultats
+- Exemples choisis par similarité (30 octobre 2026) : +7,3, +2,8 et +5,5 points pour Qwen2.5-Coder 1.5B, 3B et 7B (7B : 76,4 %), aucun écart significatif (p ≥ 0,20) ; l'abstention recule (7B : 8/10 au lieu de 10/10) et la latence médiane du 7B double. Les exemples fixes restent le défaut.
 - Familles (28 octobre 2026), exactitude sur 110 questions : Qwen2.5-Coder 7B 71,8 %, Llama 3.1 8B 59,1 % (p = 0,02 contre Qwen), Mistral 7B 47,3 % (p < 0,001), SQLCoder 7B 1,8 % (modèle de complétion, inadapté au format conversationnel). Abstentions correctes : 10, 9, 1 et 4 sur 10. Gemma 2 9B n'a répondu à aucune question en moins de 180 s sur le runner CPU : exclu.
 - 120 questions (26 octobre 2026), exactitude sur les 110 du périmètre : 7B 72,7 %, 3B 61,8 %, 1.5B 50,0 %. Abstentions correctes : 10/10, 4/10 et 7/10 ; abstentions à tort : 0, 0 et 8. Sur les 80 questions originales, 7B contre 1.5B p < 0,001.
 - 90 questions (23 octobre 2026) : 7B 67,8 %, 3B 61,1 %, 1.5B 52,2 %. Cohérence des paires source et reformulation : 90 %, 87 % et 83 %. Premier écart significatif, 7B contre 1.5B (p = 0,02, optimiste car les reformulations ne sont pas indépendantes ; p = 0,13 sur les 60 originales).
