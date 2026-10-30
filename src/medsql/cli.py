@@ -9,7 +9,7 @@ import types
 from contextlib import closing
 from dataclasses import replace
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import typer
 from rich.console import Console
@@ -20,6 +20,9 @@ from rich.table import Table
 
 from medsql import __version__
 from medsql.config import Settings, get_settings
+
+if TYPE_CHECKING:
+    from medsql.fewshot import ExampleSelector
 
 app = typer.Typer(
     name="medsql",
@@ -155,6 +158,14 @@ def ask(
     )
 
 
+def _selector(embedder: str, base_url: str) -> ExampleSelector:
+    from medsql.fewshot import ExampleSelector, LexicalEmbedder, OllamaEmbedder
+
+    if embedder == "lexical":
+        return ExampleSelector(LexicalEmbedder())
+    return ExampleSelector(OllamaEmbedder(embedder, base_url))
+
+
 def _interrupt(signum: int, frame: types.FrameType | None) -> None:
     raise KeyboardInterrupt
 
@@ -176,6 +187,16 @@ def evaluate(
     repairs: Annotated[int, typer.Option(help="Tours d'auto-correction sur erreur SQL")] = 1,
     out: Annotated[Path, typer.Option(help="Dossier des runs")] = Path("results/runs"),
     questions: Annotated[Path | None, typer.Option(help="Jeu de questions YAML")] = None,
+    dynamic: Annotated[
+        bool,
+        typer.Option(
+            "--dynamic-examples/--fixed-examples",
+            help="Choisir les exemples few-shot par similarité dans la réserve",
+        ),
+    ] = False,
+    embedder: Annotated[
+        str, typer.Option(help="Modèle d'embeddings Ollama, ou « lexical » (trigrammes)")
+    ] = "nomic-embed-text",
 ) -> None:
     """🧪 Évalue un modèle sur le jeu de questions et enregistre le run."""
     from medsql.eval.dataset import load_questions
@@ -187,6 +208,7 @@ def evaluate(
 
     s = _settings(model, backend, base_url)
     items = load_questions(questions)[:limit] if limit else load_questions(questions)
+    selector = _selector(embedder, s.base_url) if dynamic and few_shot else None
     conn = connect_readonly(s.db_path)
     engine = Text2SQL(
         make_client(s),
@@ -196,6 +218,7 @@ def evaluate(
         max_rows=10_000,
         query_timeout_s=s.query_timeout_s,
         temperature=s.temperature,
+        selector=selector,
     )
     results = []
     progress = Progress(
@@ -241,6 +264,11 @@ def evaluate(
             "temperature": s.temperature,
             "limit": len(results) if interrupted else limit,
             **({"interrupted": True} if interrupted else {}),
+            **(
+                {"examples": "dynamiques", "embedder": selector.embedder.name, "k": selector.k}
+                if selector
+                else {}
+            ),
         },
         environment=default_environment(items, s.db_path),
     )

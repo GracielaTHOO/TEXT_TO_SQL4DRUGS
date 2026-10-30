@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 
 import httpx
 
+from medsql.fewshot import ExampleSelector
 from medsql.llm.base import LLMClient
 from medsql.prompting import (
     ABSTAIN_TOKEN,
@@ -43,6 +44,7 @@ class Answer:
     completion_tokens: int = 0
     sql_history: list[str] = field(default_factory=list)
     abstained: bool = False  # le modèle a jugé la question hors du périmètre de la base
+    examples: list[str] = field(default_factory=list)  # questions des exemples choisis (dynamiques)
 
     @property
     def ok(self) -> bool:
@@ -62,6 +64,7 @@ class Text2SQL:
         max_rows: int | None = 200,
         query_timeout_s: float = 10,
         temperature: float = 0.0,
+        selector: ExampleSelector | None = None,
     ) -> None:
         self.llm = llm
         self.conn = conn
@@ -71,11 +74,17 @@ class Text2SQL:
         self.query_timeout_s = query_timeout_s
         self.temperature = temperature
         self.hints = value_hints(conn) if self.prompt.value_hints else ""
+        self.selector = selector  # None : exemples fixes
 
     def ask(self, question: str) -> Answer:
         answer = Answer(question=question)
         start = time.perf_counter()
-        messages = build_messages(question, self.prompt, hints=self.hints)
+        examples = None
+        if self.selector is not None and self.prompt.few_shot:
+            chosen = self.selector.select(question)
+            examples = [(e.question, e.sql) for e in chosen]
+            answer.examples = [e.question for e in chosen]
+        messages = build_messages(question, self.prompt, hints=self.hints, examples=examples)
         for attempt in range(self.max_repairs + 1):
             answer.attempts = attempt + 1
             try:

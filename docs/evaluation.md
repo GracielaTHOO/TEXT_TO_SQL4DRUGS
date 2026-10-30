@@ -91,18 +91,45 @@ ollama pull qwen2.5-coder:7b
 medsql eval --model qwen2.5-coder:7b             # few-shot + 1 tour d'auto-correction
 medsql eval --model qwen2.5-coder:7b --zero-shot # ablation : sans exemples
 medsql eval --model qwen2.5-coder:7b --repairs 0 # ablation : sans auto-correction
-medsql eval --model qwen2.5-coder:7b --value-hints # ablation : libellés exacts dans le prompt
+medsql eval --model qwen2.5-coder:7b --no-value-hints # ablation : sans libellés exacts
+medsql eval --model qwen2.5-coder:7b --dynamic-examples  # exemples choisis par similarité
+medsql eval --model qwen2.5-coder:7b --dynamic-examples --embedder lexical
 medsql report                                    # tableau de bord + README
 ```
 
 Sur GitHub, le workflow *Évaluation des modèles* prend une entrée `configs` (par défaut `base`) :
-`base`, `zero-shot`, `sans-correction` et `libelles`, séparées par des virgules. Chaque configuration
-est évaluée pour chaque modèle. Le tableau de bord compare alors chaque variante à la configuration de
-base du même modèle (section *Ablations*).
+`base`, `zero-shot`, `sans-correction`, `sans-libelles`, `exemples-dynamiques` et
+`exemples-lexicaux`, séparées par des virgules. Chaque configuration est évaluée pour chaque modèle.
+Le tableau de bord compare alors chaque variante à la configuration de base du même modèle
+(sections *Ablations* et *Exemples choisis par similarité*).
 
-L'option `--value-hints` lit dans la base les valeurs des colonnes catégorielles qui en ont au plus 12
-(statut de disponibilité, SMR, ASMR, type de générique…) et les ajoute au schéma du prompt, écrites
+Les libellés exacts (actifs par défaut depuis S4, `--no-value-hints` pour les retirer) sont lus dans la base les valeurs des colonnes catégorielles qui en ont au plus 12
+(statut de disponibilité, SMR, ASMR, type de générique…) et ajoutés au schéma du prompt, écrits
 comme des littéraux SQL.
+
+## Exemples choisis par similarité (S10)
+
+Par défaut, le prompt contient trois exemples SQL fixes et un exemple d'abstention. Avec
+`--dynamic-examples`, les trois exemples SQL sont choisis pour chaque question parmi une réserve de
+32 exemples (`src/medsql/examples.yaml`) : ceux dont l'embedding est le plus proche de la question
+(similarité cosinus), le plus proche placé juste avant la question. L'exemple d'abstention reste, pour
+que seule change la pertinence des exemples SQL. Les questions choisies sont enregistrées dans chaque
+réponse du run (`examples`).
+
+Deux encodeurs, tous deux locaux :
+
+| Encodeur | Principe |
+|---|---|
+| `nomic-embed-text` (Ollama) | modèle d'embeddings de phrases (137 M paramètres), proximité de sens |
+| `lexical` | trigrammes de caractères sans accents, hachés : proximité de mots, sans modèle |
+
+**Pas de fuite.** La réserve couvre toutes les tables et les principaux motifs de requête sans
+reprendre une question évaluée, ni une variante qui n'en changerait qu'une valeur. Trois tests le
+vérifient : aucune question commune, aucune requête de référence commune, et une similarité
+lexicale maximale entre une question évaluée et l'exemple le plus proche inférieure à 0,85. Trois
+premiers brouillons (« remboursées à 15 % » face à « remboursées à 100 % », « autorisation abrogée »
+face à « autorisation suspendue », « voie ophtalmique » face à « voie cutanée ») dépassaient ce
+seuil et ont été remplacés avant toute mesure. Limite : la réserve et le jeu ont le même auteur.
 
 ## Premiers constats (runs du 12 octobre 2026)
 

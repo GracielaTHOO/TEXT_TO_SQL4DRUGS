@@ -4,6 +4,8 @@ import sqlite3
 from dataclasses import asdict
 from pathlib import Path
 
+import pytest
+
 from medsql.eval.dataset import load_questions
 from medsql.eval.runner import evaluate_item, load_runs, save_run, summarize
 from medsql.pipeline import Text2SQL
@@ -12,6 +14,8 @@ from medsql.report import (
     README_END,
     README_START,
     ablations,
+    config_label,
+    dynamic_examples,
     pairwise,
     render_dashboard,
     update_readme,
@@ -164,3 +168,23 @@ def test_families_table_lists_catalogued_models() -> None:
 def test_families_table_needs_two_catalogued_models() -> None:
     runs = [_board_run("qwen2.5-coder:7b", [True]), _board_run("inconnu:1b", [False])]
     assert "Familles de modèles" not in render_dashboard(runs)
+
+
+def test_dynamic_examples_are_compared_to_the_fixed_baseline() -> None:
+    fixed = _board_run("qwen2.5-coder:7b", [True, False, False, True])
+    dynamic = _board_run("qwen2.5-coder:7b", [True, True, False, True])
+    dynamic["summary"]["config"] = {  # type: ignore[index]
+        "few_shot": True,
+        "max_repairs": 1,
+        "value_hints": True,
+        "examples": "dynamiques",
+        "embedder": "nomic-embed-text",
+    }
+    board = [dynamic, fixed]
+    (row,) = dynamic_examples(board)
+    assert row[:2] == ("qwen2.5-coder:7b", "nomic-embed-text")
+    assert row[4] == pytest.approx(25.0)
+    assert "exemples dynamiques" in config_label(dynamic["summary"])  # type: ignore[arg-type]
+    assert ablations(board) == []  # le run dynamique n'est pas pris pour une base
+    page = render_dashboard(board)
+    assert "Exemples choisis par similarité" in page

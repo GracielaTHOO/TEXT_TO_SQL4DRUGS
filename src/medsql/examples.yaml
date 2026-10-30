@@ -1,0 +1,239 @@
+# Réserve d'exemples few-shot pour la sélection dynamique (S10).
+#
+# Pour chaque question posée, les exemples les plus proches (similarité d'embeddings) sont
+# placés dans le prompt à la place des trois exemples fixes. La réserve couvre toutes les
+# tables et les principaux motifs de requête (filtre, jointure, agrégat, classement, dates,
+# pourcentage, sous-requête).
+#
+# Règle : AUCUN exemple ne reprend une question du jeu d'évaluation ni sa requête de référence
+# ni une variante qui n'en changerait qu'une valeur (« 15 % » au lieu de « 100 % ») : tests
+# automatisés sur les questions, les requêtes et la similarité lexicale maximale (< 0,85).
+# Les trois premiers exemples sont les exemples fixes du prompt.
+
+- question: Combien de spécialités sont commercialisées par le laboratoire BIOGARAN ?
+  sql: |
+    SELECT COUNT(DISTINCT cis) AS nb_specialites
+    FROM medicaments
+    WHERE etat_commercialisation = 'Commercialisée'
+      AND sans_accents(titulaires) LIKE '%BIOGARAN%'
+
+- question: Quels médicaments contiennent de la cétirizine ?
+  sql: |
+    SELECT DISTINCT m.cis, m.denomination
+    FROM medicaments m
+    JOIN compositions c ON c.cis = m.cis
+    WHERE c.nature_composant = 'SA'
+      AND sans_accents(c.substance) LIKE '%CETIRIZINE%'
+
+- question: Quel est le prix moyen d'une boîte remboursée à 30 % ?
+  sql: |
+    SELECT ROUND(AVG(prix_euros), 2) AS prix_moyen_euros
+    FROM presentations
+    WHERE taux_remboursement = 30 AND prix_euros IS NOT NULL
+
+- question: Combien de spécialités non commercialisées ont encore une autorisation active ?
+  sql: |
+    SELECT COUNT(*) AS nb_specialites
+    FROM medicaments
+    WHERE etat_commercialisation = 'Non commercialisée'
+      AND statut_amm = 'Autorisation active'
+
+- question: Par quelles voies s'administrent les spécialités à base de morphine ?
+  sql: |
+    SELECT DISTINCT v.voie
+    FROM medicament_voies v
+    JOIN compositions c ON c.cis = v.cis
+    WHERE c.nature_composant = 'SA'
+      AND sans_accents(c.substance) LIKE '%MORPHINE%'
+
+- question: Quel est le taux de remboursement le plus fréquent parmi les boîtes remboursées ?
+  sql: |
+    SELECT taux_remboursement, COUNT(*) AS nb_boites
+    FROM presentations
+    WHERE taux_remboursement IS NOT NULL
+    GROUP BY taux_remboursement
+    ORDER BY nb_boites DESC
+    LIMIT 1
+
+- question: Combien de boîtes coûtent entre 10 et 20 euros hors honoraires ?
+  sql: |
+    SELECT COUNT(*) AS nb_boites
+    FROM presentations
+    WHERE prix_euros BETWEEN 10 AND 20
+
+- question: Quels sont les 3 laboratoires qui ont le plus de spécialités sous surveillance renforcée ?
+  sql: |
+    SELECT titulaires, COUNT(*) AS nb_specialites
+    FROM medicaments
+    WHERE surveillance_renforcee = 1
+    GROUP BY titulaires
+    ORDER BY nb_specialites DESC
+    LIMIT 3
+
+- question: Combien d'avis SMR de niveau modéré la HAS a-t-elle rendus ?
+  sql: |
+    SELECT COUNT(*) AS nb_avis
+    FROM avis_smr
+    WHERE valeur_smr = 'Modéré'
+
+- question: Quels médicaments ont reçu un service médical rendu faible ?
+  sql: |
+    SELECT DISTINCT m.cis, m.denomination
+    FROM medicaments m
+    JOIN avis_smr s ON s.cis = m.cis
+    WHERE s.valeur_smr = 'Faible'
+
+- question: Quelles sont les 3 conditions de prescription les plus fréquentes ?
+  sql: |
+    SELECT condition, COUNT(*) AS nb_specialites
+    FROM conditions_prescription
+    GROUP BY condition
+    ORDER BY nb_specialites DESC
+    LIMIT 3
+
+- question: Combien de génériques compte le groupe générique de l'amlodipine ?
+  sql: |
+    SELECT COUNT(DISTINCT cis) AS nb_generiques
+    FROM groupes_generiques
+    WHERE type_generique = 1
+      AND sans_accents(libelle_groupe) LIKE '%AMLODIPINE%'
+
+- question: Quel est le princeps des génériques de l'oméprazole ?
+  sql: |
+    SELECT DISTINCT m.cis, m.denomination
+    FROM groupes_generiques g
+    JOIN medicaments m ON m.cis = g.cis
+    WHERE g.type_generique = 0
+      AND sans_accents(g.libelle_groupe) LIKE '%OMEPRAZOLE%'
+
+- question: Quelles spécialités ont fait l'objet d'un arrêt de commercialisation déclaré à l'ANSM ?
+  sql: |
+    SELECT DISTINCT m.cis, m.denomination
+    FROM medicaments m
+    JOIN disponibilites d ON d.cis = m.cis
+    WHERE d.code_statut = 3
+
+- question: Combien de déclarations de tension d'approvisionnement ont été mises à jour en 2025 ?
+  sql: |
+    SELECT COUNT(*) AS nb_declarations
+    FROM disponibilites
+    WHERE code_statut = 2 AND strftime('%Y', date_mise_a_jour) = '2025'
+
+- question: Combien de codes ATC différents figurent dans la liste des médicaments d'intérêt thérapeutique majeur ?
+  sql: |
+    SELECT COUNT(DISTINCT code_atc) AS nb_codes_atc
+    FROM mitm
+
+- question: Combien de spécialités ont obtenu leur AMM avant 1990 ?
+  sql: |
+    SELECT COUNT(*) AS nb_specialites
+    FROM medicaments
+    WHERE date_amm < '1990-01-01'
+
+- question: Combien d'AMM ont été délivrées chaque mois de l'année 2024 ?
+  sql: |
+    SELECT strftime('%m', date_amm) AS mois, COUNT(*) AS nb_amm
+    FROM medicaments
+    WHERE strftime('%Y', date_amm) = '2024'
+    GROUP BY mois
+    ORDER BY mois
+
+- question: Quel laboratoire a obtenu le plus d'AMM en 2023 ?
+  sql: |
+    SELECT titulaires, COUNT(*) AS nb_amm
+    FROM medicaments
+    WHERE strftime('%Y', date_amm) = '2023'
+    GROUP BY titulaires
+    ORDER BY nb_amm DESC
+    LIMIT 1
+
+- question: Quelles spécialités associent ibuprofène et pseudoéphédrine ?
+  sql: |
+    SELECT m.cis, m.denomination
+    FROM medicaments m
+    WHERE m.cis IN (
+        SELECT cis FROM compositions
+        WHERE nature_composant = 'SA' AND sans_accents(substance) LIKE '%IBUPROFENE%')
+      AND m.cis IN (
+        SELECT cis FROM compositions
+        WHERE nature_composant = 'SA' AND sans_accents(substance) LIKE '%PSEUDOEPHEDRINE%')
+
+- question: Quel est le dosage de la substance active du KARDEGIC 75 mg ?
+  sql: |
+    SELECT c.substance, c.dosage, c.reference_dosage
+    FROM compositions c
+    JOIN medicaments m ON m.cis = c.cis
+    WHERE c.nature_composant = 'SA'
+      AND sans_accents(m.denomination) LIKE '%KARDEGIC 75%'
+
+- question: Combien de présentations sont abrogées ?
+  sql: |
+    SELECT COUNT(*) AS nb_presentations
+    FROM presentations
+    WHERE statut_administratif = 'Présentation abrogée'
+
+- question: Combien de spécialités ont au moins une boîte à plus de 500 euros ?
+  sql: |
+    SELECT COUNT(DISTINCT cis) AS nb_specialites
+    FROM presentations
+    WHERE prix_euros > 500
+
+- question: Combien de formes pharmaceutiques différentes existe-t-il ?
+  sql: |
+    SELECT COUNT(DISTINCT forme_pharmaceutique) AS nb_formes
+    FROM medicaments
+
+- question: Combien de spécialités ont un avis SMR mais aucun avis ASMR ?
+  sql: |
+    SELECT COUNT(DISTINCT cis) AS nb_specialites
+    FROM avis_smr
+    WHERE cis NOT IN (SELECT cis FROM avis_asmr)
+
+- question: Quel pourcentage des spécialités a été autorisé par procédure décentralisée ?
+  sql: |
+    SELECT ROUND(100.0 * SUM(type_procedure_amm = 'Procédure décentralisée') / COUNT(*), 1)
+      AS pourcentage
+    FROM medicaments
+
+- question: Donne les liens vers les avis de la commission de la transparence sur le DOLIPRANE.
+  sql: |
+    SELECT DISTINCT l.lien
+    FROM liens_avis_ct l
+    JOIN avis_smr s ON s.code_dossier_has = l.code_dossier_has
+    JOIN medicaments m ON m.cis = s.cis
+    WHERE sans_accents(m.denomination) LIKE '%DOLIPRANE%'
+
+- question: Quelles spécialités ont une boîte agréée aux collectivités mais non remboursée ?
+  sql: |
+    SELECT DISTINCT m.cis, m.denomination
+    FROM medicaments m
+    JOIN presentations p ON p.cis = m.cis
+    WHERE p.agrement_collectivites = 1 AND p.taux_remboursement IS NULL
+
+- question: Quel laboratoire a le plus de spécialités en rupture de stock ?
+  sql: |
+    SELECT m.titulaires, COUNT(DISTINCT m.cis) AS nb_specialites
+    FROM medicaments m
+    JOIN disponibilites d ON d.cis = m.cis
+    WHERE d.code_statut = 1
+    GROUP BY m.titulaires
+    ORDER BY nb_specialites DESC
+    LIMIT 1
+
+- question: Combien de substances actives différentes contient la base ?
+  sql: |
+    SELECT COUNT(DISTINCT substance) AS nb_substances
+    FROM compositions
+    WHERE nature_composant = 'SA'
+
+- question: Combien de spécialités ont une autorisation européenne ?
+  sql: |
+    SELECT COUNT(*) AS nb_specialites
+    FROM medicaments
+    WHERE numero_autorisation_europeenne IS NOT NULL
+
+- question: Comment se répartissent les spécialités selon leur état de commercialisation ?
+  sql: |
+    SELECT etat_commercialisation, COUNT(*) AS nb_specialites
+    FROM medicaments
+    GROUP BY etat_commercialisation

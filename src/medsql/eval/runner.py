@@ -47,6 +47,7 @@ class ItemResult:
     paraphrase_de: str | None = None
     hors_perimetre: bool = False
     abstained: bool = False
+    examples: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -150,6 +151,7 @@ def evaluate_item(engine: Text2SQL, conn: sqlite3.Connection, item: EvalItem) ->
         paraphrase_de=item.paraphrase_de,
         hors_perimetre=item.hors_perimetre,
         abstained=answer.abstained,
+        examples=answer.examples,
     )
 
 

@@ -115,3 +115,19 @@ def test_interrupted_eval_saves_a_partial_run(
     assert saved["summary"]["n"] == 2
     assert saved["summary"]["config"]["limit"] == 2
     assert saved["summary"]["config"]["interrupted"] is True
+
+
+def test_eval_with_dynamic_examples(
+    data_dir: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(medsql.llm, "make_client", lambda _s: OracleLLM())
+    runs = tmp_path / "runs"
+    result = runner.invoke(
+        app,
+        ["eval", "--limit", "3", "--dynamic-examples", "--embedder", "lexical", "--out", str(runs)],
+    )
+    assert result.exit_code == 0, result.output
+    saved = json.loads(next(runs.glob("*.json")).read_text("utf-8"))
+    config = saved["summary"]["config"]
+    assert config["examples"] == "dynamiques" and config["embedder"] == "lexical"
+    assert all(len(item["examples"]) == config["k"] for item in saved["items"])

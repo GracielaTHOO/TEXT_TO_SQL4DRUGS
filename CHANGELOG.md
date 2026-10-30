@@ -5,6 +5,7 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 ## [Non publié]
 
 ### Ajouté
+- Exemples few-shot choisis par similarité (`medsql.fewshot`) : réserve de 32 exemples disjointe du jeu d'évaluation (`examples.yaml`), encodeur `nomic-embed-text` (Ollama) ou lexical (trigrammes), option `medsql eval --dynamic-examples [--embedder …]`, configurations `exemples-dynamiques` et `exemples-lexicaux` du workflow, section *Exemples choisis par similarité* du tableau de bord. Les exemples retenus sont enregistrés pour chaque réponse.
 - Comparaison multi-familles : catalogue des modèles (`medsql.models` : famille, éditeur, taille, spécialité, licence) et section *Familles de modèles* du tableau de bord.
 - Évaluation interruptible : sur Ctrl+C ou arrêt du runner, `medsql eval` enregistre les réponses obtenues dans un run partiel (`interrupted`, hors classement) ; l'étape d'évaluation du workflow a son propre délai pour que l'envoi des résultats s'exécute.
 - Workflow d'évaluation en matrice : un runner par modèle, en parallèle, puis le workflow réutilisable *Publication des résultats* (`publish.yml`), exécuté même si un modèle échoue et lançable à la main sur les artefacts d'une évaluation passée.

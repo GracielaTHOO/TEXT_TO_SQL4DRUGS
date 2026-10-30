@@ -14,6 +14,7 @@ Choix de conception :
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from medsql.data.schema import CATEGORICAL, schema_for_prompt
@@ -42,7 +43,7 @@ Règles :
     personnel, demande de modification des données), réponds uniquement : HORS_PERIMETRE
 """
 
-FEW_SHOTS: tuple[tuple[str, str], ...] = (
+SQL_SHOTS: tuple[tuple[str, str], ...] = (
     (
         "Combien de spécialités sont commercialisées par le laboratoire BIOGARAN ?",
         "SELECT COUNT(DISTINCT cis) AS nb_specialites\n"
@@ -64,11 +65,13 @@ FEW_SHOTS: tuple[tuple[str, str], ...] = (
         "FROM presentations\n"
         "WHERE taux_remboursement = 30 AND prix_euros IS NOT NULL",
     ),
-    (
-        "Quels sont les horaires de la pharmacie de garde la plus proche ?",
-        "HORS_PERIMETRE",
-    ),
 )
+# Toujours présent, exemples fixes ou dynamiques : apprend l'abstention (règle 11).
+ABSTAIN_SHOT = (
+    "Quels sont les horaires de la pharmacie de garde la plus proche ?",
+    "HORS_PERIMETRE",
+)
+FEW_SHOTS: tuple[tuple[str, str], ...] = (*SQL_SHOTS, ABSTAIN_SHOT)
 
 
 # Réponse convenue quand la base ne permet pas de répondre (règle 11).
@@ -117,15 +120,22 @@ def value_hints(conn: sqlite3.Connection) -> str:
 
 
 def build_messages(
-    question: str, config: PromptConfig | None = None, *, hints: str = ""
+    question: str,
+    config: PromptConfig | None = None,
+    *,
+    hints: str = "",
+    examples: Sequence[tuple[str, str]] | None = None,
 ) -> list[Message]:
+    """Messages du prompt. ``examples`` remplace les exemples SQL fixes (sélection dynamique) ;
+    l'exemple d'abstention est conservé dans tous les cas."""
     config = config or PromptConfig()
+    shots = FEW_SHOTS if examples is None else (ABSTAIN_SHOT, *examples)
     system = f"{SYSTEM_RULES}\nSchéma de la base :\n\n{schema_for_prompt()}"
     if hints:
         system += f"\n\n{hints}"
     messages = [Message("system", system)]
     if config.few_shot:
-        for q, sql in FEW_SHOTS:
+        for q, sql in shots:
             messages.append(Message("user", q))
             reply = sql if sql == ABSTAIN_TOKEN else f"```sql\n{sql}\n```"
             messages.append(Message("assistant", reply))

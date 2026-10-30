@@ -56,7 +56,13 @@ def config_label(summary: dict[str, Any]) -> str:
     # Les runs antérieurs à l'option n'ont pas la clé : ils ont été faits sans libellés.
     if not cfg.get("value_hints", False):
         parts.append("sans libellés exacts")
+    if _is_dynamic(summary):
+        parts.append(f"exemples dynamiques ({cfg.get('embedder', '?')})")
     return " · ".join(parts)
+
+
+def _is_dynamic(summary: dict[str, Any]) -> bool:
+    return bool(summary.get("config", {}).get("examples") == "dynamiques")
 
 
 def latest_per_config(runs: Sequence[Run]) -> list[Run]:
@@ -89,7 +95,7 @@ def _factors(summary: dict[str, Any]) -> dict[str, bool]:
 
 
 def _is_baseline(summary: dict[str, Any]) -> bool:
-    return all(_factors(summary).values())
+    return all(_factors(summary).values()) and not _is_dynamic(summary)
 
 
 def _variant(summary: dict[str, Any]) -> str:
@@ -103,6 +109,8 @@ def ablations(board: Sequence[Run]) -> list[tuple[str, str, str, float, float, f
     modèle qui ne diffère que par ce facteur. Renvoie (modèle, facteur retiré, configuration
     de référence, exactitude, écart en points, p-valeur de McNemar).
     """
+    # Les runs à exemples dynamiques ont leur propre comparaison (dynamic_examples).
+    board = [r for r in board if not _is_dynamic(r["summary"])]
     by_key = {(r["summary"]["model"], tuple(_factors(r["summary"]).values())): r for r in board}
     rows = []
     for run in board:
@@ -363,6 +371,45 @@ def _leaderboard(board: list[Run]) -> str:
     )
 
 
+def dynamic_examples(board: Sequence[Run]) -> list[tuple[str, str, float, float, float, float]]:
+    """Exemples dynamiques contre exemples fixes, pour chaque modèle et chaque encodeur.
+
+    Renvoie (modèle, encodeur, exactitude fixes, exactitude dynamiques, écart en points,
+    p-valeur de McNemar), en comparant à la configuration par défaut du même modèle.
+    """
+    fixed = {r["summary"]["model"]: r for r in board if _is_baseline(r["summary"])}
+    rows = []
+    for run in board:
+        s = run["summary"]
+        cfg = s.get("config", {})
+        ref = fixed.get(s["model"])
+        if not _is_dynamic(s) or ref is None or not all(_factors(s).values()):
+            continue
+        acc, ref_acc = float(s["accuracy"]), float(ref["summary"]["accuracy"])
+        p = mcnemar(run["items"], ref["items"]).p_value
+        rows.append(
+            (str(s["model"]), str(cfg.get("embedder", "?")), ref_acc, acc, 100 * (acc - ref_acc), p)
+        )
+    return sorted(rows)
+
+
+def _dynamic_table(rows: list[tuple[str, str, float, float, float, float]]) -> str:
+    body = []
+    for model, embedder, ref_acc, acc, delta, p in rows:
+        cls = "ok" if delta > 0 else "ko" if delta < 0 else ""
+        points = f"{'+' if delta > 0 else ''}{delta:.1f}".replace(".", ",")
+        body.append(
+            f"<tr><td>{_e(model)}</td><td>{_e(embedder)}</td><td class='n'>{_pct(ref_acc)}</td>"
+            f"<td class='n'>{_pct(acc)}</td><td class='n'><span class='{cls}'>{points} pt</span></td>"
+            f"<td class='n'>{_p(p)}</td></tr>"
+        )
+    return (
+        "<table><thead><tr><th>Modèle</th><th>Encodeur</th><th class='n'>Exemples fixes</th>"
+        "<th class='n'>Exemples dynamiques</th><th class='n'>Écart</th>"
+        f"<th class='n'>p (McNemar)</th></tr></thead><tbody>{''.join(body)}</tbody></table>"
+    )
+
+
 def _families_table(runs: Sequence[Run]) -> str:
     """Comparaison multi-familles : un run par modèle catalogué, du meilleur au moins bon."""
     rows = []
@@ -545,6 +592,31 @@ def _comparison_sections(baselines: Sequence[Run]) -> list[str]:
     return sections
 
 
+def _variant_sections(board: Sequence[Run]) -> list[str]:
+    """Sections « Exemples choisis par similarité » et « Ablations »."""
+    sections: list[str] = []
+    dynamic = dynamic_examples(board)
+    if dynamic:
+        sections.append("<h2>Exemples choisis par similarité</h2>")
+        sections.append(
+            "<p class='note'>Les trois exemples fixes du prompt sont remplacés, pour chaque "
+            "question, par les trois exemples les plus proches d'une réserve de 32 exemples "
+            "disjointe du jeu d'évaluation. L'exemple d'abstention reste. p : test de McNemar "
+            "apparié contre la configuration par défaut du même modèle.</p>"
+        )
+        sections.append(f'<div class="card">{_dynamic_table(dynamic)}</div>')
+    deltas = ablations(board)
+    if deltas:
+        sections.append("<h2>Ablations</h2>")
+        sections.append(
+            "<p class='note'>Effet de chaque facteur retiré seul, par rapport au run du même modèle "
+            "qui ne diffère que par ce facteur, en points d'exactitude. La base combine exemples "
+            "few-shot, une auto-correction et libellés exacts ; p : test de McNemar apparié.</p>"
+        )
+        sections.append(f'<div class="card">{_ablation_table(deltas)}</div>')
+    return sections
+
+
 def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | None = None) -> str:
     board = latest_per_config(runs)
     generated = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -579,15 +651,7 @@ def render_dashboard(runs: Sequence[Run], figures: Sequence[tuple[str, str]] | N
         sections.append(f'<div class="card">{_leaderboard(board)}</div>')
         baselines = [r for r in board if _is_baseline(r["summary"])] or board[:3]
         sections.extend(_comparison_sections(baselines))
-        deltas = ablations(board)
-        if deltas:
-            sections.append("<h2>Ablations</h2>")
-            sections.append(
-                "<p class='note'>Effet de chaque facteur retiré seul, par rapport au run du même modèle "
-                "qui ne diffère que par ce facteur, en points d'exactitude. La base combine exemples "
-                "few-shot, une auto-correction et libellés exacts ; p : test de McNemar apparié.</p>"
-            )
-            sections.append(f'<div class="card">{_ablation_table(deltas)}</div>')
+        sections.extend(_variant_sections(board))
         sections.append("<h2>Par difficulté</h2>")
         sections.append(f'<div class="card">{_heatmap(board, "by_difficulty", DIFFICULTIES)}</div>')
         sections.append("<h2>Par catégorie de question</h2>")
