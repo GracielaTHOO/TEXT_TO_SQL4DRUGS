@@ -9,6 +9,20 @@ ollama pull qwen2.5-coder:7b
 python app/app.py                 # http://127.0.0.1:7860
 ```
 
+L'onglet *Interroger* affiche, pour chaque question :
+
+- le SQL généré et le tableau de résultat ;
+- une **réponse rédigée en français** sous le tableau (« Réponse : **13 650** », « **42** résultats,
+  entre autres : … »). Elle est construite par gabarits à partir du résultat exécuté, pas rédigée
+  par le LLM : elle ne peut pas citer un chiffre que la base n'a pas renvoyé, et elle ne coûte
+  aucun appel de plus ;
+- un bouton **Exporter en CSV** : séparateur `;`, virgule décimale, UTF-8 avec BOM, pour une
+  ouverture directe dans un tableur français ;
+- l'**historique de la session** (20 dernières questions, heure, issue, lignes, durée) ; un clic
+  sur une ligne remet la question dans le champ.
+
+La CLI affiche la même phrase sous le tableau (`medsql ask`).
+
 Variables d'environnement (préfixe `MEDSQL_`) :
 
 | Variable | Défaut | Rôle |

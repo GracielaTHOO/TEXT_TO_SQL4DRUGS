@@ -132,6 +132,7 @@ def ask(
 ) -> None:
     """💬 Pose une question en français et affiche le SQL et le résultat."""
     from medsql.llm import make_client
+    from medsql.narration import narrate
     from medsql.pipeline import OUT_OF_SCOPE_MESSAGE, Text2SQL
     from medsql.sql_guard import connect_readonly
 
@@ -152,6 +153,7 @@ def ask(
     for row in answer.result.rows:
         table.add_row(*("" if v is None else str(v) for v in row))
     console.print(table)
+    console.print(narrate(answer).replace("**", ""))
     console.print(
         f"[dim]{len(answer.result.rows)} ligne(s){' (tronqué)' if answer.result.truncated else ''}"
         f" · {answer.total_latency_s:.1f} s · {answer.attempts} tentative(s)[/]"

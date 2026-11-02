@@ -38,7 +38,7 @@ LIMIT 10
 | 🧠 **Modèles** | LLM locaux servis par [Ollama](https://ollama.com) ou toute API compatible OpenAI ([vLLM](https://docs.vllm.ai), llama.cpp) |
 | 🧪 **Évaluation** | 120 questions en français (80 + 30 reformulations + 10 hors périmètre), 3 niveaux, 10 catégories, exactitude mesurée par exécution, robustesse à la formulation, abstention |
 | 🛡️ **Sécurité** | SQL en lecture seule garanti par trois barrières indépendantes |
-| 🖥️ **Interfaces** | CLI `medsql`, démo Gradio (aussi en image Docker autonome), tableau de bord HTML |
+| 🖥️ **Interfaces** | CLI `medsql`, démo Gradio (réponse rédigée en français, export CSV, historique ; aussi en image Docker autonome), tableau de bord HTML |
 | ✅ **Qualité** | 146 tests, mypy strict, ruff, CI sur Python 3.10 à 3.13 |
 
 ## 📊 Résultats

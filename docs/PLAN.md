@@ -45,7 +45,7 @@ Légende : 🙋 = action de Graciela nécessaire.
 
 ## Jalon 3 : produit fini (v1.0, 2 → 13 novembre)
 
-- [ ] **S11 · lun. 2 nov.** Démo : réponse rédigée en français sous le tableau, export CSV, historique des questions.
+- [x] **S11 · lun. 2 nov.** Démo : réponse rédigée en français sous le tableau, export CSV, historique des questions.
 - [ ] **S12 · mer. 4 nov.** Performance : cache des réponses, mesure du temps de premier token et des tokens/s,
       coût CPU par question (passerelle vers le projet « Ollama contre vLLM »).
 - [ ] **S13 · ven. 6 nov.** Sécurité : jeu de tests adverses (injection dans la question, SQL piégé, requêtes

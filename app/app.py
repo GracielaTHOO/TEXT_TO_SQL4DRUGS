@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import html
 import os
+import tempfile
 from pathlib import Path
 
 import gradio as gr
@@ -17,7 +18,8 @@ from medsql.config import get_settings
 from medsql.data.schema import TABLES
 from medsql.eval.runner import load_runs
 from medsql.llm import make_client
-from medsql.pipeline import OUT_OF_SCOPE_MESSAGE, Text2SQL
+from medsql.narration import History, narrate, to_csv
+from medsql.pipeline import Text2SQL
 from medsql.report import render_dashboard
 from medsql.sql_guard import connect_readonly
 from medsql.stats import key_figures
@@ -41,22 +43,46 @@ conn = connect_readonly(settings.db_path)
 engine = Text2SQL(make_client(settings), conn, max_rows=settings.max_rows)
 
 
-def answer(question: str) -> tuple[str, pd.DataFrame, str]:
+EXPORT_DIR = Path(tempfile.mkdtemp(prefix="medsql-export-"))
+
+Outputs = tuple[str, pd.DataFrame, str, str, gr.DownloadButton, pd.DataFrame, History]
+
+
+def _history_frame(history: History) -> pd.DataFrame:
+    return pd.DataFrame(history.rows(), columns=list(History.COLUMNS))
+
+
+def answer(question: str, history: History | None) -> Outputs:
+    """Pose la question ; renvoie SQL, tableau, statut, phrase, export CSV et historique."""
+    history = history if history is not None else History()
+    no_file = gr.DownloadButton(value=None, visible=False)
     if not question or not question.strip():
-        return "", pd.DataFrame(), "✏️ Saisissez une question."
+        frame = _history_frame(history)
+        return "", pd.DataFrame(), "✏️ Saisissez une question.", "", no_file, frame, history
     result = engine.ask(question)
+    history.add(result)
+    frame = _history_frame(history)
+    text = narrate(result)
     if result.abstained:
-        return "", pd.DataFrame(), f"⊘ {OUT_OF_SCOPE_MESSAGE}"
+        return "", pd.DataFrame(), "⊘ Hors périmètre", text, no_file, frame, history
     sql = result.sql or ""
     if result.error or result.result is None:
-        return sql, pd.DataFrame(), f"❌ {result.error}"
+        return sql, pd.DataFrame(), f"❌ {result.error}", text, no_file, frame, history
     df = pd.DataFrame(result.result.rows, columns=result.result.columns)
     status = (
         f"✅ {len(df)} ligne(s){' (tronqué)' if result.result.truncated else ''} · "
         f"{result.total_latency_s:.1f} s · {settings.model}"
         + (" · 🔁 requête auto-corrigée" if result.attempts > 1 else "")
     )
-    return sql, df, status
+    export = EXPORT_DIR / f"resultat-{len(history):03d}.csv"
+    export.write_text(to_csv(result.result), encoding="utf-8-sig")
+    download = gr.DownloadButton(value=str(export), visible=True)
+    return sql, df, status, f"💬 {text}", download, frame, history
+
+
+def reuse_question(frame: pd.DataFrame, event: gr.SelectData) -> str:
+    """Un clic sur une ligne de l'historique remet sa question dans le champ."""
+    return str(frame.iloc[event.index[0]]["Question"])
 
 
 def figures_markdown() -> str:
@@ -98,9 +124,20 @@ with gr.Blocks(title="Text-to-SQL médicaments") as demo:
         status = gr.Markdown()
         sql_out = gr.Code(label="🧾 SQL généré", language="sql")
         table_out = gr.Dataframe(label="📋 Résultat", wrap=True)
+        sentence = gr.Markdown()
+        csv_btn = gr.DownloadButton("⬇️ Exporter en CSV", visible=False)
         gr.Examples(EXAMPLES, inputs=question, label="💡 Exemples")
-        ask_btn.click(answer, question, [sql_out, table_out, status])
-        question.submit(answer, question, [sql_out, table_out, status])
+        history = gr.State(None)
+        history_out = gr.Dataframe(
+            headers=list(History.COLUMNS),
+            label="🕘 Historique de la session (cliquer une ligne pour reposer la question)",
+            interactive=False,
+            wrap=True,
+        )
+        outputs = [sql_out, table_out, status, sentence, csv_btn, history_out, history]
+        ask_btn.click(answer, [question, history], outputs)
+        question.submit(answer, [question, history], outputs)
+        history_out.select(reuse_question, history_out, question)
     with gr.Tab("📈 Évaluation"):
         gr.HTML(dashboard_iframe())
     with gr.Tab("📊 La base en chiffres"):
