@@ -2,7 +2,7 @@
 
 > Fichier généré par `medsql profile` sur la base réelle. Ne pas éditer à la main.
 
-Généré le 2026-10-30 10:49 UTC, BDPM téléchargée le 2026-10-30T10:49:14+00:00.
+Généré le 2026-11-02 11:57 UTC, BDPM téléchargée le 2026-11-02T11:57:39+00:00.
 
 ## Volumétrie et complétude
 
@@ -10,7 +10,7 @@ Généré le 2026-10-30 10:49 UTC, BDPM téléchargée le 2026-10-30T10:49:14+00
 |---|---:|---|
 | `medicaments` | 15 883 | `statut_bdm` 86 %, `numero_autorisation_europeenne` 85 % |
 | `medicament_voies` | 19 648 | — |
-| `presentations` | 20 875 | `taux_remboursement` 35 %, `prix_euros` 35 %, `prix_ttc_euros` 35 %, `honoraires_euros` 35 %, `indications_remboursement` 96 % |
+| `presentations` | 20 865 | `taux_remboursement` 35 %, `prix_euros` 35 %, `prix_ttc_euros` 35 %, `honoraires_euros` 35 %, `indications_remboursement` 96 % |
 | `compositions` | 32 439 | `dosage` 9 %, `reference_dosage` 9 % |
 | `groupes_generiques` | 10 737 | — |
 | `avis_smr` | 15 547 | — |
@@ -105,18 +105,18 @@ Généré le 2026-10-30 10:49 UTC, BDPM téléchargée le 2026-10-30T10:49:14+00
 
 | Valeur | Lignes |
 |---|---:|
-| 65 | 10 845 |
-| NULL | 7 259 |
+| 65 | 10 844 |
+| NULL | 7 248 |
 | 100 | 1 252 |
-| 30 | 1 146 |
-| 15 | 369 |
+| 30 | 1 149 |
+| 15 | 368 |
 | 35 | 4 |
 
 ### `presentations.statut_administratif` (2 valeurs distinctes)
 
 | Valeur | Lignes |
 |---|---:|
-| Présentation active | 20 784 |
+| Présentation active | 20 774 |
 | Présentation abrogée | 91 |
 
 ### `compositions.nature_composant` (2 valeurs distinctes)
