@@ -14,6 +14,7 @@ from pathlib import Path
 import gradio as gr
 import pandas as pd
 
+from medsql.cache import QueryCache
 from medsql.config import get_settings
 from medsql.data.schema import TABLES
 from medsql.eval.runner import load_runs
@@ -40,7 +41,8 @@ EXAMPLES = [
 
 settings = get_settings()
 conn = connect_readonly(settings.db_path)
-engine = Text2SQL(make_client(settings), conn, max_rows=settings.max_rows)
+# Cache des requêtes générées : une question déjà posée est rejouée sans appeler le LLM.
+engine = Text2SQL(make_client(settings), conn, max_rows=settings.max_rows, cache=QueryCache())
 
 
 EXPORT_DIR = Path(tempfile.mkdtemp(prefix="medsql-export-"))
@@ -73,6 +75,8 @@ def answer(question: str, history: History | None) -> Outputs:
         f"✅ {len(df)} ligne(s){' (tronqué)' if result.result.truncated else ''} · "
         f"{result.total_latency_s:.1f} s · {settings.model}"
         + (" · 🔁 requête auto-corrigée" if result.attempts > 1 else "")
+        + (" · ⚡ requête en cache, sans appel au modèle" if result.cached else "")
+        + (f" · 1er token {result.ttft_s:.1f} s" if result.ttft_s is not None else "")
     )
     export = EXPORT_DIR / f"resultat-{len(history):03d}.csv"
     export.write_text(to_csv(result.result), encoding="utf-8-sig")

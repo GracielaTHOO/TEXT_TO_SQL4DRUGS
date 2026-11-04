@@ -131,6 +131,25 @@ premiers brouillons (« remboursées à 15 % » face à « remboursées à 100 %
 face à « autorisation suspendue », « voie ophtalmique » face à « voie cutanée ») dépassaient ce
 seuil et ont été remplacés avant toute mesure. Limite : la réserve et le jeu ont le même auteur.
 
+## Mesures de performance (S12)
+
+Chaque réponse enregistre désormais, à partir des durées que renvoie Ollama :
+
+- **le temps de premier token** (TTFT) : chargement du modèle et lecture du prompt au premier appel,
+  soit l'attente avant le premier mot de la réponse, mesurée sans diffusion en flux ;
+- **le débit de génération** : tokens produits par seconde de génération pure ;
+- **le débit de lecture du prompt** : tokens du prompt lus par seconde. Ollama reprend le préfixe
+  commun d'une question à l'autre (règles, schéma, exemples fixes) ; ce débit est donc apparent et
+  se compare entre configurations, pas comme une vitesse brute du processeur ;
+- **le coût CPU par question** : secondes de processeur consommées par toute la machine pendant la
+  question (`/proc/stat`), tous cœurs confondus. Le LLM tourne dans le processus d'Ollama, d'où une
+  mesure au niveau de la machine ; elle est fiable sur un runner dédié, bruitée sur un poste de travail.
+
+Le résumé d'un run (`summary.performance`) donne les médianes et p95 du TTFT, les deux débits et le
+CPU moyen et médian ; le tableau de bord les affiche dans la section *Performance*. Les runs
+antérieurs à S12 et les serveurs compatibles OpenAI (vLLM) n'ont pas ces durées. Ces mesures sont
+le point de départ du projet « Ollama contre vLLM » : mêmes questions, mêmes métriques, autre moteur.
+
 ## Premiers constats (runs du 12 octobre 2026)
 
 Trois tailles de Qwen2.5-Coder, mêmes 60 questions, même prompt (few-shot et une auto-correction),

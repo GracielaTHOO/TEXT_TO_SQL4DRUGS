@@ -8,8 +8,10 @@ from dataclasses import dataclass, field
 
 import httpx
 
+from medsql.cache import QueryCache
 from medsql.fewshot import ExampleSelector
-from medsql.llm.base import LLMClient
+from medsql.llm.base import Completion, LLMClient
+from medsql.perf import CpuMeter
 from medsql.prompting import (
     ABSTAIN_TOKEN,
     PromptConfig,
@@ -45,6 +47,12 @@ class Answer:
     sql_history: list[str] = field(default_factory=list)
     abstained: bool = False  # le modèle a jugé la question hors du périmètre de la base
     examples: list[str] = field(default_factory=list)  # questions des exemples choisis (dynamiques)
+    cached: bool = False  # requête reprise du cache, sans appel au LLM
+    ttft_s: float | None = None  # temps de premier token du premier appel (Ollama)
+    load_s: float = 0.0  # chargement du modèle, cumulé sur les appels
+    prompt_eval_s: float = 0.0  # lecture du prompt, cumulée sur les appels
+    eval_s: float = 0.0  # génération, cumulée sur les appels
+    cpu_s: float | None = None  # temps CPU de la machine pendant la question (Linux)
 
     @property
     def ok(self) -> bool:
@@ -65,6 +73,7 @@ class Text2SQL:
         query_timeout_s: float = 10,
         temperature: float = 0.0,
         selector: ExampleSelector | None = None,
+        cache: QueryCache | None = None,
     ) -> None:
         self.llm = llm
         self.conn = conn
@@ -75,10 +84,63 @@ class Text2SQL:
         self.temperature = temperature
         self.hints = value_hints(conn) if self.prompt.value_hints else ""
         self.selector = selector  # None : exemples fixes
+        self.cache = cache  # None : chaque question passe par le LLM (évaluation)
+        self._cache_config = repr((self.prompt, max_repairs, temperature, selector is not None))
 
     def ask(self, question: str) -> Answer:
         answer = Answer(question=question)
         start = time.perf_counter()
+        meter = CpuMeter()
+        meter.start()
+        key = None
+        if self.cache is not None:
+            key = self.cache.key(getattr(self.llm, "model", "?"), self._cache_config, question)
+            cached = self.cache.get(key)
+            if cached is not None and self._answer_from_cache(answer, cached):
+                return self._finish(answer, start, meter)
+            if cached is not None:
+                self.cache.discard(key)  # requête devenue invalide (schéma changé) : on régénère
+        self._generate(answer, question)
+        if self.cache is not None and key is not None:
+            if answer.abstained:
+                self.cache.put(key, ABSTAIN_TOKEN)
+            elif answer.ok and answer.sql:
+                self.cache.put(key, answer.sql)
+        return self._finish(answer, start, meter)
+
+    def _finish(self, answer: Answer, start: float, meter: CpuMeter) -> Answer:
+        answer.total_latency_s = time.perf_counter() - start
+        answer.cpu_s = meter.stop()
+        return answer
+
+    def _answer_from_cache(self, answer: Answer, sql: str) -> bool:
+        """Rejoue une requête du cache ; ``False`` si elle ne s'exécute plus."""
+        answer.cached = True
+        if sql == ABSTAIN_TOKEN:
+            answer.abstained = True
+            return True
+        try:
+            answer.result = run_query(
+                self.conn, sql, max_rows=self.max_rows, timeout_s=self.query_timeout_s
+            )
+        except (UnsafeQueryError, sqlite3.Error, TimeoutError):
+            answer.cached = False
+            return False
+        answer.sql = sql
+        answer.sql_history.append(sql)
+        return True
+
+    def _record(self, answer: Answer, completion: Completion) -> None:
+        answer.llm_latency_s += completion.latency_s
+        answer.prompt_tokens += completion.prompt_tokens or 0
+        answer.completion_tokens += completion.completion_tokens or 0
+        if answer.ttft_s is None:
+            answer.ttft_s = completion.ttft_s
+        answer.load_s += completion.load_s or 0.0
+        answer.prompt_eval_s += completion.prompt_eval_s or 0.0
+        answer.eval_s += completion.eval_s or 0.0
+
+    def _generate(self, answer: Answer, question: str) -> None:
         examples = None
         if self.selector is not None and self.prompt.few_shot:
             chosen = self.selector.select(question)
@@ -94,9 +156,7 @@ class Text2SQL:
                 # le banc continue avec la suivante.
                 answer.error = f"LLMError: {type(exc).__name__}: {exc}"
                 break
-            answer.llm_latency_s += completion.latency_s
-            answer.prompt_tokens += completion.prompt_tokens or 0
-            answer.completion_tokens += completion.completion_tokens or 0
+            self._record(answer, completion)
             if ABSTAIN_TOKEN in completion.text.upper():
                 # Abstention : aucune requête n'est exécutée.
                 answer.abstained = True
@@ -118,5 +178,3 @@ class Text2SQL:
                 if isinstance(exc, ForbiddenQueryError):
                     break
                 messages = build_repair_messages(messages, sql, str(exc))
-        answer.total_latency_s = time.perf_counter() - start
-        return answer

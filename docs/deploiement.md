@@ -63,6 +63,12 @@ Sur 2 vCPU, la première question prend une trentaine de secondes (chargement du
 schéma), les suivantes quelques secondes. Pour un modèle plus gros, construire avec
 `--build-arg MEDSQL_MODEL=qwen2.5-coder:7b`.
 
+La démo garde en mémoire les 256 dernières requêtes générées (`medsql.cache.QueryCache`). Une question
+déjà posée, à la casse, aux accents et à la ponctuation près, ne repasse pas par le modèle : la requête
+SQL est réexécutée sur la base, ce qui prend quelques millisecondes, et la réponse suit donc la base
+du jour. Une requête du cache qui ne s'exécute plus est oubliée et régénérée. Le statut l'indique
+(« requête en cache »). L'évaluation n'utilise jamais ce cache.
+
 ## GitHub Pages (tableau de bord)
 
 En ligne sur <https://gracielathoo.github.io/TEXT_TO_SQL4DRUGS/> (dépôt public, *Settings → Pages →

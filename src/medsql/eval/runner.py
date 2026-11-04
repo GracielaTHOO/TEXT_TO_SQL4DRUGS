@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import platform
 import re
 import sqlite3
@@ -18,6 +19,7 @@ from medsql import __version__
 from medsql.eval.abstention import abstention_stats
 from medsql.eval.dataset import EvalItem
 from medsql.eval.metrics import soft_match, strict_match
+from medsql.eval.performance import performance
 from medsql.eval.robustness import robustness
 from medsql.pipeline import Answer, Text2SQL
 from medsql.sql_guard import run_query
@@ -48,6 +50,11 @@ class ItemResult:
     hors_perimetre: bool = False
     abstained: bool = False
     examples: list[str] = field(default_factory=list)
+    ttft_s: float | None = None
+    load_s: float = 0.0
+    prompt_eval_s: float = 0.0
+    eval_s: float = 0.0
+    cpu_s: float | None = None
 
 
 @dataclass
@@ -72,6 +79,7 @@ class RunSummary:
     warnings: list[str] = field(default_factory=list)
     robustness: dict[str, float] = field(default_factory=dict)
     abstention: dict[str, float] = field(default_factory=dict)
+    performance: dict[str, float] = field(default_factory=dict)
 
 
 def _percentile(values: list[float], q: float) -> float:
@@ -152,6 +160,11 @@ def evaluate_item(engine: Text2SQL, conn: sqlite3.Connection, item: EvalItem) ->
         hors_perimetre=item.hors_perimetre,
         abstained=answer.abstained,
         examples=answer.examples,
+        ttft_s=None if answer.ttft_s is None else round(answer.ttft_s, 3),
+        load_s=round(answer.load_s, 3),
+        prompt_eval_s=round(answer.prompt_eval_s, 3),
+        eval_s=round(answer.eval_s, 3),
+        cpu_s=answer.cpu_s,
     )
 
 
@@ -199,6 +212,7 @@ def summarize(
         warnings=warnings,
         robustness=robustness([asdict(r) for r in results]),
         abstention=abstention_stats([asdict(r) for r in results]),
+        performance=performance([asdict(r) for r in results]),
     )
 
 
@@ -208,6 +222,7 @@ def default_environment(items: list[EvalItem], db_path: Path) -> dict[str, str]:
         "python": platform.python_version(),
         "platform": platform.platform(terse=True),
         "git_commit": _git_commit(),
+        "cpu_count": str(os.cpu_count() or "inconnu"),
         "dataset_sha": dataset_fingerprint(items),
     }
     manifest = db_path.parent / "raw" / "manifest.json"

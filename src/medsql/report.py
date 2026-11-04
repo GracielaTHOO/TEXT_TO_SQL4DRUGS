@@ -410,6 +410,42 @@ def _dynamic_table(rows: list[tuple[str, str, float, float, float, float]]) -> s
     )
 
 
+def _performance_table(runs: Sequence[Run]) -> str:
+    """Premier token, débits et coût CPU de chaque configuration mesurée (runs depuis S12)."""
+    rows = []
+    for run in runs:
+        s = run["summary"]
+        perf = s.get("performance") or {}
+        if not perf:
+            continue
+        cores = s.get("environment", {}).get("cpu_count", "?")
+
+        def cell(key: str, unit: str, perf: dict[str, Any] = perf) -> str:
+            value = perf.get(key)
+            if value is None:
+                return "<td class='n'>–</td>"
+            return f"<td class='n'>{f'{value:.1f}'.replace('.', ',')}{unit}</td>"
+
+        rows.append(
+            f"<tr><td>{_e(config_label(s))}</td><td class='n'>{_sec(s['latency_p50_s'])}</td>"
+            + cell("ttft_p50_s", " s")
+            + cell("ttft_p95_s", " s")
+            + cell("generation_tokens_per_s", "")
+            + cell("prompt_tokens_per_s", "")
+            + cell("cpu_s_mean", " s")
+            + f"<td class='n'>{_e(cores)}</td></tr>"
+        )
+    if not rows:
+        return ""
+    return (
+        "<table><thead><tr><th>Configuration</th><th class='n'>Latence p50</th>"
+        "<th class='n'>1er token p50</th><th class='n'>1er token p95</th>"
+        "<th class='n'>Génération (tokens/s)</th><th class='n'>Lecture du prompt (tokens/s)</th>"
+        "<th class='n'>CPU par question</th><th class='n'>Cœurs</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table>"
+    )
+
+
 def _families_table(runs: Sequence[Run]) -> str:
     """Comparaison multi-familles : un run par modèle catalogué, du meilleur au moins bon."""
     rows = []
@@ -605,6 +641,16 @@ def _variant_sections(board: Sequence[Run]) -> list[str]:
             "apparié contre la configuration par défaut du même modèle.</p>"
         )
         sections.append(f'<div class="card">{_dynamic_table(dynamic)}</div>')
+    perf = _performance_table([r for r in board if _is_baseline(r["summary"])])
+    if perf:
+        sections.append("<h2>Performance</h2>")
+        sections.append(
+            "<p class='note'>1er token : chargement du modèle et lecture du prompt, avant le premier "
+            "mot de la réponse. Génération : tokens produits par seconde de génération. CPU par "
+            "question : secondes de processeur consommées par la machine, tous cœurs confondus "
+            "(runner GitHub sans GPU). Mesures disponibles à partir des runs de S12.</p>"
+        )
+        sections.append(f'<div class="card">{perf}</div>')
     deltas = ablations(board)
     if deltas:
         sections.append("<h2>Ablations</h2>")

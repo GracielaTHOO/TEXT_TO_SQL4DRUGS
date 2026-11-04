@@ -156,7 +156,10 @@ def ask(
     console.print(narrate(answer).replace("**", ""))
     console.print(
         f"[dim]{len(answer.result.rows)} ligne(s){' (tronqué)' if answer.result.truncated else ''}"
-        f" · {answer.total_latency_s:.1f} s · {answer.attempts} tentative(s)[/]"
+        f" · {answer.total_latency_s:.1f} s · {answer.attempts} tentative(s)"
+        + (f" · 1er token {answer.ttft_s:.1f} s" if answer.ttft_s is not None else "")
+        + (f" · CPU {answer.cpu_s:.1f} s" if answer.cpu_s is not None else "")
+        + "[/]"
     )
 
 

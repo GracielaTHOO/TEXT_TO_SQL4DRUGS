@@ -10,6 +10,11 @@ import httpx
 from medsql.llm.base import Completion, Message
 
 
+def _seconds(nanoseconds: object) -> float | None:
+    """Les durées d'Ollama sont en nanosecondes."""
+    return nanoseconds / 1e9 if isinstance(nanoseconds, int | float) else None
+
+
 class OllamaClient:
     def __init__(
         self,
@@ -48,6 +53,9 @@ class OllamaClient:
             latency_s=time.perf_counter() - start,
             prompt_tokens=data.get("prompt_eval_count"),
             completion_tokens=data.get("eval_count"),
+            load_s=_seconds(data.get("load_duration")),
+            prompt_eval_s=_seconds(data.get("prompt_eval_duration")),
+            eval_s=_seconds(data.get("eval_duration")),
         )
 
     def list_models(self) -> list[str]:
