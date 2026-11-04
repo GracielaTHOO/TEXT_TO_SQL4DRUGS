@@ -10,6 +10,9 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Mesures de performance : temps de premier token, débits de génération et de lecture du prompt (durées d'Ollama), coût CPU de la machine par question (`medsql.perf`), bilan `summary.performance` (`medsql.eval.performance`) et section *Performance* du tableau de bord. La CLI `medsql ask` affiche le premier token et le CPU.
 - Cache des requêtes générées pour la démo (`medsql.cache`) : une question déjà posée réexécute la requête SQL gardée, sans appel au modèle ; abstentions gardées aussi, requête invalide régénérée.
 
+### Résultats
+- Performance (4 novembre 2026, runner 4 vCPU sans GPU) : premier token médian de 0,6, 1,5 et 3,0 s pour Qwen2.5-Coder 1.5B, 3B et 7B avec les exemples fixes, génération à 21,8, 6,4 et 4,6 tokens/s, 6,7, 23,7 et 30,6 s de CPU par question. Les exemples dynamiques font passer le premier token du 7B à 18,7 s (le préfixe du prompt n'est plus réutilisé) et son CPU à 58,5 s, pour 79,1 % d'exactitude (+8,2 points, p = 0,06).
+
 ## [0.3.0] - 2026-10-30
 
 ### Ajouté

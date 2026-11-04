@@ -391,6 +391,42 @@ Même jour, même BDPM, trois configurations par modèle : exemples fixes (défa
 - Les 32 exemples de la réserve servent tous au moins une fois ; le plus demandé (comptage BIOGARAN)
   est retenu pour 32 des 120 questions.
 
+## Performance sur le runner CPU (runs du 4 novembre 2026)
+
+Runner GitHub standard, 4 vCPU sans GPU, Ollama, 120 questions. Fichiers sources :
+`results/runs/20261104T*.json`.
+
+| Modèle | Exemples | Exactitude | Latence p50 | 1er token p50 | Génération | Lecture du prompt | CPU / question |
+|---|---|---:|---:|---:|---:|---:|---:|
+| 1.5B | fixes | 50,9 % | 2,6 s | 0,6 s | 21,8 tokens/s | 3 172 tokens/s | 6,7 s |
+| 1.5B | dynamiques | 60,0 % | 5,0 s | 2,9 s | 21,9 tokens/s | 1 005 tokens/s | 11,5 s |
+| 3B | fixes | 61,8 % | 8,0 s | 1,5 s | 6,4 tokens/s | 1 213 tokens/s | 23,7 s |
+| 3B | dynamiques | 69,1 % | 13,6 s | 7,5 s | 6,4 tokens/s | 389 tokens/s | 31,5 s |
+| 7B | fixes | 70,9 % | 12,4 s | 3,0 s | 4,6 tokens/s | 900 tokens/s | 30,6 s |
+| 7B | dynamiques | **79,1 %** | 27,2 s | 18,7 s | 4,6 tokens/s | 154 tokens/s | 58,5 s |
+
+- **Avec les exemples fixes, la génération fait l'essentiel de l'attente.** Le prompt compte environ
+  3 000 tokens, mais Ollama reprend d'une question à l'autre le préfixe déjà lu (règles, schéma,
+  exemples) : le 7B commence à répondre en 3 s, puis passe une dizaine de secondes à écrire une
+  cinquantaine de tokens.
+- **Les exemples dynamiques coûtent en lecture, pas en génération.** Le débit de génération est
+  identique, mais le premier token du 7B passe de 3,0 à 18,7 s : les trois exemples changent à
+  chaque question et doivent être relus. Cela confirme l'hypothèse de S10 sur le doublement de la
+  latence. Le débit de lecture apparent tombe de 900 à 154 tokens/s ; on en déduit, sans l'avoir
+  mesuré directement, qu'un prompt entier relu sans préfixe commun prendrait de l'ordre de la minute.
+- **Le coût CPU double aussi** pour le 7B (31 → 59 s de processeur par question, tous cœurs), soit
+  environ 2 heures de CPU pour les 120 questions.
+- **Deuxième mesure du gain des exemples dynamiques**, dans le même sens que le 30 octobre :
+  +9,1, +7,3 et +8,2 points (p = 0,11, 0,17 et 0,06). Le 7B atteint 79,1 %, son meilleur score,
+  sans atteindre le seuil de 5 %. L'abstention recule de nouveau (10/10 → 8/10 pour le 7B, 4 → 2
+  pour le 3B, 7 → 2 pour le 1.5B).
+- **Cache de la démo** : une question déjà posée ne passe plus par le modèle ; il ne reste que
+  l'exécution de la requête SQL sur la base, de l'ordre de la milliseconde, au lieu de 3 à 27 s.
+
+Pour le projet « Ollama contre vLLM », ces chiffres fixent la base : même jeu, mêmes métriques
+(premier token, débits, CPU par question). Les questions à trancher sont le débit de lecture d'un
+prompt sans préfixe commun et la reprise automatique du préfixe de vLLM avec des exemples variables.
+
 ## Limites connues
 
 - 110 questions du périmètre donnent encore un intervalle de confiance à 95 % d'environ ±8 points ;
