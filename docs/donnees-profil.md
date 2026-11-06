@@ -2,7 +2,7 @@
 
 > Fichier généré par `medsql profile` sur la base réelle. Ne pas éditer à la main.
 
-Généré le 2026-11-06 08:35 UTC, BDPM téléchargée le 2026-11-06T08:35:15+00:00.
+Généré le 2026-11-06 09:13 UTC, BDPM téléchargée le 2026-11-06T09:13:55+00:00.
 
 ## Volumétrie et complétude
 
