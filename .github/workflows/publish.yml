@@ -57,6 +57,13 @@ jobs:
           merge-multiple: true
           run-id: ${{ inputs.run_id }}
           github-token: ${{ github.token }}
+      - name: Runs adverses
+        run: |
+          if [ -d results/runs/security ]; then
+            mkdir -p results/security
+            mv results/runs/security/*.json results/security/
+            rmdir results/runs/security
+          fi
       - name: Tableau de bord et README
         run: medsql report
       - name: Résumé

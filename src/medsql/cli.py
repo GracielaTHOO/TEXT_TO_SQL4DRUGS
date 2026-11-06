@@ -293,17 +293,61 @@ def evaluate(
 
 
 @app.command()
+def redteam(
+    model: ModelOpt = None,
+    backend: BackendOpt = None,
+    base_url: UrlOpt = None,
+    out: Annotated[Path, typer.Option(help="Dossier des runs adverses")] = Path("results/security"),
+    questions: Annotated[Path | None, typer.Option(help="Jeu adverse YAML")] = None,
+) -> None:
+    """🛡️ Passe le jeu de tests adverses au modèle ; échoue en cas d'incident de sécurité."""
+    from medsql.eval.adversarial import load_adversarial, red_team, save_red_team
+    from medsql.llm import make_client
+    from medsql.pipeline import Text2SQL
+    from medsql.sql_guard import connect_readonly
+
+    s = _settings(model, backend, base_url)
+    items = load_adversarial(questions)
+    with closing(connect_readonly(s.db_path)) as conn:
+        engine = Text2SQL(
+            make_client(s),
+            conn,
+            query_timeout_s=s.query_timeout_s,
+            temperature=s.temperature,
+        )
+        run = red_team(engine, s.db_path, items, model=s.model, backend=s.backend)
+    summary = run["summary"]
+    path = save_red_team(run, out)
+    issues = ", ".join(f"{k} {v}" for k, v in summary["issues"].items() if v)
+    console.print(
+        f"\n[bold]{summary['n']} questions adverses[/] · {issues}\n"
+        f"Tentatives interdites du modèle : {summary['tentatives_interdites']}, "
+        f"toutes bloquées : {'oui' if not summary['tentatives_passees'] else 'NON'} · "
+        f"base intacte : {'oui' if summary['base_intacte'] else 'NON'}"
+    )
+    console.print(f"[green]✓[/] Run enregistré : {path}")
+    if summary["incidents"]:
+        console.print(f"[red]✗ {summary['incidents']} incident(s) de sécurité.[/]")
+        raise typer.Exit(1)
+
+
+@app.command()
 def report(
     runs_dir: Annotated[Path, typer.Option(help="Dossier des runs")] = Path("results/runs"),
     out: Annotated[Path, typer.Option(help="Fichier HTML")] = Path("results/dashboard.html"),
     readme: Annotated[Path, typer.Option(help="README à mettre à jour")] = Path("README.md"),
+    security_dir: Annotated[
+        Path, typer.Option(help="Dossier des runs adverses (medsql redteam)")
+    ] = Path("results/security"),
     with_stats: Annotated[bool, typer.Option(help="Inclure les chiffres de la base")] = True,
 ) -> None:
     """📈 Génère le tableau de bord HTML et met à jour le tableau du README."""
+    from medsql.eval.adversarial import load_red_teams
     from medsql.eval.runner import load_runs
     from medsql.report import render_dashboard, update_readme
 
     runs = load_runs(runs_dir) if runs_dir.exists() else []
+    security = load_red_teams(security_dir)
     figures: list[tuple[str, str]] = []
     db_path = _settings().db_path
     if with_stats and db_path.exists():
@@ -320,7 +364,7 @@ def report(
             json.dumps(dict(figures), indent=2, ensure_ascii=False) + "\n", "utf-8"
         )
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render_dashboard(runs, figures), "utf-8")
+    out.write_text(render_dashboard(runs, figures, security), "utf-8")
     console.print(f"[green]✓[/] Tableau de bord : {out} ({len(runs)} run(s))")
     if readme.exists() and update_readme(readme, runs):
         console.print(f"[green]✓[/] Tableau de résultats mis à jour dans {readme}")

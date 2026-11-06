@@ -20,7 +20,7 @@ from medsql.data.schema import TABLES
 from medsql.eval.runner import load_runs
 from medsql.llm import make_client
 from medsql.narration import History, narrate, to_csv
-from medsql.pipeline import Text2SQL
+from medsql.pipeline import MAX_QUESTION_CHARS, Text2SQL
 from medsql.report import render_dashboard
 from medsql.sql_guard import connect_readonly
 from medsql.stats import key_figures
@@ -122,7 +122,9 @@ with gr.Blocks(title="Text-to-SQL médicaments") as demo:
     )
     with gr.Tab("💬 Interroger"):
         question = gr.Textbox(
-            label="Votre question", placeholder="Ex. : quels médicaments sont en rupture de stock ?"
+            label="Votre question",
+            placeholder="Ex. : quels médicaments sont en rupture de stock ?",
+            max_length=MAX_QUESTION_CHARS,
         )
         ask_btn = gr.Button("🔎 Interroger la base", variant="primary")
         status = gr.Markdown()

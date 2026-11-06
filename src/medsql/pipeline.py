@@ -32,6 +32,12 @@ OUT_OF_SCOPE_MESSAGE = (
     "aucune requête n'a été exécutée."
 )
 
+# Une question de la BDPM tient en une ou deux phrases (la plus longue du jeu : 146 caractères).
+# Au-delà, le texte n'est pas transmis au modèle : un long texte sert surtout à noyer les
+# règles du prompt (injection) et allonge la lecture du prompt sur CPU.
+MAX_QUESTION_CHARS = 500
+TOO_LONG_ERROR = f"QuestionTropLongue: plus de {MAX_QUESTION_CHARS} caractères, non transmise."
+
 
 @dataclass
 class Answer:
@@ -93,6 +99,9 @@ class Text2SQL:
         meter = CpuMeter()
         meter.start()
         key = None
+        if len(question) > MAX_QUESTION_CHARS:
+            answer.error = TOO_LONG_ERROR
+            return self._finish(answer, start, meter)
         if self.cache is not None:
             key = self.cache.key(getattr(self.llm, "model", "?"), self._cache_config, question)
             cached = self.cache.get(key)

@@ -44,6 +44,15 @@ _ALLOWED_ACTIONS = {
     sqlite3.SQLITE_RECURSIVE,
 }
 
+# Fonctions qu'une requête de lecture n'a aucune raison d'appeler : chargement de code natif,
+# fuite d'adresse mémoire (fts3_tokenizer), accès aux fichiers des extensions du shell sqlite3.
+_DENIED_FUNCTIONS = frozenset({"load_extension", "fts3_tokenizer", "readfile", "writefile", "edit"})
+
+# Taille maximale d'une chaîne ou d'un blob produit par une requête (défaut SQLite : 1 Go).
+# Le plus long texte de la BDPM fait quelques kilo-octets ; 1 Mo laisse une large marge.
+MAX_VALUE_BYTES = 1_000_000
+_LIMIT_LENGTH = 0  # sqlite3.SQLITE_LIMIT_LENGTH, exposé à partir de Python 3.11
+
 _FENCE = re.compile(r"```(?:sql|sqlite)?\s*(.*?)```", re.IGNORECASE | re.DOTALL)
 
 
@@ -90,8 +99,12 @@ def validate(sql: str) -> str:
     return sql.strip().rstrip(";")
 
 
-def _authorizer(action: int, *_: object) -> int:
-    return sqlite3.SQLITE_OK if action in _ALLOWED_ACTIONS else sqlite3.SQLITE_DENY
+def _authorizer(action: int, _arg1: object, arg2: object, *_: object) -> int:
+    if action not in _ALLOWED_ACTIONS:
+        return sqlite3.SQLITE_DENY
+    if action == sqlite3.SQLITE_FUNCTION and str(arg2).lower() in _DENIED_FUNCTIONS:
+        return sqlite3.SQLITE_DENY
+    return sqlite3.SQLITE_OK
 
 
 def sans_accents(value: object) -> str | None:
@@ -114,6 +127,9 @@ def connect_readonly(db_path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(uri, uri=True, check_same_thread=False)
     conn.create_function("sans_accents", 1, sans_accents, deterministic=True)
     conn.set_authorizer(_authorizer)
+    setlimit = getattr(conn, "setlimit", None)  # Python ≥ 3.11
+    if setlimit is not None:
+        setlimit(_LIMIT_LENGTH, MAX_VALUE_BYTES)
     return conn
 
 
