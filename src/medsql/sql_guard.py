@@ -51,7 +51,6 @@ _DENIED_FUNCTIONS = frozenset({"load_extension", "fts3_tokenizer", "readfile", "
 # Taille maximale d'une chaîne ou d'un blob produit par une requête (défaut SQLite : 1 Go).
 # Le plus long texte de la BDPM fait quelques kilo-octets ; 1 Mo laisse une large marge.
 MAX_VALUE_BYTES = 1_000_000
-_LIMIT_LENGTH = 0  # sqlite3.SQLITE_LIMIT_LENGTH, exposé à partir de Python 3.11
 
 _FENCE = re.compile(r"```(?:sql|sqlite)?\s*(.*?)```", re.IGNORECASE | re.DOTALL)
 
@@ -127,9 +126,7 @@ def connect_readonly(db_path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(uri, uri=True, check_same_thread=False)
     conn.create_function("sans_accents", 1, sans_accents, deterministic=True)
     conn.set_authorizer(_authorizer)
-    setlimit = getattr(conn, "setlimit", None)  # Python ≥ 3.11
-    if setlimit is not None:
-        setlimit(_LIMIT_LENGTH, MAX_VALUE_BYTES)
+    conn.setlimit(sqlite3.SQLITE_LIMIT_LENGTH, MAX_VALUE_BYTES)
     return conn
 
 

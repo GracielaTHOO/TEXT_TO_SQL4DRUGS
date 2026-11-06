@@ -11,7 +11,7 @@ import json
 import logging
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
@@ -71,7 +71,7 @@ def download_all(
             results.append(DownloadedFile(name, url, len(content), digest))
             logger.info("%s : %d octets", name, len(content))
     manifest = {
-        "downloaded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "downloaded_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "files": [asdict(r) for r in results],
     }
     (raw_dir / MANIFEST).write_text(json.dumps(manifest, indent=2, ensure_ascii=False), "utf-8")

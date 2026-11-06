@@ -12,7 +12,7 @@ import statistics
 import subprocess
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from medsql import __version__
@@ -187,7 +187,7 @@ def summarize(
         for r in inside
         if r.gold_rows == 0
     ]
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     slug = re.sub(r"[^a-z0-9]+", "-", model.lower()).strip("-")
     return RunSummary(
         run_id=f"{now:%Y%m%dT%H%M%S}_{slug}",

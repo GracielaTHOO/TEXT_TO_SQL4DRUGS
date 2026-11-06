@@ -9,7 +9,7 @@ description = "Text-to-SQL en français sur la Base de données publique des mé
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Graciela THOO" }]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = ["text-to-sql", "llm", "ollama", "sqlite", "open-data", "medicaments", "bdpm"]
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -48,7 +48,7 @@ packages = ["src/medsql"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 src = ["src", "tests", "app"]
 
 [tool.ruff.lint]
@@ -63,7 +63,7 @@ ignore = ["E501", "PLR0913", "PLR2004", "RUF001", "RUF002", "RUF003"]
 "app/**" = ["PLC0415"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 files = ["src/medsql"]
 

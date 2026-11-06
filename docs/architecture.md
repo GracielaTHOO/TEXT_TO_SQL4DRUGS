@@ -58,7 +58,8 @@ on expose une fonction déterministe et on l'impose dans les règles du prompt.
 
 **Défense en profondeur.** Le SQL vient d'un modèle probabiliste : il est traité comme une entrée
 utilisateur non fiable. Chaque barrière suffit seule à empêcher une écriture ; les tests vérifient
-la connexion en lecture seule *sans* passer par le validateur.
+la connexion en lecture seule *sans* passer par le validateur. Le jeu de tests adverses et ses
+résultats sont décrits dans [securite.md](securite.md).
 
 **Clients HTTP minces plutôt que LangChain.** Deux classes de 40 lignes, testées avec
 `httpx.MockTransport`, sans dépendance lourde ni abstraction à apprendre. Le même code mesure

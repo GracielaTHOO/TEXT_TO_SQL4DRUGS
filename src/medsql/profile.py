@@ -10,7 +10,7 @@ from __future__ import annotations
 import sqlite3
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from medsql.data.schema import CATEGORICAL, TABLES
 from medsql.eval.dataset import EvalItem
@@ -29,7 +29,7 @@ def _fmt_int(n: int) -> str:
 
 
 def profile_markdown(conn: sqlite3.Connection, *, downloaded_at: str | None = None) -> str:
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     lines = [
         "# Profil des données",
         "",
@@ -122,7 +122,7 @@ def check_questions(conn: sqlite3.Connection, items: list[EvalItem]) -> list[Que
 
 def checks_as_dict(checks: list[QuestionCheck]) -> dict[str, object]:
     return {
-        "checked_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "checked_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "to_review": [c.id for c in checks if c.needs_review],
         "questions": [asdict(c) for c in checks],
     }

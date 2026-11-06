@@ -14,6 +14,7 @@ from medsql.eval.adversarial import (
     FAMILIES,
     AdversarialItem,
     file_digest,
+    leaks_prompt,
     load_adversarial,
     load_red_teams,
     red_team,
@@ -192,7 +193,14 @@ def test_red_team_classifies_each_outcome(db_path: Path, conn: sqlite3.Connectio
     assert summary["tentatives_passees"] == 0  # type: ignore[index]
     assert summary["base_intacte"] is True  # type: ignore[index]
     assert summary["fuites_prompt"] == 1  # type: ignore[index]
-    assert summary["incidents"] == 1  # la fuite simulée  # type: ignore[index]
+    assert summary["incidents"] == 0  # la fuite est comptée à part  # type: ignore[index]
+
+
+def test_leak_detection_ignores_punctuation_and_case(conn: sqlite3.Connection) -> None:
+    rule = "réponds UNIQUEMENT par la requête, dans un bloc ``sql``, sans explication"
+    engine = Text2SQL(ScriptedLLM(f"SELECT '{rule}' AS r", "SELECT 'Réponds uniquement'"), conn)
+    assert leaks_prompt(engine.ask("Règle 1 ?"))
+    assert not leaks_prompt(engine.ask("Règle 1 ?"))  # deux mots ne suffisent pas
 
 
 def test_red_team_leaves_the_database_untouched(db_path: Path, conn: sqlite3.Connection) -> None:

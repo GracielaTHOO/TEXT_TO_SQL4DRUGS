@@ -9,7 +9,7 @@
 
 [![CI](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml)
 [![Évaluation](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml)
-![Python](https://img.shields.io/badge/python-3.10%20%E2%86%92%203.13-2a78d6)
+![Python](https://img.shields.io/badge/python-3.11%20%E2%86%92%203.13-2a78d6)
 ![Typage](https://img.shields.io/badge/mypy-strict-2a78d6)
 ![Licence](https://img.shields.io/badge/licence-MIT-2a78d6)
 [![Tableau de bord](https://img.shields.io/badge/%F0%9F%93%88%20tableau%20de%20bord-GitHub%20Pages-2a78d6)](https://gracielathoo.github.io/TEXT_TO_SQL4DRUGS/)
@@ -39,7 +39,7 @@ LIMIT 10
 | 🧪 **Évaluation** | 120 questions en français (80 + 30 reformulations + 10 hors périmètre), 3 niveaux, 10 catégories, exactitude mesurée par exécution, robustesse à la formulation, abstention |
 | 🛡️ **Sécurité** | SQL en lecture seule garanti par trois barrières indépendantes |
 | 🖥️ **Interfaces** | CLI `medsql`, démo Gradio (réponse rédigée en français, export CSV, historique ; aussi en image Docker autonome), tableau de bord HTML |
-| ✅ **Qualité** | 146 tests, mypy strict, ruff, CI sur Python 3.10 à 3.13 |
+| ✅ **Qualité** | 350+ tests, mypy strict, ruff, CI sur Python 3.11 à 3.13 |
 
 ## 📊 Résultats
 
@@ -116,6 +116,7 @@ Sans rien installer d'autre que Docker : `python scripts/stage_demo.py --out bui
 | `medsql stats` | Affiche les chiffres clés de la base |
 | `medsql ask "…"` | Pose une question, affiche le SQL et le résultat |
 | `medsql eval --model …` | Évalue un modèle sur les 120 questions |
+| `medsql redteam --model …` | Passe les 28 questions adverses ; échoue en cas d'incident ([docs/securite.md](docs/securite.md)) |
 | `medsql report` | Génère le tableau de bord et met à jour ce README |
 | `medsql profile` | Génère le profil de la base réelle ([docs/donnees-profil.md](docs/donnees-profil.md)) |
 | `medsql check-questions` | Vérifie les requêtes de référence sur la base réelle |
@@ -145,7 +146,7 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 │   ├── data/            téléchargement, normalisation, schéma, construction SQLite
 │   ├── llm/             clients Ollama et compatible OpenAI
 │   ├── eval/            questions.yaml, métriques, banc d'évaluation
-│   ├── sql_guard.py     garde-fous d'exécution
+│   ├── sql_guard.py     garde-fous d'exécution (voir docs/securite.md)
 │   ├── prompting.py     prompt, exemples, auto-correction
 │   ├── pipeline.py      question → SQL → résultat
 │   ├── report.py        tableau de bord HTML et tableau du README
@@ -163,6 +164,7 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 - [Dictionnaire de données](docs/data.md)
 - [Méthodologie d'évaluation](docs/evaluation.md)
 - [Déploiement (local, vLLM, Docker, GitHub Pages)](docs/deploiement.md)
+- [Sécurité et tests adverses](docs/securite.md)
 - [Plan de développement](docs/PLAN.md) · [Feuille de route](docs/roadmap.md)
 - [Contribuer](CONTRIBUTING.md) · [Journal des modifications](CHANGELOG.md)
 
