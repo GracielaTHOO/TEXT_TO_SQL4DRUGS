@@ -10,6 +10,7 @@
 [![CI](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml)
 [![Évaluation](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml)
 ![Python](https://img.shields.io/badge/python-3.11%20%E2%86%92%203.13-2a78d6)
+![Couverture](assets/coverage.svg)
 ![Typage](https://img.shields.io/badge/mypy-strict-2a78d6)
 ![Licence](https://img.shields.io/badge/licence-MIT-2a78d6)
 [![Tableau de bord](https://img.shields.io/badge/%F0%9F%93%88%20tableau%20de%20bord-GitHub%20Pages-2a78d6)](https://gracielathoo.github.io/TEXT_TO_SQL4DRUGS/)
@@ -37,36 +38,45 @@ LIMIT 10
 | 📦 **Données** | Les 11 fichiers open data de la [BDPM](https://base-donnees-publique.medicaments.gouv.fr/telechargement) (ANSM, HAS, Assurance maladie), normalisés en 12 tables SQLite documentées |
 | 🧠 **Modèles** | LLM locaux servis par [Ollama](https://ollama.com) ou toute API compatible OpenAI ([vLLM](https://docs.vllm.ai), llama.cpp) |
 | 🧪 **Évaluation** | 120 questions en français (80 + 30 reformulations + 10 hors périmètre), 3 niveaux, 10 catégories, exactitude mesurée par exécution, robustesse à la formulation, abstention |
-| 🛡️ **Sécurité** | SQL en lecture seule garanti par trois barrières indépendantes |
+| 🛡️ **Sécurité** | SQL en lecture seule garanti par trois barrières indépendantes, limites de temps et de mémoire, 28 questions adverses passées à 5 modèles sans incident ([rapport](docs/securite.md)) |
 | 🖥️ **Interfaces** | CLI `medsql`, démo Gradio (réponse rédigée en français, export CSV, historique ; aussi en image Docker autonome), tableau de bord HTML |
-| ✅ **Qualité** | 350+ tests, mypy strict, ruff, CI sur Python 3.11 à 3.13 |
+| ✅ **Qualité** | 357 tests, 96 % de couverture, mypy strict, ruff, CI sur Python 3.11 à 3.13 |
+
+## 🎬 La démo
+
+![Trois questions posées à la démo : un comptage, un classement et une question hors périmètre refusée](assets/demo/demo.gif)
+
+Réponses réelles de `qwen2.5-coder:7b` sur la BDPM, dans l'image Docker du dépôt, capturées par le
+workflow *Captures de la démo*. Images fixes : [comptage](assets/demo/question-1.png),
+[classement](assets/demo/question-2.png), [question refusée](assets/demo/question-3.png),
+[onglet Évaluation](assets/demo/evaluation.png).
 
 ## 📊 Résultats
 
 <!-- RESULTS:START -->
-| Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Abstention | Latence p50 | Latence p95 | Date |
-|---|---:|---:|---:|---:|---:|---:|---:|---|
-| qwen2.5-coder:7b · exemples dynamiques (nomic-embed-text) | **79,1 %** | 70,9 – 86,4 % | 62,7 % | 100,0 % | 8/10 | 27,2 s | 47,9 s | 2026-11-04 |
-| qwen2.5-coder:7b · exemples dynamiques (lexical) | **74,5 %** | 66,4 – 82,7 % | 59,1 % | 99,1 % | 8/10 | 31,0 s | 45,0 s | 2026-10-30 |
-| qwen2.5-coder:7b | **70,9 %** | 62,7 – 79,1 % | 57,3 % | 99,1 % | 10/10 | 12,4 s | 33,6 s | 2026-11-04 |
-| qwen2.5-coder:3b · exemples dynamiques (nomic-embed-text) | **69,1 %** | 60,9 – 77,3 % | 54,5 % | 98,2 % | 2/10 | 13,6 s | 30,9 s | 2026-11-04 |
-| qwen2.5-coder:3b · exemples dynamiques (lexical) | **64,5 %** | 55,5 – 73,6 % | 49,1 % | 95,5 % | 1/10 | 14,3 s | 25,0 s | 2026-10-30 |
-| qwen2.5-coder:7b · sans libellés exacts | **63,3 %** | 51,7 – 75,0 % | 51,7 % | 100,0 % | – | 14,7 s | 36,9 s | 2026-10-14 |
-| qwen2.5-coder:7b · zero-shot · sans libellés exacts | **63,3 %** | 51,7 – 75,0 % | 50,0 % | 100,0 % | – | 14,0 s | 24,9 s | 2026-10-14 |
-| qwen2.5-coder:3b | **61,8 %** | 52,7 – 70,9 % | 47,3 % | 90,9 % | 4/10 | 8,0 s | 28,3 s | 2026-11-04 |
-| qwen2.5-coder:7b · sans auto-correction · sans libellés exacts | **61,7 %** | 48,3 – 73,3 % | 50,0 % | 95,0 % | – | 15,2 s | 27,3 s | 2026-10-14 |
-| qwen2.5-coder:1.5b · exemples dynamiques (nomic-embed-text) | **60,0 %** | 50,9 – 69,1 % | 49,1 % | 91,8 % | 2/10 | 5,0 s | 9,7 s | 2026-11-04 |
-| llama3.1:8b | **59,1 %** | 50,0 – 68,2 % | 45,5 % | 98,2 % | 9/10 | 15,7 s | 33,8 s | 2026-10-28 |
-| qwen2.5-coder:3b · sans libellés exacts | **56,7 %** | 43,3 – 68,3 % | 41,7 % | 91,7 % | – | 7,4 s | 25,2 s | 2026-10-12 |
-| qwen2.5-coder:1.5b · sans libellés exacts | **55,0 %** | 41,7 – 66,7 % | 33,3 % | 95,0 % | – | 3,8 s | 11,1 s | 2026-10-14 |
-| qwen2.5-coder:1.5b · exemples dynamiques (lexical) | **54,5 %** | 45,5 – 63,6 % | 40,0 % | 93,6 % | 4/10 | 3,2 s | 6,1 s | 2026-10-30 |
-| qwen2.5-coder:1.5b · sans auto-correction · sans libellés exacts | **51,7 %** | 38,3 – 65,0 % | 33,3 % | 88,3 % | – | 3,6 s | 5,8 s | 2026-10-14 |
-| qwen2.5-coder:1.5b | **50,9 %** | 41,8 – 60,0 % | 38,2 % | 82,7 % | 7/10 | 2,6 s | 8,1 s | 2026-11-04 |
-| qwen2.5-coder:1.5b · zero-shot · sans libellés exacts | **48,3 %** | 35,0 – 61,7 % | 41,7 % | 91,7 % | – | 3,4 s | 8,6 s | 2026-10-14 |
-| mistral:7b | **47,3 %** | 38,2 – 56,4 % | 37,3 % | 92,7 % | 1/10 | 11,5 s | 117,2 s | 2026-10-28 |
-| sqlcoder:7b | **1,8 %** | 0,0 – 4,5 % | 1,8 % | 70,0 % | 4/10 | 127,1 s | 256,6 s | 2026-10-28 |
+| Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Abstention | Latence p50 | Latence p95 | Questions | Date |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| qwen2.5-coder:7b · exemples dynamiques (nomic-embed-text) | **79,1 %** | 70,9 – 86,4 % | 62,7 % | 100,0 % | 8/10 | 27,2 s | 47,9 s | 110 | 2026-11-04 |
+| qwen2.5-coder:7b · exemples dynamiques (lexical) | **74,5 %** | 66,4 – 82,7 % | 59,1 % | 99,1 % | 8/10 | 31,0 s | 45,0 s | 110 | 2026-10-30 |
+| qwen2.5-coder:7b | **70,9 %** | 62,7 – 79,1 % | 57,3 % | 99,1 % | 10/10 | 12,4 s | 33,6 s | 110 | 2026-11-04 |
+| qwen2.5-coder:3b · exemples dynamiques (nomic-embed-text) | **69,1 %** | 60,9 – 77,3 % | 54,5 % | 98,2 % | 2/10 | 13,6 s | 30,9 s | 110 | 2026-11-04 |
+| qwen2.5-coder:3b · exemples dynamiques (lexical) | **64,5 %** | 55,5 – 73,6 % | 49,1 % | 95,5 % | 1/10 | 14,3 s | 25,0 s | 110 | 2026-10-30 |
+| qwen2.5-coder:7b · sans libellés exacts | **63,3 %** | 51,7 – 75,0 % | 51,7 % | 100,0 % | – | 14,7 s | 36,9 s | 60 | 2026-10-14 |
+| qwen2.5-coder:7b · zero-shot · sans libellés exacts | **63,3 %** | 51,7 – 75,0 % | 50,0 % | 100,0 % | – | 14,0 s | 24,9 s | 60 | 2026-10-14 |
+| qwen2.5-coder:3b | **61,8 %** | 52,7 – 70,9 % | 47,3 % | 90,9 % | 4/10 | 8,0 s | 28,3 s | 110 | 2026-11-04 |
+| qwen2.5-coder:7b · sans auto-correction · sans libellés exacts | **61,7 %** | 48,3 – 73,3 % | 50,0 % | 95,0 % | – | 15,2 s | 27,3 s | 60 | 2026-10-14 |
+| qwen2.5-coder:1.5b · exemples dynamiques (nomic-embed-text) | **60,0 %** | 50,9 – 69,1 % | 49,1 % | 91,8 % | 2/10 | 5,0 s | 9,7 s | 110 | 2026-11-04 |
+| llama3.1:8b | **59,1 %** | 50,0 – 68,2 % | 45,5 % | 98,2 % | 9/10 | 15,7 s | 33,8 s | 110 | 2026-10-28 |
+| qwen2.5-coder:3b · sans libellés exacts | **56,7 %** | 43,3 – 68,3 % | 41,7 % | 91,7 % | – | 7,4 s | 25,2 s | 60 | 2026-10-12 |
+| qwen2.5-coder:1.5b · sans libellés exacts | **55,0 %** | 41,7 – 66,7 % | 33,3 % | 95,0 % | – | 3,8 s | 11,1 s | 60 | 2026-10-14 |
+| qwen2.5-coder:1.5b · exemples dynamiques (lexical) | **54,5 %** | 45,5 – 63,6 % | 40,0 % | 93,6 % | 4/10 | 3,2 s | 6,1 s | 110 | 2026-10-30 |
+| qwen2.5-coder:1.5b · sans auto-correction · sans libellés exacts | **51,7 %** | 38,3 – 65,0 % | 33,3 % | 88,3 % | – | 3,6 s | 5,8 s | 60 | 2026-10-14 |
+| qwen2.5-coder:1.5b | **50,9 %** | 41,8 – 60,0 % | 38,2 % | 82,7 % | 7/10 | 2,6 s | 8,1 s | 110 | 2026-11-04 |
+| qwen2.5-coder:1.5b · zero-shot · sans libellés exacts | **48,3 %** | 35,0 – 61,7 % | 41,7 % | 91,7 % | – | 3,4 s | 8,6 s | 60 | 2026-10-14 |
+| mistral:7b | **47,3 %** | 38,2 – 56,4 % | 37,3 % | 92,7 % | 1/10 | 11,5 s | 117,2 s | 110 | 2026-10-28 |
+| sqlcoder:7b | **1,8 %** | 0,0 – 4,5 % | 1,8 % | 70,0 % | 4/10 | 127,1 s | 256,6 s | 110 | 2026-10-28 |
 
-_110 questions + 10 hors périmètre · exactitude = résultat d'exécution identique à la référence, sur les questions du périmètre · abstention = questions hors périmètre correctement refusées · IC 95 % par bootstrap sur les questions (voir [docs/evaluation.md](docs/evaluation.md))._
+_Jeu actuel : 110 questions + 10 hors périmètre ; la colonne Questions donne le périmètre de chaque run, plus petit pour les runs antérieurs à son extension · exactitude = résultat d'exécution identique à la référence, sur les questions du périmètre · abstention = questions hors périmètre correctement refusées · IC 95 % par bootstrap sur les questions (voir [docs/evaluation.md](docs/evaluation.md))._
 <!-- RESULTS:END -->
 
 Ce tableau est régénéré par `medsql report` à chaque évaluation. Le détail par difficulté,
@@ -89,8 +99,11 @@ flowchart LR
    (noms en majuscules accentuées, dates ISO, CIS contre CIP13…).
 2. **Génération** : température 0, graine fixe.
 3. **Garde-fous** : une seule instruction `SELECT` vérifiée par [sqlglot](https://github.com/tobymao/sqlglot),
-   base ouverte en lecture seule, autorisateur SQLite qui refuse toute écriture, délai maximal de 10 s.
+   base ouverte en lecture seule, autorisateur SQLite qui refuse toute écriture et les fonctions à
+   risque, délai maximal de 10 s, valeurs limitées à 1 Mo ([docs/securite.md](docs/securite.md)).
 4. **Auto-correction** : en cas d'erreur SQL, le modèle reçoit le message d'erreur et a droit à un second essai.
+5. **Abstention** : une question sans réponse dans la base (posologie, ventes…) est refusée par le modèle
+   (`HORS_PERIMETRE`), aucune requête n'est exécutée.
 
 ## 🚀 Démarrage rapide
 
@@ -133,9 +146,13 @@ recalculées sur la base du jour, si bien que le jeu reste valide après chaque 
 
 | Difficulté | Questions | Exemple |
 |---|---:|---|
-| Facile | 25 | *Combien de médicaments ne sont plus commercialisés ?* |
-| Moyen | 26 | *Quel laboratoire est titulaire du plus grand nombre de génériques ?* |
-| Difficile | 9 | *Quels sont les génériques du TAHOR 10 mg ?* |
+| Facile | 49 | *Combien de médicaments ne sont plus commercialisés ?* |
+| Moyen | 45 | *Quel laboratoire est titulaire du plus grand nombre de génériques ?* |
+| Difficile | 16 | *Quels sont les génériques du TAHOR 10 mg ?* |
+| Hors périmètre | 10 | *Quelle est la posologie de l'amoxicilline chez l'adulte ?* (abstention attendue) |
+
+Les 110 questions du périmètre comptent 30 reformulations d'autres questions, qui mesurent la
+robustesse à la formulation.
 
 Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evaluation.md).
 
@@ -145,17 +162,21 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 ├── src/medsql/
 │   ├── data/            téléchargement, normalisation, schéma, construction SQLite
 │   ├── llm/             clients Ollama et compatible OpenAI
-│   ├── eval/            questions.yaml, métriques, banc d'évaluation
+│   ├── eval/            questions.yaml, adversarial.yaml, métriques, statistiques, banc
 │   ├── sql_guard.py     garde-fous d'exécution (voir docs/securite.md)
 │   ├── prompting.py     prompt, exemples, auto-correction
-│   ├── pipeline.py      question → SQL → résultat
+│   ├── fewshot.py       exemples choisis par similarité (examples.yaml)
+│   ├── pipeline.py      question → SQL → résultat, cache des requêtes
+│   ├── narration.py     réponse rédigée en français, export CSV
 │   ├── report.py        tableau de bord HTML et tableau du README
 │   └── cli.py           commande medsql
 ├── app/app.py           démo Gradio
 ├── docker/              image Docker autonome de la démo (Ollama embarqué)
 ├── results/runs/        un fichier JSON par évaluation
-├── tests/               146 tests, échantillon synthétique au format BDPM
-└── docs/                architecture, données, évaluation, déploiement, feuille de route
+├── results/security/    un fichier JSON par passage du jeu adverse
+├── scripts/             échantillon de test, image Docker, badge de couverture, captures
+├── tests/               357 tests, échantillon synthétique au format BDPM
+└── docs/                architecture, données, évaluation, sécurité, déploiement, feuille de route
 ```
 
 ## 📚 Documentation

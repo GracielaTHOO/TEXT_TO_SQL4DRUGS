@@ -13,16 +13,20 @@ flowchart LR
         P --> L[LLM local<br/>Ollama / vLLM]
         L --> X[Extraction SQL]
         X --> G{Garde-fous}
+        L -->|HORS_PERIMETRE| AB[Abstention]
         G -->|refus| E[Erreur]
         G -->|OK| R[Exécution<br/>lecture seule]
         R -->|erreur SQL| P
-        R --> T[Tableau de résultats]
+        R --> T[Tableau de résultats<br/>+ phrase en français]
     end
     C --> R
     subgraph Évaluation
         D[120 questions<br/>+ SQL de référence] --> V[medsql eval]
         V --> J[results/runs/*.json]
         J -->|medsql report| H[Tableau de bord<br/>+ README]
+        AD[28 questions adverses] --> RT[medsql redteam]
+        RT --> K[results/security/*.json]
+        K -->|medsql report| H
     end
 ```
 
@@ -34,11 +38,15 @@ flowchart LR
 | `medsql.data.download` | Téléchargement avec reprise et repli d'URL, manifeste horodaté avec empreintes SHA-256. |
 | `medsql.data.normalize` | Fonctions pures de nettoyage (dates, prix, taux, booléens, encodage). Testées unitairement. |
 | `medsql.data.build_db` | Chargement atomique (fichier temporaire puis renommage), index, `ANALYZE`. |
-| `medsql.sql_guard` | Validation sqlglot, connexion `mode=ro`, autorisateur, délai, plafond, fonction `sans_accents()`. |
+| `medsql.sql_guard` | Validation sqlglot, connexion `mode=ro`, autorisateur (lecture seule, fonctions à risque refusées), délai, plafond de lignes, taille maximale des valeurs, fonction `sans_accents()`. |
 | `medsql.llm` | Protocole `LLMClient` et deux implémentations HTTP (Ollama natif, API OpenAI). |
-| `medsql.prompting` | Prompt système, exemples few-shot, message d'auto-correction. |
-| `medsql.pipeline` | Orchestration question → SQL → résultat, avec boucle de réparation bornée. |
-| `medsql.eval` | Jeu de questions, métriques, exécution du banc, agrégations. |
+| `medsql.prompting` | Prompt système, exemples few-shot, libellés exacts, abstention, message d'auto-correction. |
+| `medsql.fewshot` | Exemples choisis par similarité dans une réserve de 32 (`examples.yaml`), encodeur Ollama ou lexical. |
+| `medsql.pipeline` | Orchestration question → SQL → résultat, avec boucle de réparation bornée, limite de longueur de la question et cache des requêtes. |
+| `medsql.cache`, `medsql.perf` | Cache LRU des requêtes générées (démo) ; temps CPU de la machine par question. |
+| `medsql.narration` | Phrase de réponse en français, export CSV, historique de session (démo et CLI). |
+| `medsql.models` | Catalogue des modèles évalués : famille, éditeur, taille, spécialité, licence. |
+| `medsql.eval` | Jeu de questions, métriques, abstention, robustesse, intervalles de confiance et McNemar, analyse des erreurs, performance, jeu adverse. |
 | `medsql.report` | Tableau de bord HTML autonome et tableau Markdown du README. |
 | `medsql.cli` | Interface `medsql` (Typer + Rich). |
 | `app/app.py` | Démo Gradio. |

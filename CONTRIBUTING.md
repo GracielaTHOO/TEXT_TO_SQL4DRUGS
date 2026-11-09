@@ -7,6 +7,7 @@ python -m venv .venv && source .venv/bin/activate
 make install        # dépendances de développement et de la démo
 make setup          # télécharge la BDPM et construit data/bdpm.sqlite
 make check          # ruff + mypy strict + pytest : doit passer avant tout commit
+make coverage-badge # après un ajout de tests : met à jour assets/coverage.svg (vérifié en CI)
 ```
 
 ## Conventions
@@ -19,7 +20,9 @@ make check          # ruff + mypy strict + pytest : doit passer avant tout commi
   1. avoir une requête de référence qui ne renvoie pas un résultat vide sur la base réelle ;
   2. ne pas reprendre un exemple few-shot du prompt (vérifié par `tests/test_dataset.py`) ;
   3. utiliser `sans_accents()` pour toute recherche textuelle.
-- **Résultats** : on ne modifie jamais un fichier de `results/runs/` à la main.
+- **Résultats** : on ne modifie jamais un fichier de `results/runs/` ou `results/security/` à la main.
+- **Sécurité** : toute évolution de `sql_guard.py` s'accompagne d'un test dans
+  `tests/test_security.py` ; une nouvelle attaque connue s'ajoute à `adversarial.yaml`.
 
 ## Ajouter un modèle au classement
 

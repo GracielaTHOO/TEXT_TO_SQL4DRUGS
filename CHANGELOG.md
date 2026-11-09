@@ -10,8 +10,14 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Mesures de performance : temps de premier token, débits de génération et de lecture du prompt (durées d'Ollama), coût CPU de la machine par question (`medsql.perf`), bilan `summary.performance` (`medsql.eval.performance`) et section *Performance* du tableau de bord. La CLI `medsql ask` affiche le premier token et le CPU.
 - Cache des requêtes générées pour la démo (`medsql.cache`) : une question déjà posée réexécute la requête SQL gardée, sans appel au modèle ; abstentions gardées aussi, requête invalide régénérée.
 - Sécurité : jeu de 28 questions adverses (`adversarial.yaml` : injection, injection mêlée à une vraie question, requêtes coûteuses, fuite du prompt, texte démesuré), commande `medsql redteam` qui échoue en cas d'incident, configuration `securite` du workflow d'évaluation, section *Sécurité* du tableau de bord et rapport `docs/securite.md`.
+- Badge de couverture sans service tiers (`scripts/coverage_badge.py`, `make coverage-badge`, vérifié par la CI) et seuil minimal de 90 % ; tests du téléchargement de la BDPM (couverture 94 → 96 %).
+- Workflow *Captures de la démo* et `scripts/capture_demo.py` : l'image Docker, avec la vraie BDPM et le vrai modèle, répond à trois questions posées dans un navigateur ; captures et GIF dans `assets/demo/`.
 
 ### Modifié
+- Tableau des résultats du README : colonne *Questions* (périmètre de chaque run), les runs d'octobre portant sur 60 questions et les suivants sur 110.
+- Relecture de la documentation : README (garde-fous, abstention, répartition actuelle des 120 questions, organisation du dépôt), architecture (modules ajoutés depuis la v0.2.0), guide de contribution.
+- La démo affiche les runs adverses dans son onglet *Évaluation* et masque le cadre SQL et le tableau quand il n'y a rien à montrer (abstention, erreur) : les captures montraient un cadre vide et un tableau aux colonnes 1, 2, 3.
+- README : section *La démo* avec le GIF et les captures.
 - Garde-fous renforcés après la sonde de S13 : taille maximale d'une valeur de 1 Mo (`randomblob`, `zeroblob` et `group_concat` démesurés échouent au lieu d'allouer des centaines de mégaoctets), fonctions `load_extension`, `fts3_tokenizer` (fuite d'adresse mémoire), `readfile`, `writefile` et `edit` refusées, question de plus de 500 caractères non transmise au modèle.
 - Python 3.11 minimum (Python 3.10 n'est plus maintenu et n'offre pas `Connection.setlimit`) ; la CI couvre 3.11 à 3.13.
 

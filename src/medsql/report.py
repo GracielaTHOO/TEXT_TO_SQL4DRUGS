@@ -178,27 +178,33 @@ def _sec(x: float) -> str:
     return f"{x:.1f} s".replace(".", ",")
 
 
+def _in_scope(run: Run) -> int:
+    """Questions du périmètre du run, celles sur lesquelles porte l'exactitude."""
+    return int(run["summary"]["n"]) - int(abstention_stats(run["items"]).get("out_of_scope", 0))
+
+
 def readme_table(runs: Sequence[Run]) -> str:
     board = latest_per_config(runs)
     if not board:
         return "_Aucun run d'évaluation complet pour l'instant. Lancez `medsql eval`._"
     lines = [
-        "| Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Abstention | Latence p50 | Latence p95 | Date |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---|",
+        "| Modèle | Exactitude | IC 95 % | Exactitude stricte | SQL exécutable | Abstention | Latence p50 | Latence p95 | Questions | Date |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for run in board:
         s = run["summary"]
         lines.append(
             f"| {config_label(s)} | **{_pct(s['accuracy'])}** | {_ci(run)} | {_pct(s['accuracy_strict'])} "
             f"| {_pct(s['executable_rate'])} | {_abstention(run)} | {_sec(s['latency_p50_s'])} "
-            f"| {_sec(s['latency_p95_s'])} | {s['created_at'][:10]} |"
+            f"| {_sec(s['latency_p95_s'])} | {_in_scope(run)} | {s['created_at'][:10]} |"
         )
     stats = abstention_stats(board[0]["items"])
     n = board[0]["summary"]["n"] - int(stats.get("out_of_scope", 0))
     outside = f" + {stats['out_of_scope']:.0f} hors périmètre" if stats else ""
     lines.append("")
     lines.append(
-        f"_{n} questions{outside} · exactitude = résultat d'exécution identique à la référence, "
+        f"_Jeu actuel : {n} questions{outside} ; la colonne Questions donne le périmètre de chaque "
+        "run, plus petit pour les runs antérieurs à son extension · exactitude = résultat d'exécution identique à la référence, "
         "sur les questions du périmètre · abstention = questions hors périmètre correctement "
         "refusées · IC 95 % par bootstrap sur les questions "
         "(voir [docs/evaluation.md](docs/evaluation.md))._"

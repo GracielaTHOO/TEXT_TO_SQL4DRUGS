@@ -118,7 +118,8 @@ def test_demo_answer_fills_sentence_csv_and_history(demo: ModuleType) -> None:
     sql, table, status, sentence, download, frame, history = demo.answer(
         "Quels médicaments ?", None
     )
-    assert "SELECT" in sql and len(table) == 4 and status.startswith("✅")
+    assert "SELECT" in sql.value and len(table.value["data"]) == 4 and status.startswith("✅")
+    assert sql.visible is True and table.visible is True
     assert sentence.startswith("💬 **4** résultats")
     exported = Path(download.value["path"])
     assert exported.read_bytes().startswith(b"\xef\xbb\xbf")  # BOM : accents lus par un tableur
@@ -129,8 +130,9 @@ def test_demo_answer_fills_sentence_csv_and_history(demo: ModuleType) -> None:
 
 def test_demo_out_of_scope_has_no_export(demo: ModuleType) -> None:
     demo.engine = Text2SQL(ScriptedLLM("HORS_PERIMETRE"), demo.conn)
-    _, table, status, sentence, download, frame, _ = demo.answer("Météo à Lyon ?", None)
-    assert table.empty and "Hors périmètre" in status
+    sql, table, status, sentence, download, frame, _ = demo.answer("Météo à Lyon ?", None)
+    assert sql.visible is False and table.visible is False  # pas de cadre vide sous le statut
+    assert "Hors périmètre" in status
     assert OUT_OF_SCOPE_MESSAGE in sentence
     assert download.visible is False
     assert list(frame["Issue"]) == ["hors périmètre"]

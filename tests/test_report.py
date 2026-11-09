@@ -107,7 +107,8 @@ def test_dashboard_and_readme_show_abstention(conn: sqlite3.Connection, tmp_path
     update_readme(readme, runs)
     text = readme.read_text("utf-8")
     assert "| 2/2 |" in text
-    assert "_3 questions + 2 hors périmètre" in text
+    assert "_Jeu actuel : 3 questions + 2 hors périmètre" in text
+    assert "| 3 | 20" in text  # colonne Questions : périmètre du run
 
 
 def _board_run(model: str, outcomes: list[bool]) -> dict[str, object]:

@@ -49,11 +49,20 @@ engine = Text2SQL(make_client(settings), conn, max_rows=settings.max_rows, cache
 
 EXPORT_DIR = Path(tempfile.mkdtemp(prefix="medsql-export-"))
 
-Outputs = tuple[str, pd.DataFrame, str, str, gr.DownloadButton, pd.DataFrame, History]
+Outputs = tuple[gr.Code, gr.Dataframe, str, str, gr.DownloadButton, pd.DataFrame, History]
 
 
 def _history_frame(history: History) -> pd.DataFrame:
     return pd.DataFrame(history.rows(), columns=list(History.COLUMNS))
+
+
+def _shown(sql: str, df: pd.DataFrame | None) -> tuple[gr.Code, gr.Dataframe]:
+    """SQL et tableau, masqués quand ils sont vides (abstention, erreur sans résultat)."""
+    table = df if df is not None else pd.DataFrame()
+    return (
+        gr.Code(value=sql, visible=bool(sql)),
+        gr.Dataframe(value=table, visible=df is not None),
+    )
 
 
 def answer(question: str, history: History | None) -> Outputs:
@@ -62,16 +71,16 @@ def answer(question: str, history: History | None) -> Outputs:
     no_file = gr.DownloadButton(value=None, visible=False)
     if not question or not question.strip():
         frame = _history_frame(history)
-        return "", pd.DataFrame(), "✏️ Saisissez une question.", "", no_file, frame, history
+        return *_shown("", None), "✏️ Saisissez une question.", "", no_file, frame, history
     result = engine.ask(question)
     history.add(result)
     frame = _history_frame(history)
     text = narrate(result)
     if result.abstained:
-        return "", pd.DataFrame(), "⊘ Hors périmètre", text, no_file, frame, history
+        return *_shown("", None), "⊘ Hors périmètre", text, no_file, frame, history
     sql = result.sql or ""
     if result.error or result.result is None:
-        return sql, pd.DataFrame(), f"❌ {result.error}", text, no_file, frame, history
+        return *_shown(sql, None), f"❌ {result.error}", text, no_file, frame, history
     df = pd.DataFrame(result.result.rows, columns=result.result.columns)
     status = (
         f"✅ {len(df)} ligne(s){' (tronqué)' if result.result.truncated else ''} · "
@@ -83,7 +92,7 @@ def answer(question: str, history: History | None) -> Outputs:
     export = EXPORT_DIR / f"resultat-{len(history):03d}.csv"
     export.write_text(to_csv(result.result), encoding="utf-8-sig")
     download = gr.DownloadButton(value=str(export), visible=True)
-    return sql, df, status, f"💬 {text}", download, frame, history
+    return *_shown(sql, df), status, f"💬 {text}", download, frame, history
 
 
 def reuse_question(frame: pd.DataFrame, event: gr.SelectData) -> str:

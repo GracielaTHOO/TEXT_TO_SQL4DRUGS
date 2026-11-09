@@ -50,7 +50,7 @@ Légende : 🙋 = action de Graciela nécessaire.
       coût CPU par question (passerelle vers le projet « Ollama contre vLLM »).
 - [x] **S13 · ven. 6 nov.** Sécurité : jeu de tests adverses (injection dans la question, SQL piégé, requêtes
       coûteuses), rapport dans `docs/securite.md`.
-- [ ] **S14 · lun. 9 nov.** Finitions : captures et GIF de la démo, badge de couverture, relecture complète
+- [x] **S14 · lun. 9 nov.** Finitions : captures et GIF de la démo, badge de couverture, relecture complète
       de la documentation.
 - [ ] **S15 · mer. 11 nov.** Note de synthèse des résultats (`docs/resultats.md`) et brouillon d'article LinkedIn.
 - [ ] **S16 · ven. 13 nov.** Release **v1.0.0** : tag, notes de version, résultats figés, démo et tableau de bord à jour.
