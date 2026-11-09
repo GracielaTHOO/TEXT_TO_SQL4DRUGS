@@ -1,6 +1,6 @@
 """Assemble le contexte de construction de l'image Docker de la démo.
 
-Copie le code, la licence et les runs d'évaluation à côté du Dockerfile de ``docker/``.
+Copie le code, la licence, les runs d'évaluation et les runs adverses à côté du Dockerfile de ``docker/``.
 Utilisé par ``.github/workflows/demo-image.yml`` ; en local :
 
     python scripts/stage_demo.py --out build/demo
@@ -15,7 +15,7 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-INCLUDE = ("pyproject.toml", "LICENSE", "src", "app", "results/runs")
+INCLUDE = ("pyproject.toml", "LICENSE", "src", "app", "results/runs", "results/security")
 
 
 def stage(target: Path) -> None:

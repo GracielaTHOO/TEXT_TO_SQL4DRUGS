@@ -79,3 +79,6 @@ markers = ["ollama: tests nécessitant un serveur Ollama local (désactivés par
 [tool.coverage.run]
 source = ["medsql"]
 branch = true
+
+[tool.coverage.report]
+fail_under = 90

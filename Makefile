@@ -1,4 +1,4 @@
-.PHONY: help install setup test lint format typecheck check eval report app docs fixtures
+.PHONY: help install setup test lint format typecheck check coverage-badge eval report redteam app docs fixtures
 
 MODEL ?= qwen2.5-coder:7b
 
@@ -12,7 +12,10 @@ setup: ## Télécharge la BDPM et construit la base SQLite
 	medsql setup
 
 test: ## Lance les tests avec couverture
-	pytest --cov --cov-report=term-missing
+	python -m pytest --cov --cov-report=term-missing --cov-report=xml
+
+coverage-badge: test ## Met à jour le badge de couverture (assets/coverage.svg)
+	python scripts/coverage_badge.py coverage.xml assets/coverage.svg
 
 lint: ## Vérifie le style (ruff)
 	ruff check . && ruff format --check .
@@ -27,6 +30,9 @@ check: lint typecheck test ## Lint + typage + tests (comme la CI)
 
 eval: ## Évalue un modèle : make eval MODEL=qwen2.5-coder:7b
 	ollama pull $(MODEL) && medsql eval --model $(MODEL)
+
+redteam: ## Passe le jeu adverse : make redteam MODEL=qwen2.5-coder:7b
+	ollama pull $(MODEL) && medsql redteam --model $(MODEL)
 
 report: ## Génère le tableau de bord et met à jour le README
 	medsql report

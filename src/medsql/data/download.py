@@ -58,12 +58,19 @@ def _fetch(client: httpx.Client, name: str, retries: int) -> tuple[str, bytes]:
 
 
 def download_all(
-    raw_dir: Path, *, retries: int = 3, timeout_s: float = 120
+    raw_dir: Path,
+    *,
+    retries: int = 3,
+    timeout_s: float = 120,
+    transport: httpx.BaseTransport | None = None,
 ) -> list[DownloadedFile]:
-    """Télécharge tous les fichiers sources et écrit un manifeste (URL, taille, SHA-256)."""
+    """Télécharge tous les fichiers sources et écrit un manifeste (URL, taille, SHA-256).
+
+    ``transport`` remplace le réseau dans les tests (``httpx.MockTransport``).
+    """
     raw_dir.mkdir(parents=True, exist_ok=True)
     results: list[DownloadedFile] = []
-    with httpx.Client(timeout=timeout_s, follow_redirects=True) as client:
+    with httpx.Client(timeout=timeout_s, follow_redirects=True, transport=transport) as client:
         for name in SOURCE_FILES:
             url, content = _fetch(client, name, retries)
             (raw_dir / name).write_bytes(content)

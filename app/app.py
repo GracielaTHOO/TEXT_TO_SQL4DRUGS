@@ -17,6 +17,7 @@ import pandas as pd
 from medsql.cache import QueryCache
 from medsql.config import get_settings
 from medsql.data.schema import TABLES
+from medsql.eval.adversarial import load_red_teams
 from medsql.eval.runner import load_runs
 from medsql.llm import make_client
 from medsql.narration import History, narrate, to_csv
@@ -27,6 +28,7 @@ from medsql.stats import key_figures
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNS_DIR = Path(os.environ.get("MEDSQL_RUNS_DIR", ROOT / "results" / "runs"))
+SECURITY_DIR = RUNS_DIR.parent / "security"
 
 EXAMPLES = [
     "Combien de médicaments sont actuellement commercialisés ?",
@@ -99,7 +101,7 @@ def figures_markdown() -> str:
 
 def dashboard_iframe() -> str:
     runs = load_runs(RUNS_DIR) if RUNS_DIR.exists() else []
-    page = render_dashboard(runs)
+    page = render_dashboard(runs, security=load_red_teams(SECURITY_DIR))
     return (
         f'<iframe srcdoc="{html.escape(page)}" style="width:100%;height:1400px;border:0" '
         'title="Tableau de bord"></iframe>'
@@ -127,7 +129,7 @@ with gr.Blocks(title="Text-to-SQL médicaments") as demo:
             max_length=MAX_QUESTION_CHARS,
         )
         ask_btn = gr.Button("🔎 Interroger la base", variant="primary")
-        status = gr.Markdown()
+        status = gr.Markdown(elem_id="status")  # repère des captures (scripts/capture_demo.py)
         sql_out = gr.Code(label="🧾 SQL généré", language="sql")
         table_out = gr.Dataframe(label="📋 Résultat", wrap=True)
         sentence = gr.Markdown()
