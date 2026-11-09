@@ -48,7 +48,7 @@ Légende : 🙋 = action de Graciela nécessaire.
 - [x] **S11 · lun. 2 nov.** Démo : réponse rédigée en français sous le tableau, export CSV, historique des questions.
 - [x] **S12 · mer. 4 nov.** Performance : cache des réponses, mesure du temps de premier token et des tokens/s,
       coût CPU par question (passerelle vers le projet « Ollama contre vLLM »).
-- [ ] **S13 · ven. 6 nov.** Sécurité : jeu de tests adverses (injection dans la question, SQL piégé, requêtes
+- [x] **S13 · ven. 6 nov.** Sécurité : jeu de tests adverses (injection dans la question, SQL piégé, requêtes
       coûteuses), rapport dans `docs/securite.md`.
 - [ ] **S14 · lun. 9 nov.** Finitions : captures et GIF de la démo, badge de couverture, relecture complète
       de la documentation.

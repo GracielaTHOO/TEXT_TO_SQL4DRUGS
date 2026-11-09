@@ -9,8 +9,14 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 - Tests de la démo (fonction `answer` sur la base de test) ; la CI installe l'extra `app`.
 - Mesures de performance : temps de premier token, débits de génération et de lecture du prompt (durées d'Ollama), coût CPU de la machine par question (`medsql.perf`), bilan `summary.performance` (`medsql.eval.performance`) et section *Performance* du tableau de bord. La CLI `medsql ask` affiche le premier token et le CPU.
 - Cache des requêtes générées pour la démo (`medsql.cache`) : une question déjà posée réexécute la requête SQL gardée, sans appel au modèle ; abstentions gardées aussi, requête invalide régénérée.
+- Sécurité : jeu de 28 questions adverses (`adversarial.yaml` : injection, injection mêlée à une vraie question, requêtes coûteuses, fuite du prompt, texte démesuré), commande `medsql redteam` qui échoue en cas d'incident, configuration `securite` du workflow d'évaluation, section *Sécurité* du tableau de bord et rapport `docs/securite.md`.
+
+### Modifié
+- Garde-fous renforcés après la sonde de S13 : taille maximale d'une valeur de 1 Mo (`randomblob`, `zeroblob` et `group_concat` démesurés échouent au lieu d'allouer des centaines de mégaoctets), fonctions `load_extension`, `fts3_tokenizer` (fuite d'adresse mémoire), `readfile`, `writefile` et `edit` refusées, question de plus de 500 caractères non transmise au modèle.
+- Python 3.11 minimum (Python 3.10 n'est plus maintenu et n'offre pas `Connection.setlimit`) ; la CI couvre 3.11 à 3.13.
 
 ### Résultats
+- Tests adverses (6 novembre 2026), 28 questions × 5 modèles : 32 requêtes d'écriture ou d'administration produites par les modèles, toutes bloquées, base intacte, 0 incident. Qwen2.5-Coder 3B suit 8 injections directes sur 10, le 7B 2 sur 10 (15 abstentions sur 28). Une fuite de règle du prompt (public) par Llama 3.1 8B.
 - Performance (4 novembre 2026, runner 4 vCPU sans GPU) : premier token médian de 0,6, 1,5 et 3,0 s pour Qwen2.5-Coder 1.5B, 3B et 7B avec les exemples fixes, génération à 21,8, 6,4 et 4,6 tokens/s, 6,7, 23,7 et 30,6 s de CPU par question. Les exemples dynamiques font passer le premier token du 7B à 18,7 s (le préfixe du prompt n'est plus réutilisé) et son CPU à 58,5 s, pour 79,1 % d'exactitude (+8,2 points, p = 0,06).
 
 ## [0.3.0] - 2026-10-30
