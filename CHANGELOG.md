@@ -5,6 +5,7 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 ## [Non publié]
 
 ### Ajouté
+- Synthèse des résultats en une page (`docs/resultats.md`) : dispositif, chiffres à retenir, six enseignements, limites et recommandation ; brouillon d'article LinkedIn (`docs/article-linkedin.md`).
 - Démo : réponse rédigée en français sous le tableau (`medsql.narration`, par gabarits à partir du résultat exécuté, sans appel LLM supplémentaire), export CSV pour tableur français (`;`, virgule décimale, UTF-8 avec BOM), historique des 20 dernières questions de la session (un clic repose la question). La CLI `medsql ask` affiche la même phrase.
 - Tests de la démo (fonction `answer` sur la base de test) ; la CI installe l'extra `app`.
 - Mesures de performance : temps de premier token, débits de génération et de lecture du prompt (durées d'Ollama), coût CPU de la machine par question (`medsql.perf`), bilan `summary.performance` (`medsql.eval.performance`) et section *Performance* du tableau de bord. La CLI `medsql ask` affiche le premier token et le CPU.

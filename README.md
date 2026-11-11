@@ -79,6 +79,7 @@ workflow *Captures de la démo*. Images fixes : [comptage](assets/demo/question-
 _Jeu actuel : 110 questions + 10 hors périmètre ; la colonne Questions donne le périmètre de chaque run, plus petit pour les runs antérieurs à son extension · exactitude = résultat d'exécution identique à la référence, sur les questions du périmètre · abstention = questions hors périmètre correctement refusées · IC 95 % par bootstrap sur les questions (voir [docs/evaluation.md](docs/evaluation.md))._
 <!-- RESULTS:END -->
 
+Ce que ces chiffres veulent dire, en une page : [docs/resultats.md](docs/resultats.md).
 Ce tableau est régénéré par `medsql report` à chaque évaluation. Le détail par difficulté,
 par catégorie et question par question est dans le [tableau de bord](https://gracielathoo.github.io/TEXT_TO_SQL4DRUGS/).
 
@@ -176,13 +177,14 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 ├── results/security/    un fichier JSON par passage du jeu adverse
 ├── scripts/             échantillon de test, image Docker, badge de couverture, captures
 ├── tests/               357 tests, échantillon synthétique au format BDPM
-└── docs/                architecture, données, évaluation, sécurité, déploiement, feuille de route
+└── docs/                synthèse, architecture, données, évaluation, sécurité, déploiement, feuille de route
 ```
 
 ## 📚 Documentation
 
 - [Architecture et choix de conception](docs/architecture.md)
 - [Dictionnaire de données](docs/data.md)
+- [Synthèse des résultats](docs/resultats.md)
 - [Méthodologie d'évaluation](docs/evaluation.md)
 - [Déploiement (local, vLLM, Docker, GitHub Pages)](docs/deploiement.md)
 - [Sécurité et tests adverses](docs/securite.md)

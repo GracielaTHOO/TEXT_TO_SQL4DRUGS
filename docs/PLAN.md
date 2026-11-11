@@ -52,8 +52,12 @@ Légende : 🙋 = action de Graciela nécessaire.
       coûteuses), rapport dans `docs/securite.md`.
 - [x] **S14 · lun. 9 nov.** Finitions : captures et GIF de la démo, badge de couverture, relecture complète
       de la documentation.
-- [ ] **S15 · mer. 11 nov.** Note de synthèse des résultats (`docs/resultats.md`) et brouillon d'article LinkedIn.
+- [x] **S15 · mer. 11 nov.** Note de synthèse des résultats (`docs/resultats.md`) et brouillon d'article LinkedIn.
+      🙋 Relire et publier le brouillon `docs/article-linkedin.md` (après la v1.0.0, pour que le lien
+      pointe vers la version finale).
 - [ ] **S16 · ven. 13 nov.** Release **v1.0.0** : tag, notes de version, résultats figés, démo et tableau de bord à jour.
+      🙋 Créer les releases v0.3.0 et v1.0.0 sur GitHub (*Releases → Draft a new release*), le proxy de
+      l'assistant ne pouvant pas pousser de tags.
 
 ## Règles de conduite
 
