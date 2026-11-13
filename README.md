@@ -9,6 +9,7 @@
 
 [![CI](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/ci.yml)
 [![Évaluation](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml/badge.svg)](https://github.com/GracielaTHOO/TEXT_TO_SQL4DRUGS/actions/workflows/eval.yml)
+![Version](https://img.shields.io/badge/version-1.0.0-2a78d6)
 ![Python](https://img.shields.io/badge/python-3.11%20%E2%86%92%203.13-2a78d6)
 ![Couverture](assets/coverage.svg)
 ![Typage](https://img.shields.io/badge/mypy-strict-2a78d6)
@@ -189,7 +190,7 @@ Méthodologie complète, ablations et limites : [docs/evaluation.md](docs/evalua
 - [Déploiement (local, vLLM, Docker, GitHub Pages)](docs/deploiement.md)
 - [Sécurité et tests adverses](docs/securite.md)
 - [Plan de développement](docs/PLAN.md) · [Feuille de route](docs/roadmap.md)
-- [Contribuer](CONTRIBUTING.md) · [Journal des modifications](CHANGELOG.md)
+- [Contribuer](CONTRIBUTING.md) · [Journal des modifications](CHANGELOG.md) · [Notes de la v1.0.0](docs/releases/v1.0.0.md)
 
 ## ⚖️ Données et avertissement
 

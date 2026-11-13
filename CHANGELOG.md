@@ -4,7 +4,14 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), ver
 
 ## [Non publié]
 
+## [1.0.0] - 2026-11-13
+
+Version finale du projet : démo enrichie, mesures de performance, sécurité éprouvée par un jeu de
+questions adverses, synthèse des résultats. Les runs qui portent les chiffres de cette version sont
+figés dans `results/releases/v1.0.0.json`.
+
 ### Ajouté
+- Résultats figés par version (`scripts/freeze_results.py`, `results/releases/v1.0.0.json`) : fichier, empreinte SHA-256 et chiffres clés de chaque run du classement et du jeu adverse.
 - Synthèse des résultats en une page (`docs/resultats.md`) : dispositif, chiffres à retenir, six enseignements, limites et recommandation ; brouillon d'article LinkedIn (`docs/article-linkedin.md`).
 - Démo : réponse rédigée en français sous le tableau (`medsql.narration`, par gabarits à partir du résultat exécuté, sans appel LLM supplémentaire), export CSV pour tableur français (`;`, virgule décimale, UTF-8 avec BOM), historique des 20 dernières questions de la session (un clic repose la question). La CLI `medsql ask` affiche la même phrase.
 - Tests de la démo (fonction `answer` sur la base de test) ; la CI installe l'extra `app`.
